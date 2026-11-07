@@ -55,7 +55,7 @@ namespace Server
 
 	// This setting is the number of days a character must exist before a player can delete them.
 
-		public static double S_DeleteDays = 3.0;
+		public static double S_DeleteDays = 0.0;
 
 	// If true, players can just type in a name and password and it will create an account for them.
 
@@ -90,7 +90,7 @@ namespace Server
 	// If true, the blackjack tables will retain their settings and information if the server ever restarts. Better for
 	// persistent worlds.
 
-		public static bool S_PersistentBlackjack = false;
+		public static bool S_PersistentBlackjack = true;
 
 	// The percent chance a floor trap will trigger in whole number format and no less than 5 percent.
 
@@ -306,12 +306,12 @@ namespace Server
 	// The percent of gold you get from creatures, treasure, cargo, museum searches, shoppes, and some quests
 	// between 5 (low) to 100 (high).
 
-		public static int S_GetGoldCutRate = 35;
+		public static int S_GetGoldCutRate = 50;
 
 	// The gold reward from bulletin board quests is modified below between 0 and 250 percent. It also modifies
 	// the thief note quests you get from whispering to the guildmaster, and the decorative items they steal.
 
-		public static int S_QuestRewardModifier = 150;
+		public static int S_QuestRewardModifier = 250;
 
 	// If set to true, then characters can steal decoration artifacts as many times as they want. Otherwise,
 	// they can only steal each one once.
@@ -398,7 +398,7 @@ namespace Server
 	// successful resources are gathered (lumberjacking, mining, fishing, forensics, cooking, and inscription).
 	// Setting this greater than one will enable macroing.
 
-		public static int S_Resources = 1;
+		public static int S_Resources = 3;
 
 	// Increasing this number will increase the price of enhancing items with extraordinary tools that are used by
 	// guild members, when next to their guildmasters. This value is a percentage increase from the base price.
@@ -442,7 +442,7 @@ namespace Server
 	// occurs if the enemy can pass the various checks to even determine that they can dispel the summoned creature.
 	// If set to zero, this check does not occur as per default. Valid values are between 10 and 90.
 
-		public static int S_DispelFailure = 0;
+		public static int S_DispelFailure = 50;
 
 	// Increasing this number will only increase the hit points of all creatures that percentage, so setting this
 	// to 100 will double the hit points of creatures (adding an additional 100% on top of their normal hit points).
@@ -504,7 +504,7 @@ namespace Server
 	// value higher than 10 could mean that the paralyze cooldown is lower than its duration, 
 	// which can lead to frustrating fights as enemies can flee and chain-paralyze a character until they heal 
 	// enough to get back into the fight. 
-		public static double S_paralyzeDuration = 10.0;
+		public static double S_paralyzeDuration = 7.0;
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// 008 - MERCHANTS ////////////////////////////////////////////////////////////////////////////
@@ -518,7 +518,7 @@ namespace Server
 
 	// If true (default false) then vendors will sell anything they normally stock. Some items have a default rarity % that this setting does not affect.
 
-		public static bool S_SellAll = false;
+		public static bool S_SellAll = true;
 
 	// If true (default false) then vendors will buy anything they normally stock. Some items have a default rarity % that this setting does not affect.
 
@@ -541,7 +541,7 @@ namespace Server
 	// to do commerce with, and only is applied if they are not rich merchants. Each restocking period, vendors will set their gold back to these
 	// default levels. As gameplay occurs, this value can increase for a vendor as you buy things from them, or pay for services they offer.
 
-		public static bool S_RichMerchants = false;
+		public static bool S_RichMerchants = true;
 		public static bool S_UseRemainingGold = false;
 		public static int S_MinMerchant = 1000;
 		public static int S_MaxMerchant = 2000;
@@ -573,7 +573,7 @@ namespace Server
 	// So a setting of 50 will increase resource sold prices by 50%. WARNING: This will stack with the increased
 	// prices set with the above setting.
 
-		public static int S_ResourcePrice = 500;
+		public static int S_ResourcePrice = 100;
 
 	// If true, then some merchants may sell large volumes of resources (ingots, ore, boards, leather, hides, cloth,
 	// bottles, jars, and blank scrolls) and more types, except for non-magical resources (reagents). The resources
@@ -582,7 +582,7 @@ namespace Server
 	// available for sale in that land. Those that set this to true, want a game where they would like to craft
 	// items and spend gold gathering the resources more often than harvesting.
 
-		public static bool S_SoldResource = false;
+		public static bool S_SoldResource = true;
 
 	// If true, then vendors will not buy resources you try to sell.
 	// Consider leaving this true if you allow players to harvest many resources at once.
@@ -596,14 +596,14 @@ namespace Server
 	// regular stocking schedule. The resources items are made of will be land specific. EXAMPLE: If you can only 
 	// get obsidian metal in the Serpent Island, then you will may only find obsidian items in that land.
 
-		public static bool S_BlackMarket = false;
+		public static bool S_BlackMarket = true;
 
 	// If true, then the custom merchant is enabled. After a [buildworld command, these merchants will appear in
 	// the various settlements with their wagon. They will sell any custom items you set in the Info/Scripts folder.
 	// This is in the Merchant.cs file. WARNING: Vendors can only sell 250 different items. NOTE: Many settings
 	// here, that affect vendors, will not affect the custom merchant.
 
-		public static bool S_CustomMerchant = false;
+		public static bool S_CustomMerchant = true;
 
 
 
@@ -616,7 +616,7 @@ namespace Server
 	// then specify this dual ownership when choosing an item security level. The default setting is false, where
 	// co-owners have much more limited permissions as the standard game allows.
 
-		public static bool S_HouseOwners = false;
+		public static bool S_HouseOwners = true;
 
 	// When true (default setting), characters can use lawn tools (from architects) to add items to the outside
 	// of their home like trees, shrubs, fences, lave, water, and other items. Lawn tools require an amount of
@@ -637,7 +637,7 @@ namespace Server
 	// The number of days, no less than 5.0 (decimal format), that a boat or magic carpet will decay if on
 	// the sea not used.
 
-		public static double S_BoatDecay = 30.0;
+		public static double S_BoatDecay = 365.0;
 
 	// The number of days, no less than 30.0 (decimal format), that a home will decay if an owner never shows up.
 
@@ -649,7 +649,7 @@ namespace Server
 
 	// The amount of houses an account's characters may own. A -1 setting will be unlimited.
 
-		public static int S_HousesPerAccount = 2;
+		public static int S_HousesPerAccount = -1;
 
 	// If true, this means that the players can dye construction contracts so their pre-designed home is
 	// entirely in that same color.
@@ -681,7 +681,7 @@ namespace Server
 	// This setting is the percentage of the total storage capacity of a house that is available to the player.
 	// So a setting of 1.20 will give the player 20% more storage space than the original storage capacity of the house.
 
-		public static double S_HouseStoragePercent = 1.20;
+		public static double S_HouseStoragePercent = 1.50;
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -749,7 +749,7 @@ namespace Server
 	// This number can be set from 0 to 30, which determines the number of days before you can bond
 	// a pet one tamed (default is 7).
 
-		public static int S_BondDays = 7;
+		public static int S_BondDays = 5;
 
 
 
