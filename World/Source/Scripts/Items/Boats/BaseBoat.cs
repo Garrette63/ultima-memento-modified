@@ -19,7 +19,8 @@ namespace Server.Multis
 	// Smooth sailing - https://github.com/runuo/runuo/commit/110bd99e565441c2df33bacb3696bdffb9d70675
 	public abstract class BaseBoat : BaseMulti
 	{
-		public const int MAX_SPEED_BOOSTS = 4; // Absolute max amount of boosts
+		public const int MAX_SPEED_BOOSTS = 6; // Absolute max amount of boosts
+		public const int MAX_CARPET_SPEED_BOOSTS = 4; // Magic carpets never exceed this many boosts
 		const string CLEAR_THE_DECK = "clear the deck";
 
 		// THE LAST TWO INTEGERS ARE THE SEA WIDTH AND HEIGHT //
@@ -944,14 +945,17 @@ namespace Server.Multis
 			var player = (PlayerMobile)from;
 			var speedBoosts = DefaultBoatSpeedIncrease;
 
-			var seafaringValue = player.Skills[SkillName.Seafaring].Value;
-			var seafaringBoosts = 0;
-			if ( 125 <= seafaringValue ) seafaringBoosts = 4;
-			else if ( 100 <= seafaringValue ) seafaringBoosts = 3;
-			else if ( 75 <= seafaringValue ) seafaringBoosts = 2;
-			else if ( 50 <= seafaringValue ) seafaringBoosts = 1;
+			// Sailing vessels are powered by Seafaring (and ignore Magery); magic carpets
+			// are powered by Magery (and ignore Seafaring) but cap out at MAX_CARPET_SPEED_BOOSTS.
+			var speedSkill = isCarpet( this ) ? SkillName.Magery : SkillName.Seafaring;
+			var skillValue = player.Skills[speedSkill].Value;
+			var skillBoosts = 0;
+			if ( 125 <= skillValue ) skillBoosts = 4;
+			else if ( 100 <= skillValue ) skillBoosts = 3;
+			else if ( 75 <= skillValue ) skillBoosts = 2;
+			else if ( 50 <= skillValue ) skillBoosts = 1;
 
-			speedBoosts = Math.Max( speedBoosts, seafaringBoosts );
+			speedBoosts = Math.Max( speedBoosts, skillBoosts );
 
 			if ( player.Avatar.Active )
 				speedBoosts = Math.Max( speedBoosts, player.Avatar.BoatSpeedLevel );
@@ -959,7 +963,8 @@ namespace Server.Multis
 			if ( speedBoosts < 1 ) return speed;
 
 			const int MILLISECONDS_PER_BOOST = 25;
-			var speedBoost = MILLISECONDS_PER_BOOST * Math.Min( speedBoosts, MAX_SPEED_BOOSTS );
+			var maxSpeedBoosts = isCarpet( this ) ? MAX_CARPET_SPEED_BOOSTS : MAX_SPEED_BOOSTS;
+			var speedBoost = MILLISECONDS_PER_BOOST * Math.Min( speedBoosts, maxSpeedBoosts );
 
 			return speed - speedBoost;
 		}
