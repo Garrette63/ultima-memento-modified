@@ -1,0 +1,144 @@
+namespace Server.Items
+{
+	public class MangarRobe : Robe
+	{
+		[Constructable]
+		public MangarRobe()
+		{
+			Hue = 0x497;
+			ItemID = 0x26AE;
+			Name = "Mangar's Robe";
+			Attributes.SpellDamage = 25;
+			Attributes.LowerRegCost = 25;
+			SkillBonuses.SetValues( 0, SkillName.Psychology, 10 );
+			SkillBonuses.SetValues( 1, SkillName.Magery, 10 );
+			SkillBonuses.SetValues( 2, SkillName.MagicResist, 10 );
+			SkillBonuses.SetValues( 3, SkillName.Meditation, 10 );
+			Attributes.RegenMana = 3;
+			Attributes.BonusInt = 20;
+			ArtifactLevel = ArtifactLevel.StandardArtefact;
+		}
+
+		public MangarRobe( Serial serial ) : base( serial )
+		{
+		}
+
+		public override void Serialize( GenericWriter writer )
+		{
+			base.Serialize( writer );
+			writer.Write( (int) 1 ); // version
+		}
+
+		public override void Deserialize( GenericReader reader )
+		{
+			base.Deserialize( reader );
+			int version = reader.ReadInt();
+		}
+	}
+
+	public class MangarNecroRobe : Robe
+	{
+		[Constructable]
+		public MangarNecroRobe()
+		{
+			Hue = 0x497;
+			ItemID = 0x26AE;
+			Name = "Mangar's Robe";
+			Attributes.SpellDamage = 25;
+			Attributes.LowerRegCost = 25;
+			SkillBonuses.SetValues( 0, SkillName.Spiritualism, 10 );
+			SkillBonuses.SetValues( 1, SkillName.Necromancy, 10 );
+			SkillBonuses.SetValues( 2, SkillName.MagicResist, 10 );
+			SkillBonuses.SetValues( 3, SkillName.Meditation, 10 );
+			Attributes.RegenMana = 3;
+			Attributes.BonusInt = 20;
+			ArtifactLevel = ArtifactLevel.StandardArtefact;
+		}
+
+		public MangarNecroRobe( Serial serial ) : base( serial )
+		{
+		}
+
+		public override void Serialize( GenericWriter writer )
+		{
+			base.Serialize( writer );
+			writer.Write( (int) 1 ); // version
+		}
+
+		public override void Deserialize( GenericReader reader )
+		{
+			base.Deserialize( reader );
+			int version = reader.ReadInt();
+		}
+	}
+
+	public class MangarElementalistRobe : Robe
+	{
+		[Constructable]
+		public MangarElementalistRobe()
+		{
+			Hue = 0x497;
+			ItemID = 0x26AE;
+			Name = "Mangar's Robe";
+			Attributes.SpellDamage = 25;
+			Attributes.LowerRegCost = 25;
+			SkillBonuses.SetValues( 0, SkillName.Elementalism, 10 );
+			SkillBonuses.SetValues( 1, SkillName.Focus, 10 );
+			SkillBonuses.SetValues( 2, SkillName.MagicResist, 10 );
+			SkillBonuses.SetValues( 3, SkillName.Meditation, 10 );
+			Attributes.RegenMana = 3;
+			Attributes.BonusInt = 20;
+			ArtifactLevel = ArtifactLevel.StandardArtefact;
+		}
+
+		public MangarElementalistRobe( Serial serial ) : base( serial )
+		{
+		}
+
+		public override void Serialize( GenericWriter writer )
+		{
+			base.Serialize( writer );
+			writer.Write( (int) 1 ); // version
+		}
+
+		public override void Deserialize( GenericReader reader )
+		{
+			base.Deserialize( reader );
+			int version = reader.ReadInt();
+		}
+	}
+
+	public class BardicFeatheredCap : FeatheredHat
+	{
+		[Constructable]
+		public BardicFeatheredCap()
+		{
+			Hue = 0x300;
+			ItemID = 5914;
+			Name = "Bardic Feathered Cap";
+			SkillBonuses.SetValues( 0, SkillName.Musicianship, 10 );
+			SkillBonuses.SetValues( 1, SkillName.Provocation, 10 );
+			SkillBonuses.SetValues( 2, SkillName.Discordance, 10 );
+			SkillBonuses.SetValues( 3, SkillName.Peacemaking, 10 );
+			Attributes.RegenMana = 10;
+			Attributes.BonusDex = 10;
+			ArtifactLevel = ArtifactLevel.StandardArtefact;
+		}
+
+		public BardicFeatheredCap( Serial serial ) : base( serial )
+		{
+		}
+
+		public override void Serialize( GenericWriter writer )
+		{
+			base.Serialize( writer );
+			writer.Write( (int) 0 ); // version
+		}
+
+		public override void Deserialize( GenericReader reader )
+		{
+			base.Deserialize( reader );
+			int version = reader.ReadInt();
+		}
+	}
+}

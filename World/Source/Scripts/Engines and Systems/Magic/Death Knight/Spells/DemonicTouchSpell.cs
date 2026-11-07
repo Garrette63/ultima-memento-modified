@@ -1,0 +1,85 @@
+using System;
+using Server.Targeting;
+
+namespace Server.Spells.DeathKnight
+{
+	public class DemonicTouchSpell : DeathKnightSpell
+	{
+		public static readonly SpellInfo SpellInfo = new SpellInfo(
+			new SpellDefinition
+			{
+				SpellID = 751,
+				IconGraphic = 0x5009,
+				Name = "Demonic Touch",
+				PowerWords = "Raum Curare",
+				Description = "The death knight's target is healed by demonic forces for a significant amount.",
+				ManaCost = 16,
+				TithingCost = 21,
+				MinSkill = 15,
+				TargetType = TargetFlags.Beneficial
+			},
+			224,
+			9061
+		);
+
+		public override TimeSpan CastDelayBase { get { return TimeSpan.FromSeconds( 1 ); } }
+		public override int RequiredTithing{ get{ return SpellInfo.SpellDefinition.TithingCost; } }
+		public override double RequiredSkill{ get{ return SpellInfo.SpellDefinition.MinSkill; } }
+		public override int RequiredMana{ get{ return SpellInfo.SpellDefinition.ManaCost; } }
+
+		public DemonicTouchSpell( Mobile caster, Item scroll ) : base( caster, scroll, SpellInfo )
+		{
+		}
+
+		public override void OnCast()
+		{
+			Caster.Target = new InternalTarget( this );
+		}
+
+		public void Target( Mobile m )
+		{
+			if ( !Caster.CanSee( m ) )
+			{
+				Caster.SendLocalizedMessage( 500237 ); // Target can not be seen.
+			}
+			else if ( CheckBSequence( m, false ) )
+			{
+				SpellHelper.Turn( Caster, m );
+
+				m.PlaySound( 0x202 );
+				m.FixedParticles( 0x376A, 1, 62, 0x480, 3, 3, EffectLayer.Waist );
+				m.FixedParticles( 0x37C4, 1, 46, 0x481, 5, 3, EffectLayer.Waist );
+
+				double toHeal = GetKarmaPower( Caster ) / 2;
+				int heal = MyServerSettings.PlayerLevelMod( (int)toHeal, Caster );
+				m.Heal( heal );
+				DrainSoulsInLantern( Caster, RequiredTithing );
+			}
+
+			FinishSequence();
+		}
+
+		private class InternalTarget : Target
+		{
+			private DemonicTouchSpell m_Owner;
+
+			public InternalTarget( DemonicTouchSpell owner ) : base( 12, false, TargetFlags.Beneficial )
+			{
+				m_Owner = owner;
+			}
+
+			protected override void OnTarget( Mobile from, object o )
+			{
+				if ( o is Mobile )
+				{
+					m_Owner.Target( (Mobile)o );
+				}
+			}
+
+			protected override void OnTargetFinish( Mobile from )
+			{
+				m_Owner.FinishSequence();
+			}
+		}
+	}
+}

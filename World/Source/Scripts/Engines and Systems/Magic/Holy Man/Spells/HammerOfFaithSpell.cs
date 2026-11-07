@@ -1,0 +1,161 @@
+using System;
+using Server.Items;
+using Server.Targeting;
+
+namespace Server.Spells.HolyMan
+{
+	public class HammerOfFaithSpell : HolyManSpell
+	{
+		public static readonly SpellInfo SpellInfo = new SpellInfo(
+			new SpellDefinition
+			{
+				SpellID = 773,
+				IconGraphic = 0x968,
+				Name = "Hammer of Faith",
+				PowerWords = "Malleo Fidei",
+				Description = "Temporarily summons a hammer from the gods.",
+				ManaCost = 25,
+				TithingCost = 100,
+				MinSkill = 50,
+				TargetType = TargetFlags.Beneficial
+			},
+			266,
+			9040
+		);
+
+		public override TimeSpan CastDelayBase { get { return TimeSpan.FromSeconds( 3 ); } }
+		public override int RequiredTithing{ get{ return SpellInfo.SpellDefinition.TithingCost; } }
+		public override double RequiredSkill{ get{ return SpellInfo.SpellDefinition.MinSkill; } }
+		public override int RequiredMana{ get{ return SpellInfo.SpellDefinition.ManaCost; } }
+
+		public HammerOfFaithSpell( Mobile caster, Item scroll ) : base( caster, scroll, SpellInfo )
+		{
+		}
+
+		public override void OnCast()
+		{
+			if ( CheckSequence() )
+			{
+				Item weap = new HammerOfFaith( Caster );
+
+				Caster.AddToBackpack( weap );
+				Caster.SendMessage( "You create a magical hammer and place it in your backpack." );
+
+				Caster.PlaySound( 0x212 );
+				Caster.PlaySound( 0x206 );
+
+				Effects.SendLocationParticles( EffectItem.Create( Caster.Location, Caster.Map, EffectItem.DefaultDuration ), 0x376A, 1, 29, 0x47D, 2, 9962, 0 );
+				Effects.SendLocationParticles( EffectItem.Create( new Point3D( Caster.X, Caster.Y, Caster.Z - 7 ), Caster.Map, EffectItem.DefaultDuration ), 0x37C4, 1, 29, 0x47D, 2, 9502, 0 );
+			}
+		}
+
+		private class HammerOfFaith : WarHammer
+		{
+			public Mobile m_Owner;
+			[CommandProperty(AccessLevel.Owner)]
+			public Mobile Owner { get { return m_Owner; } set { m_Owner = value; InvalidateProperties(); } }
+
+			public DateTime m_Expire;
+			[CommandProperty(AccessLevel.Owner)]
+			public DateTime Expire { get { return m_Expire; } set { m_Expire = value; InvalidateProperties(); } }
+
+			private Timer m_Timer;
+
+			[Constructable]
+			public HammerOfFaith( Mobile owner ) : base()
+			{
+				m_Owner = owner;
+				Weight = 10.0;
+				Layer = Layer.TwoHanded;
+				Hue = 0x9C2;
+				BlessedFor = owner;
+				Slayer = SlayerName.Silver;
+				Slayer2 = SlayerName.Exorcism;
+				WeaponAttributes.LowerStatReq = 100;
+				SkillBonuses.SetValues( 0, SkillName.Bludgeoning, 10 );
+				AccuracyLevel = WeaponAccuracyLevel.Supremely;
+				DamageLevel = WeaponDamageLevel.Vanq;
+				Attributes.AttackChance = 30;
+				Name = "Hammer of Faith";
+
+				double time = ( owner.Skills[SkillName.Healing].Value / 5.0 );
+				m_Expire = DateTime.Now + TimeSpan.FromMinutes( (int)time );
+				m_Timer = new InternalTimer( this, m_Expire );
+
+				m_Timer.Start();
+
+				BuffInfo.RemoveBuff( owner, BuffIcon.HammerOfFaith );
+				BuffInfo.AddBuff( owner, new BuffInfo( BuffIcon.HammerOfFaith, 1063532, TimeSpan.FromMinutes( (int)time ), owner ) );
+			}
+
+			public override void OnDelete()
+			{
+				if ( m_Timer != null )
+					m_Timer.Stop();
+
+				base.OnDelete();
+			}
+
+			public override bool CanEquip( Mobile m )
+			{
+				if ( m != m_Owner )
+					return false;
+
+				return true;
+			}
+
+			public void Remove()
+			{
+				m_Owner.SendMessage( "Your hammer slowly disappears." );
+				BuffInfo.RemoveBuff( m_Owner, BuffIcon.HammerOfFaith );
+				Delete();
+			}
+
+			public HammerOfFaith( Serial serial ) : base( serial )
+			{
+			}
+
+			public override void Serialize( GenericWriter writer )
+			{
+				base.Serialize( writer );
+
+				writer.Write( (int) 0 ); // version
+				writer.Write( m_Owner );
+				writer.Write( m_Expire );
+			}
+
+			public override void Deserialize( GenericReader reader )
+			{
+				base.Deserialize( reader );
+
+				int version = reader.ReadInt();
+				m_Owner = reader.ReadMobile();
+				m_Expire = reader.ReadDateTime();
+
+				m_Timer = new InternalTimer( this, m_Expire );
+				m_Timer.Start();
+			}
+		}
+
+		private class InternalTimer : Timer
+		{
+			private HammerOfFaith m_Hammer;
+			private DateTime m_Expire;
+
+			public InternalTimer( HammerOfFaith hammer, DateTime expire ) : base( TimeSpan.Zero, TimeSpan.FromSeconds( 0.1 ) )
+			{
+				m_Hammer = hammer;
+				m_Expire = expire;
+			}
+
+			protected override void OnTick()
+			{
+				if ( DateTime.Now >= m_Expire )
+				{
+					m_Hammer.Remove();
+					Stop();
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,318 @@
+using Server.Gumps;
+using Server.Items;
+using Server.Mobiles;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Server.Engines.Avatar
+{
+	public class AvatarEngine
+	{
+		private static AvatarEngine m_Engine;
+		private readonly Dictionary<Serial, PlayerContext> m_Context = new Dictionary<Serial, PlayerContext>();
+
+		public static AvatarEngine Instance
+		{
+			get
+			{
+				if (m_Engine == null)
+					m_Engine = new AvatarEngine() { IsEnabled = true };
+
+				return m_Engine;
+			}
+		}
+
+		public bool IsEnabled { get; set; }
+
+		public static void Initialize()
+		{
+			LoadData();
+
+			if (Instance.IsEnabled)
+			{
+				EventSink.WorldSave += Instance.OnWorldSave;
+				EventSink.OnKilledBy += Instance.OnKilledBy;
+				EventSink.PlayerDeath += Instance.OnPlayerDeath;
+				EventSink.SkillGain += Instance.OnSkillGain;
+				CustomEventSink.CombatQuestCompleted += Instance.OnCombatQuestCompleted;
+				CustomEventSink.PlayerDeleted += Instance.OnPlayerDeleted;
+			}
+		}
+
+		public static void InitializePlayer(PlayerMobile player)
+		{
+			player.InitStats(10, 10, 10);
+
+			if (player.Backpack == null)
+				player.AddItem(new Backpack() { Movable = false });
+
+			if (player.Backpack.FindItemByType<AvatarBook>() == null)
+				player.Backpack.AddItem(new AvatarBook());
+		}
+
+		public void ApplyContext(PlayerMobile player, PlayerContext context)
+		{
+			if (!context.Active) return;
+
+			player.StatCap = 100 + context.StatCapLevel * Constants.STAT_CAP_PER_LEVEL;
+
+			// Skill cap could have changed
+			player.RefreshSkillCap();
+
+			SoulOrb.Create(player, SoulOrbType.PermadeathPlaceholder);
+		}
+
+		public void ClearContext(Mobile mobile)
+		{
+			var context = GetContextOrDefault(mobile);
+			if (!context.Active) return;
+
+			m_Context.Remove(mobile.Serial);
+		}
+
+		public PlayerContext GetContextOrDefault(Mobile mobile)
+		{
+			PlayerContext context;
+			return mobile != null && mobile is PlayerMobile && m_Context.TryGetValue(mobile.Serial, out context) ? context : PlayerContext.Default;
+		}
+
+		public PlayerContext GetOrCreateContext(Mobile mobile)
+		{
+			var serial = mobile.Serial;
+
+			PlayerContext context;
+			if (m_Context.TryGetValue(serial, out context)) return context;
+
+			return m_Context[serial] = new PlayerContext();
+		}
+
+		public void MigrateContext(Mobile oldMobile, Mobile newMobile)
+		{
+			var context = GetContextOrDefault(oldMobile);
+			if (!context.Active) return;
+			if (!m_Context.Remove(oldMobile.Serial)) return;
+
+			m_Context.Add(newMobile.Serial, context);
+
+			// Clear any cache
+			context.RewardCache = null;
+			context.BoostedTemplateCache = null;
+			context.SelectedTemplate = AvatarStarterTemplates.None;
+
+			context.GenerateRivalry();
+		}
+
+		private static void LoadData()
+		{
+			Persistence.Deserialize(
+				"Saves//Player//Avatar.bin",
+				reader =>
+				{
+					int version = reader.ReadInt();
+					int count = reader.ReadInt();
+
+					for (int i = 0; i < count; ++i)
+					{
+						var serial = reader.ReadInt();
+						var context = new PlayerContext(reader);
+						Instance.m_Context.Add(serial, context);
+					}
+
+					Console.WriteLine("[Avatar] Loaded data for '{0}' characters", Instance.m_Context.Count);
+				}
+			);
+
+			foreach (var key in Instance.m_Context.Keys)
+			{
+				Mobile mobile;
+				World.Mobiles.TryGetValue(key, out mobile);
+				if (false == (mobile is PlayerMobile)) continue;
+
+				var player = (PlayerMobile)mobile;
+				if (!player.Avatar.Active) continue;
+
+				Instance.ApplyContext(player, player.Avatar);
+			}
+		}
+
+		private int GetBonusCoinsAmount(int value, PlayerContext context)
+		{
+			return (int)(value * context.PointGainRateLevel * Constants.POINT_GAIN_RATE_PER_LEVEL * 0.01);
+		}
+
+		private void GrantCoins(PlayerMobile player, int value, PlayerContext context)
+		{
+			context.PointsFarmed += value;
+			CombatBar.Refresh(player);
+
+			player.SendMessage("You have gained {0} coins.", value);
+		}
+
+		private void OnCombatQuestCompleted(CombatQuestCompletedArgs e)
+		{
+			if (e == null) return;
+			if (e.Award < 1) return;
+			if (false == (e.Mobile is PlayerMobile)) return;
+
+			var player = (PlayerMobile)e.Mobile;
+			if (!player.Avatar.Active) return;
+
+			var value = e.Award * 5;
+			value += GetBonusCoinsAmount(value, player.Avatar);
+
+			player.Avatar.LifetimeCombatQuestCompletions += 1;
+
+			GrantCoins(player, value, player.Avatar);
+		}
+
+		private void OnKilledBy(OnKilledByArgs e)
+		{
+			if (e.Corpse == null) return;
+			if (false == (e.Killed is BaseCreature)) return;
+
+			var player = MobileUtilities.TryGetMasterPlayer(e.KilledBy);
+			if (player == null) return;
+
+			var context = GetContextOrDefault(player);
+			if (!context.Active) return;
+
+			var creature = (BaseCreature)e.Killed;
+			if (creature.AI == AIType.AI_Vendor) return;
+			if (
+				creature.NoKillAwards // Idk, but seems reasonable
+				|| (creature.IsEphemeral && false == creature is BaseChampion) // No temporary mobs
+				|| MobileUtilities.TryGetMasterPlayer(creature) != null // No pets
+			 ) return;
+
+			int value = CoinRewardCalculator.GetKillCoinValue(creature);
+			if (value < 1) return;
+
+			if (1 < e.DamagerCount) value /= 2;
+
+			context.LifetimeCreatureKills += 1;
+
+			// Apply bonus coin multiplier
+			value += GetBonusCoinsAmount(value, context);
+
+			// Apply rivalry bonus
+			if (context.HasRivalFaction)
+			{
+				var slayer = SlayerGroup.GetEntryByName(context.RivalSlayerName);
+				if (slayer != null && slayer.Slays(e.Killed))
+				{
+					context.LifetimeEnemyFactionKills += 1;
+
+					if (context.RivalBonusEnabled)
+					{
+						var bonus = (int)(value * Constants.RIVAL_BONUS_PERCENT * 0.01);
+						if (0 < bonus)
+						{
+							context.RivalBonusPoints += bonus;
+							value += bonus;
+
+							if (Constants.RIVAL_BONUS_MAX_POINTS <= context.RivalBonusPoints)
+							{
+								context.RivalBonusEnabled = false;
+								player.SendMessage("You have avenged your family by vanquishing all members of '{0}'.", context.RivalFactionName);
+							}
+							else
+							{
+								player.SendMessage("You have eliminated another member of '{0}'.", context.RivalFactionName);
+							}
+						}
+					}
+				}
+			}
+
+			GrantCoins(player, value, context);
+		}
+
+		private void OnPlayerDeath(PlayerDeathEventArgs e)
+		{
+			var player = e.Mobile as PlayerMobile;
+			if (player == null) return;
+
+			var context = GetContextOrDefault(player);
+			if (!context.Active) return;
+
+			DeathContext.TrySave(player, context);
+
+			context.LifetimeDeaths += 1;
+			context.LifetimePointsGained += context.PointsFarmed;
+			context.PointsSaved += context.PointsFarmed;
+			context.PointsFarmed = 0;
+			context.RivalBonusPoints = 0;
+		}
+
+		private void OnPlayerDeleted(PlayerDeletedArgs e)
+		{
+			var player = e.Mobile;
+			if (player == null) return;
+
+			var context = GetContextOrDefault(player);
+			if (context.Active)
+			{
+				m_Context.Remove(player.Serial);
+				Console.WriteLine("[Avatar] Removed context for player '{0}' ({1})", player.Name, player.Serial);
+			}
+
+			Prune();
+		}
+
+		private void OnSkillGain(SkillGainArgs e)
+		{
+			if (e == null) return;
+			if (e.Skill == null) return;
+			if (false == (e.From is PlayerMobile)) return;
+
+			var player = (PlayerMobile)e.From;
+			if (!player.Avatar.Active) return;
+
+			player.Avatar.Skills[e.Skill.SkillID] = Math.Max(player.Avatar.Skills[e.Skill.SkillID], e.Skill.BaseFixedPoint);
+		}
+
+		private void OnWorldSave(WorldSaveEventArgs e)
+		{
+			Prune();
+			Persistence.Serialize(
+				"Saves//Player//Avatar.bin",
+				writer =>
+				{
+					writer.Write(0); // version
+
+					writer.Write(m_Context.Count);
+					foreach (var kv in m_Context)
+					{
+						writer.Write(kv.Key);
+						kv.Value.Serialize(writer);
+					}
+				}
+			);
+		}
+
+		private void Prune()
+		{
+			var toRemove = Instance.m_Context.Keys.Where(key =>
+			{
+				Mobile mobile;
+				if (!World.Mobiles.TryGetValue(key, out mobile)) return true; // Doesn't exist
+
+				var player = mobile as PlayerMobile;
+				return player == null // Not a player
+					|| player.Deleted // Deleted
+					|| !player.Avatar.Active; // Avatar no longer active
+			});
+
+			if (toRemove.Any())
+			{
+				var removeList = toRemove.ToList();
+				foreach (var key in removeList)
+				{
+					Instance.m_Context.Remove(key);
+				}
+				Console.WriteLine("[Avatar] Removed data for '{0}' characters. A total of '{1}' characters remain.", removeList.Count, Instance.m_Context.Count);
+			}
+		}
+	}
+}

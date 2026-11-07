@@ -1,0 +1,459 @@
+using System;
+using Server;
+using Server.Items;
+using Server.Gumps;
+using Server.Network;
+using Server.Utilities;
+
+namespace Server.Engines.Plants
+{
+	public class MainPlantGump : Gump
+	{
+		private PlantItem m_Plant;
+
+		public MainPlantGump( PlantItem plant ) : base( 20, 20 )
+		{
+			m_Plant = plant;
+
+			DrawBackground();
+
+			DrawPlant();
+			const int GRAPHIC_SLOT_WIDTH = 20;
+			const int GRAPHIC_SLOT_HEIGHT = 20;
+
+			AddButton( 71, 67, 0xD4, 0xD4, 1, GumpButtonType.Reply, 0 ); // Reproduction menu
+			AddItem( 59, 68, 0xD08 );
+			AddTooltip("Reproduction Menu");
+
+			PlantSystem system = plant.PlantSystem;
+
+			AddButton( 71, 91, 0xD4, 0xD4, 2, GumpButtonType.Reply, 0 ); // Infestation
+			AddItem( 8, 96, 0x372 );
+			AddTooltip("Infestation Level");
+			AddPlus( 95, 92, system.Infestation );
+
+			AddButton( 71, 115, 0xD4, 0xD4, 3, GumpButtonType.Reply, 0 ); // Fungus
+			AddItem( 58, 115, 0xD16 );
+			AddTooltip("Fungus Level");
+			AddPlus( 95, 116, system.Fungus );
+
+			AddButton( 71, 139, 0xD4, 0xD4, 4, GumpButtonType.Reply, 0 ); // Poison
+			AddItem( 59, 143, 0x1AE4 );
+			AddTooltip("Poison Level");
+			AddPlus( 95, 140, system.Poison );
+
+			AddButton( 71, 163, 0xD4, 0xD4, 5, GumpButtonType.Reply, 0 ); // Disease
+			AddItem( 55, 167, 0x1727 );
+			AddTooltip("Disease Level");
+			AddPlus( 95, 164, system.Disease );
+
+			AddButton( 209, 67, 0xD2, 0xD2, 6, GumpButtonType.Reply, 0 ); // Water
+			AddItem( 193, 67, 0x1F9D );
+			AddTooltip("Water Level");
+			AddPlusMinus( 196, 67, system.Water );
+
+			const int ITEM_START_X = 209;
+
+			AddButton( 209, 91, 0xD4, 0xD4, 7, GumpButtonType.Reply, 0 ); // Poison potion
+			GumpUtilities.AddCenteredItemToGump(this, 0xF0A, ITEM_START_X, 91, GRAPHIC_SLOT_WIDTH, GRAPHIC_SLOT_HEIGHT);
+			AddLevel( 196, 91, system.PoisonPotion );
+
+			AddButton( 209, 115, 0xD4, 0xD4, 8, GumpButtonType.Reply, 0 ); // Cure potion
+			GumpUtilities.AddCenteredItemToGump(this, 0xF07, ITEM_START_X, 115, GRAPHIC_SLOT_WIDTH, GRAPHIC_SLOT_HEIGHT);
+			AddLevel( 196, 115, system.CurePotion );
+
+			AddButton( 209, 139, 0xD4, 0xD4, 9, GumpButtonType.Reply, 0 ); // Heal potion
+			GumpUtilities.AddCenteredItemToGump(this, 0xF0C, ITEM_START_X, 139, GRAPHIC_SLOT_WIDTH, GRAPHIC_SLOT_HEIGHT);
+			AddLevel( 196, 139, system.HealPotion );
+
+			AddButton( 209, 163, 0xD4, 0xD4, 10, GumpButtonType.Reply, 0 ); // Strength potion
+			GumpUtilities.AddCenteredItemToGump(this, 0xF09, ITEM_START_X, 163, GRAPHIC_SLOT_WIDTH, GRAPHIC_SLOT_HEIGHT);
+			AddLevel( 196, 163, system.StrengthPotion );
+
+			AddImage( 48, 47, 0xD2 );
+			AddTooltip("Plant Stage: " + ((int)m_Plant.PlantStatus).ToString());
+			AddLevel( 54, 47, (int)m_Plant.PlantStatus );
+
+			AddImage( 232, 47, 0xD2 );
+			// Tooltip internal
+			AddGrowthIndicator( 239, 47 );
+
+			AddButton( 48, 183, 0xD2, 0xD2, 11, GumpButtonType.Reply, 0 ); // Help
+			AddTooltip("Help");
+			AddLabel( 54, 183, 0x835, "?" );
+
+			AddButton( 232, 183, 0xD4, 0xD4, 12, GumpButtonType.Reply, 0 ); // Empty the bowl
+			AddTooltip("Empty the bowl");
+			AddItem( 219, 180, 0x15FD );
+		}
+
+		private void DrawBackground()
+		{
+			AddBackground( 50, 50, 200, 150, 0xE10 );
+
+			AddItem( 45, 45, 0xCEF );
+			AddItem( 45, 118, 0xCF0 );
+
+			AddItem( 211, 45, 0xCEB );
+			AddItem( 211, 118, 0xCEC );
+		}
+
+		private void DrawPlant()
+		{
+			PlantStatus status = m_Plant.PlantStatus;
+
+			if ( status < PlantStatus.FullGrownPlant )
+			{
+				AddImage( 110, 85, 0x589 );
+
+				AddItem( 122, 94, 0x914 );
+				AddItem( 135, 94, 0x914 );
+				AddItem( 120, 112, 0x914 );
+				AddItem( 135, 112, 0x914 );
+
+				if ( status >= PlantStatus.Stage2 )
+				{
+					AddItem( 127, 112, 0xC62 );
+				}
+				if ( status == PlantStatus.Stage3 || status == PlantStatus.Stage4 )
+				{
+					AddItem( 129, 85, 0xC7E );
+				}
+				if ( status >= PlantStatus.Stage4 )
+				{
+					AddItem( 121, 117, 0xC62 );
+					AddItem( 133, 117, 0xC62 );
+				}
+				if ( status >= PlantStatus.Stage5 )
+				{
+					AddItem( 110, 100, 0xC62 );
+					AddItem( 140, 100, 0xC62 );
+					AddItem( 110, 130, 0xC62 );
+					AddItem( 140, 130, 0xC62 );
+				}
+				if ( status >= PlantStatus.Stage6 )
+				{
+					AddItem( 105, 115, 0xC62 );
+					AddItem( 145, 115, 0xC62 );
+					AddItem( 125, 90, 0xC62 );
+					AddItem( 125, 135, 0xC62 );
+				}
+			}
+			else
+			{
+				PlantTypeInfo typeInfo = PlantTypeInfo.GetInfo( m_Plant.PlantType );
+				PlantHueInfo hueInfo = PlantHueInfo.GetInfo( m_Plant.PlantHue );
+
+				// The large images for these trees trigger a client crash, so use a smaller, generic tree.
+				if ( m_Plant.PlantType == PlantType.CypressTwisted || m_Plant.PlantType == PlantType.CypressStraight )
+					AddItem( 130 + typeInfo.OffsetX, 96 + typeInfo.OffsetY, 0x0CCA, hueInfo.Hue );
+				else
+					AddItem( 130 + typeInfo.OffsetX, 96 + typeInfo.OffsetY, typeInfo.ItemID, hueInfo.Hue );
+			}
+
+			if ( status != PlantStatus.BowlOfDirt )
+			{
+				int message = m_Plant.PlantSystem.GetLocalizedHealth();
+
+				switch ( m_Plant.PlantSystem.Health )
+				{
+					case PlantHealth.Dying:
+					{
+						AddItem( 92, 167, 0x1B9D );
+						AddItem( 161, 167, 0x1B9D );
+
+						AddHtmlLocalized( 136, 167, 42, 20, message, 0x00FC00, false, false );
+
+						break;
+					}
+					case PlantHealth.Wilted:
+					{
+						AddItem( 91, 164, 0x18E6 );
+						AddItem( 161, 164, 0x18E6 );
+
+						AddHtmlLocalized( 132, 167, 42, 20, message, 0x00C207, false, false );
+
+						break;
+					}
+					case PlantHealth.Healthy:
+					{
+						AddItem( 96, 168, 0xC61 );
+						AddItem( 162, 168, 0xC61 );
+
+						AddHtmlLocalized( 129, 167, 42, 20, message, 0x008200, false, false );
+
+						break;
+					}
+					case PlantHealth.Vibrant:
+					{
+						AddItem( 93, 162, 0x1A99 );
+						AddItem( 162, 162, 0x1A99 );
+
+						AddHtmlLocalized( 129, 167, 42, 20, message, 0x0083E0, false, false );
+
+						break;
+					}
+				}
+			}
+		}
+
+		private void AddPlus( int x, int y, int value )
+		{
+			switch ( value )
+			{
+				case 1: AddLabel( x, y, 0x35, "+" ); break;
+				case 2: AddLabel( x, y, 0x21, "+" ); break;
+			}
+		}
+
+		private void AddPlusMinus( int x, int y, int value )
+		{
+			switch ( value )
+			{
+				case 0: AddLabel( x, y, 0x21, "-" ); break;
+				case 1: AddLabel( x, y, 0x35, "-" ); break;
+				case 3: AddLabel( x, y, 0x35, "+" ); break;
+				case 4: AddLabel( x, y, 0x21, "+" ); break;
+			}
+		}
+
+		private void AddLevel( int x, int y, int value )
+		{
+			AddLabel( x, y, 0x835, value.ToString() );
+		}
+
+		private void AddGrowthIndicator( int x, int y )
+		{
+			if ( !m_Plant.IsGrowable )
+				return;
+
+			switch ( m_Plant.PlantSystem.GrowthIndicator )
+			{
+				case PlantGrowthIndicator.InvalidLocation : AddTooltip("Growth: Invalid Location"); AddLabel( x, y, 0x21, "!" ); break;
+				case PlantGrowthIndicator.NotHealthy : AddTooltip("Growth: Not Healthy"); AddLabel( x, y, 0x21, "-" ); break;
+				case PlantGrowthIndicator.Delay : AddTooltip("Growth: Waiting"); AddLabel( x, y, 0x35, "-" ); break;
+				case PlantGrowthIndicator.Grown : AddTooltip("Growth: Grown"); AddLabel( x, y, 0x3, "+" ); break;
+				case PlantGrowthIndicator.DoubleGrown : AddTooltip("Growth: Double Grown"); AddLabel( x, y, 0x3F, "+" ); break;
+			}
+		}
+
+		public override void OnResponse( NetState sender, RelayInfo info )
+		{
+			Mobile from = sender.Mobile;
+
+			if ( info.ButtonID == 0 || m_Plant.Deleted || m_Plant.PlantStatus >= PlantStatus.DecorativePlant )
+				return;
+			
+			if ( ( ( info.ButtonID >= 6 && info.ButtonID <= 10 ) || info.ButtonID == 12 ) && !from.InRange( m_Plant.GetWorldLocation(), 3 ) )
+			{
+				from.LocalOverheadMessage( MessageType.Regular, 0x3E9, 500446 ); // That is too far away.
+				return;
+			}
+
+			if ( !m_Plant.IsUsableBy( from ) )
+			{
+				m_Plant.LabelTo( from, 1061856 ); // You must have the item in your backpack or locked down in order to use it.
+				return;
+			}
+
+			switch ( info.ButtonID )
+			{
+				case 1: // Reproduction menu
+				{
+					if ( m_Plant.PlantStatus > PlantStatus.BowlOfDirt )
+					{
+						from.SendGump( new ReproductionGump( m_Plant ) );
+					}
+					else
+					{
+						from.SendLocalizedMessage( 1061885 ); // You need to plant a seed in the bowl first.
+
+						from.SendGump( new MainPlantGump( m_Plant ) );
+					}
+
+					break;
+				}
+				case 2: // Infestation
+				{
+					from.SendGump(
+						new InfoHelpGump(
+							from,
+							"Infestation Level",
+							"The Infestation Level meter (grey bug image) shows the relative amount of insects that are currently attacking your plant.<BR><BR>A yellow + sign means the plant has a small infestation.  A red + sign indicates a severe infestation.",
+							onClose: () => from.SendGump( new MainPlantGump( m_Plant ) )
+						)
+					);
+
+					break;
+				}
+				case 3: // Fungus
+				{
+					from.SendGump(
+						new InfoHelpGump(
+							from,
+							"Fungus Level",
+							"The Fungus Level meter (mushroom image) shows the amount of fungi that are currently sapping health from your plant.<BR><BR>A yellow + sign means the plant has a small fungus infection.  A red + sign indicates a severe fungus infection.",
+							onClose: () => from.SendGump( new MainPlantGump( m_Plant ) )
+						)
+					);
+
+					break;
+				}
+				case 4: // Poison
+				{
+					from.SendGump(
+						new InfoHelpGump(
+							from,
+							"Poison Level",
+							"The Poison Level meter (skull image) shows the amount of poison that your plant has soaked up.<BR><BR>A yellow + sign means the plant is slightly poisoned.  A red + sign indicates that the plant is severely poisoned.",
+							onClose: () => from.SendGump( new MainPlantGump( m_Plant ) )
+						)
+					);
+
+					break;
+				}
+				case 5: // Disease
+				{
+					from.SendGump(
+						new InfoHelpGump(
+							from,
+							"Disease Level",
+							"The Disease Level meter (purple goo image) shows the strength of the disease affecting your plant.<BR><BR>A yellow + sign means the plant is slightly infected.  A red + sign indicates that the plant is severely infected.",
+							onClose: () => from.SendGump( new MainPlantGump( m_Plant ) )
+						)
+					);
+
+					break;
+				}
+				case 6: // Water
+				{
+					Item[] item = from.Backpack.FindItemsByType( typeof( BaseBeverage ) );
+					
+					bool foundUsableWater = false;
+					
+					if ( item != null && item.Length > 0 )
+					{
+						for ( int i = 0; i < item.Length; ++i )
+						{
+							BaseBeverage beverage = (BaseBeverage)item[i];
+							
+							if ( !beverage.IsEmpty && beverage.Pourable && beverage.Content == BeverageType.Water )
+							{
+								foundUsableWater = true;
+								m_Plant.Pour( from, beverage );
+								break;
+							}
+						}
+					}
+					
+					if ( !foundUsableWater )
+					{
+						from.Target = new PlantPourTarget( m_Plant );
+						from.SendLocalizedMessage( 1060808, "#" + m_Plant.GetLocalizedPlantStatus().ToString() ); // Target the container you wish to use to water the ~1_val~.
+					}
+
+					break;
+				}
+				case 7: // Poison potion
+				{
+					AddPotion( from, PotionEffect.PoisonGreater, PotionEffect.PoisonDeadly );
+
+					break;
+				}
+				case 8: // Cure potion
+				{
+					AddPotion( from, PotionEffect.CureGreater );
+
+					break;
+				}
+				case 9: // Heal potion
+				{
+					AddPotion( from, PotionEffect.HealGreater );
+
+					break;
+				}
+				case 10: // Strength potion
+				{
+					AddPotion( from, PotionEffect.StrengthGreater );
+
+					break;
+				}
+				case 11: // Help
+				{
+					from.SendGump(
+						new InfoHelpGump(
+							from,
+							"Plant Growing",
+							"Using special seeds harvested from slain monsters, you may grow uniquely colored plants to use as house decorations or to produce hybrid seeds and resources. <BR><BR> As your plant grows from a seed to a full-grown plant, it will need watering and alchemical care in order to protect if from insect infestations and harmful fungi.<BR><BR>Through the process of cross-pollination, you may even be the first person to grow a unique new hybrid plant type!",
+							onClose: () => from.SendGump( new MainPlantGump( m_Plant ) )
+						)
+					);
+					break;
+				}
+				case 12: // Empty the bowl
+				{
+					from.SendGump( new EmptyTheBowlGump( m_Plant ) );
+
+					break;
+				}
+			}
+		}
+
+		private void AddPotion( Mobile from, params PotionEffect[] effects )
+		{
+			Item item = GetPotion( from, effects );
+
+			if ( item != null )
+			{
+				m_Plant.Pour( from, item );
+			}
+			else
+			{
+				int message;
+				if ( m_Plant.ApplyPotion( effects[0], true, out message ) )
+				{
+					from.SendLocalizedMessage( 1061884 ); // You don't have any strong potions of that type in your pack.
+
+					from.Target = new PlantPourTarget( m_Plant );
+					from.SendLocalizedMessage( 1060808, "#" + m_Plant.GetLocalizedPlantStatus().ToString() ); // Target the container you wish to use to water the ~1_val~.
+
+					return;
+				}
+				else
+				{
+					m_Plant.LabelTo( from, message );
+				}
+			}
+
+			from.SendGump( new MainPlantGump( m_Plant ) );
+		}
+
+		public static Item GetPotion( Mobile from, PotionEffect[] effects )
+		{
+			if ( from.Backpack == null )
+				return null;
+
+			Item[] items = from.Backpack.FindItemsByType( new Type[] { typeof( BasePotion ), typeof( PotionKeg ) } );
+
+			foreach ( Item item in items )
+			{
+				if ( item is BasePotion )
+				{
+					BasePotion potion = (BasePotion)item;
+
+					if ( Array.IndexOf( effects, potion.PotionEffect ) >= 0 )
+						return potion;
+				}
+				else
+				{
+					PotionKeg keg = (PotionKeg)item;
+
+					if ( keg.Held > 0 && Array.IndexOf( effects, keg.Type ) >= 0 )
+						return keg;
+				}
+			}
+
+			return null;
+		}
+	}
+}

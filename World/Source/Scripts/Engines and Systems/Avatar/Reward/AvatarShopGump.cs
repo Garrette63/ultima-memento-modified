@@ -1,0 +1,805 @@
+using Server.Gumps;
+using Server.Mobiles;
+using Server.Network;
+using Server.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Server.Engines.Avatar
+{
+	public class AvatarShopGump : Gump
+	{
+		public const int BLANK_ITEM_ID = 0;
+		public const int COST_FREE = -1;
+		public const int COST_NO_BUY = 0;
+		public const int FAT_BOTTLE_ITEM_ID = 0x1FD9;
+		public const int GOLD_STACK_ITEM_ID = 0x0EEF;
+		public const int NO_ITEM_ID = -1;
+		private const int CARD_HEIGHT = 68;
+		private const int CARD_WIDTH = 864 - NAVIGATION_WIDTH;
+		private const int CATEGORY_WIDTH = NAVIGATION_WIDTH - 28 - 20;
+		private const int COMPACT_CARD_GAP = 10;
+		private const int COMPACT_CARD_HEIGHT = 40;
+		private const int COMPACT_CARD_WIDTH = (CARD_WIDTH - COMPACT_CARD_GAP) / 2;
+		private const int GIANT_COIN_ITEM_ID = 0x4FAD;
+		private const int NAVIGATION_WIDTH = 152 + 20 + 20;
+
+		private readonly PlayerContext m_Context;
+		private readonly PlayerMobile m_From;
+		private readonly bool m_InGypsyEncampment;
+		private readonly Action m_onGumpClose;
+		private readonly int m_PageNumber;
+		private readonly List<IReward> m_Rewards;
+		private readonly Categories m_SelectedCategory;
+
+		public AvatarShopGump(PlayerMobile from, Categories selectedCategory = Categories.Information, int pageNumber = 1, Action onGumpClose = null) : base(25, 25)
+		{
+			m_Context = AvatarEngine.Instance.GetOrCreateContext(from);
+			m_From = from;
+			m_onGumpClose = onGumpClose;
+			m_PageNumber = pageNumber;
+			m_SelectedCategory = selectedCategory;
+			m_InGypsyEncampment = InGypsyEncampment(from);
+
+			AddPage(0);
+
+			const int BACKGROUND_WIDTH = 904;
+			const int BACKGROUND_HEIGHT = 729;
+			AddBackground(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, 2620);
+
+			const int GUMP_WIDTH = BACKGROUND_WIDTH;
+			const int GUMP_HEIGHT = BACKGROUND_HEIGHT;
+			TextDefinition.AddHtmlText(this, 11, 11, GUMP_WIDTH, 20, "<CENTER>The Avatar's Ascent</CENTER>", HtmlColors.COOL_BLUE);
+
+			AddCategoryList(selectedCategory, 27, 48);
+
+			var y = 48;
+
+			if (selectedCategory == Categories.Information)
+			{
+				AddKeyValuePairsCard(NAVIGATION_WIDTH + 20, y, true,
+					new _Metric("Time Played", m_From.GameTime.ToString("dd'd 'hh'h 'mm'm'")),
+					new _Metric("Stat Cap", m_From.StatCap.ToString()),
+					new _Metric("Skill Cap", (m_From.SkillsCap / 10).ToString("n0")),
+					new _Metric("Faction Bonus", Math.Min(Constants.RIVAL_BONUS_MAX_POINTS, m_Context.RivalBonusPoints).ToString("n0"),
+						"The amount of coins you have received for killing your enemy faction.")
+				);
+				y += CARD_HEIGHT;
+				y += 10;
+
+				AddInformationCard(NO_ITEM_ID, "An Avatar is Born", string.Format(
+					"You have begun the Avatar's Ascent. This is a challenging journey of self-discovery and growth. You may access this gump at any time by double-clicking {0} in your backpack.",
+					TextDefinition.GetColorizedText("The Avatar's Ascent", HtmlColors.ORANGE)
+				), y);
+				y += CARD_HEIGHT;
+				y += 10;
+
+				AddInformationCard(NO_ITEM_ID, "Everything is Temporary", "Unless explicitly stated, everything your character owns will be deleted when your character dies. The only exception to this is your house, which will be inherited by your new character.", y);
+				y += CARD_HEIGHT;
+				y += 10;
+
+				AddInformationCard(NO_ITEM_ID, "Meta Progression", string.Format(
+					"{0} are permanent and may be purchased for a fee. {0} can enable permanence between runs, unlock new features, accelerate progression, or even raise the ceiling of your character.",
+					TextDefinition.GetColorizedText("Ascensions", HtmlColors.ORANGE)
+				), y);
+				y += CARD_HEIGHT;
+				y += 10;
+
+				AddInformationCard(NO_ITEM_ID, "Your Template", string.Format(
+					"Your Avatar is weak when they are reborn. It is recommended that you select a {0} each run. The Erudian Ascensions will allw you to recover skills using the {1} and {2} skill pages.",
+					TextDefinition.GetColorizedText("Template", HtmlColors.ORANGE),
+					TextDefinition.GetColorizedText("Primary", HtmlColors.ORANGE),
+					TextDefinition.GetColorizedText("Secondary", HtmlColors.ORANGE)
+				), y);
+				y += CARD_HEIGHT;
+				y += 10;
+
+				if (m_Context.HasRivalFaction)
+				{
+					AddInformationCard(NO_ITEM_ID, "Enemy Faction", string.Format("Your family has been wronged by {0}. You will receive a bonus each time you kill monsters of this faction. Once you have avenged your family, you will no longer receive the bonus.", TextDefinition.GetColorizedText(m_Context.RivalFactionName, HtmlColors.ORANGE)), y);
+					y += CARD_HEIGHT;
+					y += 10;
+				}
+
+				AddInformationCard(NO_ITEM_ID, "Opportunity Only Knocks Once...", string.Format(
+					"Your vessel is frail; once you leave the {0} you may not purchase anything from this gump.",
+					TextDefinition.GetColorizedText("Gypsy Encampment", HtmlColors.ORANGE)
+				), y);
+				y += CARD_HEIGHT;
+				y += 10;
+
+				return;
+			}
+
+			if (pageNumber == 1)
+			{
+				switch (m_SelectedCategory)
+				{
+					case Categories.Ascensions:
+						{
+							AddInformationCard(BLANK_ITEM_ID, "Ascensions - Unlock Permanent Enhancements", "Ascensions are a way to apply permanent changes to your lineage. Some of these changes may allow you to persist knowledge between runs while others may simply make you stronger.", y, addBackground: false);
+							break;
+						}
+
+					case Categories.Templates:
+						{
+							AddInformationCard(BLANK_ITEM_ID, "Templates - Select Your Beginning", "A template can provide a fixed combination of skills, stats, and/or items to aid with your run. The templates available to you will change each run.", y, addBackground: false);
+							break;
+						}
+
+					case Categories.PrimaryBoosts:
+					case Categories.SecondaryBoosts:
+						{
+							var isPrimary = m_SelectedCategory == Categories.PrimaryBoosts;
+							AddInformationCard(
+								BLANK_ITEM_ID,
+								isPrimary ? "Available Primary Skills" : "Available Secondary Skills",
+								string.Format(
+									"Only half the {0} skills that you've ever become proficient in ({1} skill) are available for selection. As long as you have capacity, selecting a skill will immediately raise it to the displayed value.",
+									isPrimary ? "Primary" : "Secondary",
+									Constants.RECORDED_SKILL_CAP_MIN_AMOUNT
+									),
+								y,
+								addBackground: false
+							);
+							break;
+						}
+
+					case Categories.FullSkillArchive:
+						{
+							AddInformationCard(
+								BLANK_ITEM_ID,
+								"Skill Archive",
+								string.Format(
+									"Review the highest you've ever reached in each skill. Once you become proficient ({0} skill), you may be able to restore the skill to that value for free.",
+									Constants.RECORDED_SKILL_CAP_MIN_AMOUNT
+									),
+								y,
+								addBackground: false
+							);
+							break;
+						}
+
+					case Categories.Items:
+						{
+							AddInformationCard(BLANK_ITEM_ID, "Items - Purchase Temporary Conveniences", "Items can be purchased to assist you with your next run. Be wary of how much you invest, as these items are lost upon death.", y, addBackground: false);
+							break;
+						}
+
+					case Categories.Statistics:
+						{
+							AddInformationCard(BLANK_ITEM_ID, "My Stats", "Review your current stats and see how you compare to the average player.", y, addBackground: false);
+
+							y += CARD_HEIGHT;
+							y += 10;
+							AddKeyValuePairsCard(NAVIGATION_WIDTH + 20, y, true,
+							new _Metric("Time Played", m_From.GameTime.ToString("dd'd 'hh'h 'mm'm'")),
+								new _Metric("Stat Cap", m_From.StatCap.ToString()),
+								new _Metric("Skill Cap", (m_From.SkillsCap / 10).ToString("n0")),
+								new _Metric("Faction Bonus", Math.Min(Constants.RIVAL_BONUS_MAX_POINTS, m_Context.RivalBonusPoints).ToString("n0"),
+									"The amount of coins you have received for killing your enemy faction.")
+							);
+
+							y += CARD_HEIGHT;
+							y += 10;
+							AddKeyValuePairsCard(NAVIGATION_WIDTH + 20, y, true,
+								new _Metric("Lifetime", ""),
+								new _Metric("Time Played", m_From.Avatar.LifetimeGameTime.ToString("dd'd 'hh'h 'mm'm'")),
+								new _Metric("Coins Gained", m_From.Avatar.GrandTotalPoints.ToString("n0")),
+								new _Metric("Combat Quests", m_From.Avatar.LifetimeCombatQuestCompletions.ToString("n0"))
+							);
+
+							y += CARD_HEIGHT;
+							y += 10;
+							AddKeyValuePairsCard(NAVIGATION_WIDTH + 20, y, true,
+								new _Metric("Lifetime", ""),
+								new _Metric("Deaths", m_From.Avatar.LifetimeDeaths.ToString("n0")),
+								new _Metric("Faction Kills", m_From.Avatar.LifetimeEnemyFactionKills.ToString("n0")),
+								new _Metric("Other Kills", (m_From.Avatar.LifetimeCreatureKills - m_From.Avatar.LifetimeEnemyFactionKills).ToString("n0"))
+							);
+							break;
+						}
+
+					case Categories.Draft:
+						{
+							AddInformationCard(BLANK_ITEM_ID, "Draft - Pick Skills to Train", string.Format("Draft mode allows you to pick skills to train each run. While in the Gypsy Encampment, selecting a skill will automatically increase it."), y, addBackground: false);
+
+							y += CARD_HEIGHT;
+							y += 10;
+							AddKeyValuePairsCard(NAVIGATION_WIDTH + 20, y, true,
+								new _Metric("Level", string.Format("{0}/{1}", m_From.Avatar.DraftLevel, Constants.DRAFT_MAX_LEVEL)),
+								new _Metric("Experience", m_From.Avatar.DraftTotalExperienceGained.ToString("n0")),
+								new _Metric("To Next Pick", m_From.Avatar.DraftExperienceToNextPick.ToString("n0")),
+								new _Metric("Picks Earned", string.Format("{0}/{1}", m_From.Avatar.DraftPicksAvailable - Constants.DRAFT_START_PICK_AMOUNT, Constants.DRAFT_MAX_LEVEL / Constants.DRAFT_LEVELS_PER_PICK)),
+								new _Metric("Picks Spent", string.Format("{0}/{1}", m_From.Avatar.DraftPicksSpent, m_From.Avatar.DraftPicksAvailable))
+							);
+							break;
+						}
+
+					case Categories.Information:
+					default:
+						break;
+				}
+			}
+
+			var rewards = RewardFactory.CreateRewards(m_From, selectedCategory, m_Context, m_InGypsyEncampment);
+			if (rewards == null || rewards.Count == 0) return;
+
+			if (m_Context.RewardCache == null) m_Context.RewardCache = new Dictionary<Categories, List<int>>();
+
+			List<int> randomRewardIndexes;
+			if (!m_Context.RewardCache.TryGetValue(selectedCategory, out randomRewardIndexes))
+			{
+				randomRewardIndexes = new List<int>();
+
+				switch (selectedCategory)
+				{
+					case Categories.Ascensions:
+					case Categories.FullSkillArchive:
+						{
+							randomRewardIndexes.AddRange(
+								rewards
+								.Select((reward, index) => index)
+							);
+							break;
+						}
+
+					case Categories.Templates:
+					case Categories.PrimaryBoosts:
+					case Categories.SecondaryBoosts:
+					case Categories.Items:
+						{
+							if (rewards.Any(reward => reward.Static))
+							{
+								randomRewardIndexes.AddRange(
+									rewards
+									.Where(reward => reward.Static)
+									.Select(reward => rewards.FindIndex(r => r == reward))
+								);
+							}
+
+							if (rewards.Any(reward => !reward.Static))
+							{
+								var nonStaticRewards = rewards.Where(reward => !reward.Static).ToList();
+
+								var addEntireList = m_Context.UnlockFullSkillArchive && (selectedCategory == Categories.PrimaryBoosts || selectedCategory == Categories.SecondaryBoosts);
+								if (addEntireList)
+								{
+									randomRewardIndexes.AddRange(
+										nonStaticRewards
+										.Select(reward => rewards.FindIndex(r => r == reward))
+									);
+								}
+								else
+								{
+									var rewardsToPick = nonStaticRewards.Count / 2;
+									if (0 < rewardsToPick)
+									{
+										randomRewardIndexes.AddRange(
+											nonStaticRewards
+											.OrderBy(r => Utility.RandomMinMax(0, 100))
+											.Take(rewardsToPick)
+											.Select(reward => rewards.FindIndex(r => r == reward))
+										);
+									}
+								}
+
+								m_Context.RewardCache[selectedCategory] = randomRewardIndexes;
+							}
+							break;
+						}
+
+					case Categories.Draft:
+						{
+							if (rewards.Any(reward => reward.Static))
+							{
+								randomRewardIndexes.AddRange(
+									rewards
+									.Where(reward => reward.Static)
+									.Select(reward => rewards.FindIndex(r => r == reward))
+								);
+							}
+
+							if (rewards.Any(reward => !reward.Static))
+							{
+								var nonStaticRewards = rewards.Where(reward => !reward.Static).ToList();
+
+								randomRewardIndexes.AddRange(
+									nonStaticRewards
+									.OrderBy(r => Utility.RandomMinMax(0, 100))
+									.Take(Constants.DRAFT_PICKS_PER_ROUND)
+									.Select(reward => rewards.FindIndex(r => r == reward))
+								);
+
+								// Only cache if random options were returned
+								m_Context.RewardCache[Categories.Draft] = randomRewardIndexes;
+							}
+							break;
+						}
+
+					case Categories.Information:
+					default:
+						break;
+				}
+			}
+
+			if (randomRewardIndexes == null) return;
+
+			var queryable = randomRewardIndexes
+				.Select(index => index < rewards.Count ? rewards[index] : null)
+				.Where(reward => reward != null);
+			if (selectedCategory != Categories.Ascensions && selectedCategory != Categories.FullSkillArchive) queryable = queryable.OrderBy(reward => reward.Name);
+
+			var randomRewards = queryable.ToList();
+			if (randomRewards.Count < 1) return;
+
+			var useCompactCard = selectedCategory == Categories.FullSkillArchive;
+			var itemsPerPage = 8;
+			var infoCardSlots = 1;
+			if (useCompactCard)
+			{
+				itemsPerPage = 24; // 12 rows x 2 columns
+				infoCardSlots = 2; // one compact row
+			}
+
+			var toTake = itemsPerPage;
+			var skip = (pageNumber - 1) * toTake;
+
+			// All pages except the Information page have a description card
+			var hasInfoCard = selectedCategory != Categories.Information;
+			if (hasInfoCard)
+			{
+				if (pageNumber == 1) toTake -= infoCardSlots;
+				else skip -= infoCardSlots;
+			}
+
+			if (pageNumber == 1)
+			{
+				y += CARD_HEIGHT;
+				y += 10;
+			}
+
+			m_Rewards = new List<IReward>();
+			var itemIndex = 0;
+			const int START_X = NAVIGATION_WIDTH + 20;
+			var x = START_X;
+			foreach (var reward in randomRewards.Skip(skip).Take(toTake))
+			{
+				m_Rewards.Add(reward);
+
+				var tooltip = reward is ActionReward ? ((ActionReward)reward).PrequisiteTooltip : null;
+				var canPurchase = (m_InGypsyEncampment || reward.CanSelectAnywhere) && reward.CanSelect && string.IsNullOrWhiteSpace(tooltip);
+
+				if (useCompactCard)
+				{
+					AddCompactCard(x, y, reward.Name, reward.Description, canPurchase, itemIndex, tooltip);
+
+					if (itemIndex % 2 == 0)
+						x += COMPACT_CARD_WIDTH + COMPACT_CARD_GAP;
+					else
+					{
+						x = START_X;
+						y += COMPACT_CARD_HEIGHT + COMPACT_CARD_GAP;
+					}
+				}
+				else
+				{
+					var cost = reward is ActionReward && ((ActionReward)reward).IsComplete ? COST_NO_BUY : reward.Cost;
+
+					AddCard(m_Context.PointsSaved, reward.Graphic, reward.Name, reward.Description, canPurchase, cost, itemIndex, y, tooltip);
+
+					y += CARD_HEIGHT;
+					y += 10;
+				}
+
+				++itemIndex;
+			}
+
+			y = GUMP_HEIGHT - 33;
+
+			// Prev page
+			if (0 < skip)
+				AddButton(NAVIGATION_WIDTH + 20, y, 4014, 4015, (int)_Actions.PageBase + (pageNumber - 1), GumpButtonType.Reply, 0);
+
+			// Next page
+			var remain = randomRewards.Count - skip - toTake;
+			if (0 < remain)
+				AddButton(GUMP_WIDTH - 47, y, 4005, 4007, (int)_Actions.PageBase + (pageNumber + 1), GumpButtonType.Reply, 0);
+		}
+
+		private enum _Actions
+		{
+			Close = 0,
+			SelectCategoryBase = 10,
+			PurchaseBase = 50,
+			PageBase = 500,
+		}
+
+		public static bool InGypsyEncampment(PlayerMobile from)
+		{
+			return from.Region != null && from.Region.Name == "the Forest";
+		}
+
+		public override void OnResponse(NetState sender, RelayInfo info)
+		{
+			var buttonID = info.ButtonID;
+			if (buttonID == 0)
+			{
+				if (m_onGumpClose != null)
+					m_onGumpClose();
+				return;
+			}
+
+			var player = sender.Mobile as PlayerMobile;
+			if (player == null) return;
+
+			if ((int)_Actions.PageBase <= buttonID) // Page is higher
+			{
+				var page = buttonID - (int)_Actions.PageBase;
+				sender.Mobile.SendGump(new AvatarShopGump(m_From, m_SelectedCategory, page, m_onGumpClose));
+				return;
+			}
+			else if ((int)_Actions.PurchaseBase <= buttonID) // Purchase is higher
+			{
+				var index = buttonID - (int)_Actions.PurchaseBase;
+				var reward = m_Rewards[index];
+				var cost = Math.Max(0, reward.Cost);
+				if (m_Context.PointsSaved < cost)
+				{
+					player.SendMessage("You do not have enough coins to purchase this.");
+				}
+				else
+				{
+					var itemReward = reward as ItemReward;
+					if (itemReward != null)
+					{
+						var item = itemReward.OnSelect();
+						if (item != null)
+						{
+							if (0 < cost)
+								player.SendMessage("You have purchased '{0}' for '{1:n0}' coins.", reward.Name, cost);
+							else
+								player.SendMessage("You have purchased '{0}'.", reward.Name);
+
+							m_Context.PointsSaved -= cost;
+							player.AddToBackpack(item);
+							CombatBar.Refresh(player);
+						}
+					}
+					else
+					{
+						var actionReward = reward as ActionReward;
+						if (actionReward != null)
+						{
+							if (m_SelectedCategory == Categories.Templates)
+							{
+								player.SendMessage("You have selected a template.");
+								Timer.DelayCall(TimeSpan.FromSeconds(0.25), () => actionReward.OnSelect());
+							}
+							else if (m_SelectedCategory == Categories.FullSkillArchive)
+							{
+								Timer.DelayCall(TimeSpan.FromSeconds(0.25), () => actionReward.OnSelect());
+							}
+							else
+							{
+								if (0 < cost)
+									player.SendMessage("You have purchased '{0}' for '{1:n0}' coins.", reward.Name, cost);
+								else
+									player.SendMessage("You have purchased '{0}'.", reward.Name);
+
+								m_Context.PointsSaved -= cost;
+								actionReward.OnSelect();
+								AvatarEngine.Instance.ApplyContext(player, player.Avatar);
+								CombatBar.Refresh(player);
+							}
+						}
+					}
+				}
+
+				sender.Mobile.SendGump(new AvatarShopGump(m_From, m_SelectedCategory, m_PageNumber, m_onGumpClose));
+			}
+			else if ((int)_Actions.SelectCategoryBase <= buttonID) // Select Category is higher
+			{
+				var selectedCategory = (Categories)(buttonID - (int)_Actions.SelectCategoryBase);
+				sender.Mobile.SendGump(new AvatarShopGump(m_From, selectedCategory, 1, m_onGumpClose));
+				return;
+			}
+		}
+
+		private void AddCard(
+			int points,
+			int itemId,
+			string name,
+			string description,
+			bool canPurchase,
+			int purchaseCost,
+			int index,
+			int y,
+			string tooltip = null,
+			bool scrollable = false,
+			bool addBackground = true
+			)
+		{
+			const int START_X = NAVIGATION_WIDTH + 20;
+			const int GRAPHIC_SLOT_WIDTH = 73;
+			const int GRAPHIC_SLOT_HEIGHT = 68;
+			const int PURCHASE_WIDTH = 130;
+
+			int x = START_X;
+			int cost = purchaseCost;
+			if (cost == COST_NO_BUY) cost = int.MinValue;
+			if (cost == COST_FREE) cost = 0;
+
+			if (addBackground)
+				AddBackground(x, y, CARD_WIDTH, CARD_HEIGHT + 5, 2620);
+
+			// Item image
+			if (itemId > BLANK_ITEM_ID)
+			{
+				AddBackground(x, y, GRAPHIC_SLOT_WIDTH, CARD_HEIGHT + 5, 2620);
+				if (itemId > NO_ITEM_ID)
+					GumpUtilities.AddCenteredItemToGump(this, itemId, x, y, GRAPHIC_SLOT_WIDTH, GRAPHIC_SLOT_HEIGHT);
+				x += GRAPHIC_SLOT_WIDTH;
+			}
+
+			// Item text
+			x += 10;
+			y += 5; // Top padding
+
+			int DESCRIPTION_WIDTH = CARD_WIDTH - (x - START_X);
+			if (0 <= cost) DESCRIPTION_WIDTH -= PURCHASE_WIDTH;
+
+			const int LAZY_AMOUNT = 30; // Arbitrary value to account for left padding
+			TextDefinition.AddHtmlText(this, x, y, DESCRIPTION_WIDTH - LAZY_AMOUNT, 20, name, HtmlColors.ORANGE);
+			TextDefinition.AddHtmlText(this, x + 10, y + 20, DESCRIPTION_WIDTH - LAZY_AMOUNT, 40, TextDefinition.GetColorizedText(description, HtmlColors.COOL_BLUE), false, scrollable);
+
+			if (0 <= cost)
+			{
+				x = START_X + CARD_WIDTH - PURCHASE_WIDTH;
+				y += 6;
+
+				// Purchase section
+				const int GRAPHIC_WIDTH = 55;
+				var canAfford = cost <= points;
+				if (0 < cost)
+				{
+					var pointsColor = canAfford ? HtmlColors.ORANGE : HtmlColors.RED;
+					TextDefinition.AddHtmlText(this, x + GRAPHIC_WIDTH, y + 2, 80, 20, cost.ToString("n0"), pointsColor);
+				}
+
+				if (canAfford)
+				{
+					y += 30;
+
+					if (canPurchase)
+						AddButton(x + 13, y - 1, 4023, 4023, (int)_Actions.PurchaseBase + index, GumpButtonType.Reply, 0); // OK
+					else
+					{
+						AddImage(x + 21, y + 3, 2092); // Lock icon
+						if (!string.IsNullOrWhiteSpace(tooltip))
+							AddTooltip(tooltip);
+					}
+
+					string purchaseText;
+					switch (m_SelectedCategory)
+					{
+						case Categories.Templates:
+							purchaseText = "Select";
+							break;
+
+						case Categories.PrimaryBoosts:
+						case Categories.SecondaryBoosts:
+							purchaseText = "Teach Me";
+							break;
+
+						case Categories.Ascensions:
+						case Categories.Draft:
+							purchaseText = "Unlock";
+							break;
+
+						case Categories.FullSkillArchive:
+							purchaseText = "Drop Skill";
+							break;
+
+						case Categories.Items:
+						case Categories.Information:
+						default:
+							purchaseText = "Purchase";
+							break;
+					}
+
+					TextDefinition.AddHtmlText(this, x + GRAPHIC_WIDTH, y + 2, 60, 20, purchaseText, HtmlColors.ORANGE);
+				}
+			}
+		}
+
+		private void AddCategoryList(Categories selectedCategory, int x, int y)
+		{
+			// Show current coins
+			{
+				var firstRowY = y + 20 - 3;
+				var secondRowY = firstRowY + 20;
+
+				AddBackground(x, y, CATEGORY_WIDTH, CARD_HEIGHT + 5, 2620);
+				GumpUtilities.AddCenteredItemToGump(this, GIANT_COIN_ITEM_ID, x + 10, y, 40, CARD_HEIGHT + 5);
+				AddTooltip("Coins are earned by killing monsters and completing combat-based quests.");
+				TextDefinition.AddHtmlText(this, x + 60, firstRowY, CATEGORY_WIDTH - 20, 40, string.Format("{0}", (m_From.Avatar.PointsSaved + m_From.Avatar.PointsFarmed).ToString("n0")), HtmlColors.ORANGE);
+				TextDefinition.AddHtmlText(this, x + 60, secondRowY, CATEGORY_WIDTH - 20, 40, "Coins", HtmlColors.COOL_BLUE);
+				y += CARD_HEIGHT + 10;
+			}
+
+			List<Categories> categoriesToShow;
+			if (m_From.Avatar.DraftModeEnabled)
+			{
+				categoriesToShow = new List<Categories>
+				{
+					Categories.Information,
+					Categories.Ascensions,
+					Categories.Templates,
+					Categories.Draft,
+					Categories.FullSkillArchive,
+					// Categories.Items,
+					Categories.Statistics,
+				};
+			}
+			else
+			{
+				categoriesToShow = new List<Categories>
+				{
+					Categories.Information,
+					Categories.Ascensions,
+					Categories.Templates,
+					Categories.PrimaryBoosts,
+					Categories.SecondaryBoosts,
+					Categories.FullSkillArchive,
+					// Categories.Items,
+					Categories.Statistics,
+				};
+			}
+
+			int i = 0;
+			foreach (var category in categoriesToShow)
+			{
+				var isSelected = selectedCategory == category;
+				const int CATEGORY_CARD_HEIGHT = 34;
+				const int TOP_PADDING = 6;
+				const int HEIGHT_PER_ITEM = CATEGORY_CARD_HEIGHT + TOP_PADDING; // Extra top padding
+				const int LEFT_PADDING = 36;
+
+				if (!isSelected)
+				{
+					const int HIDDEN_BUTTON_ID = 1150;
+					const int HIDDEN_BUTTON_WIDTH = 28;
+
+					int buttonId = (int)_Actions.SelectCategoryBase + (int)category;
+					AddButton(x, y + TOP_PADDING + (i * HEIGHT_PER_ITEM), HIDDEN_BUTTON_ID, HIDDEN_BUTTON_ID, buttonId, GumpButtonType.Reply, 0);
+					AddButton(x + HIDDEN_BUTTON_WIDTH, y + TOP_PADDING + (i * HEIGHT_PER_ITEM), HIDDEN_BUTTON_ID, HIDDEN_BUTTON_ID, buttonId, GumpButtonType.Reply, 0);
+					AddButton(x + HIDDEN_BUTTON_WIDTH + HIDDEN_BUTTON_WIDTH, y + TOP_PADDING + (i * HEIGHT_PER_ITEM), HIDDEN_BUTTON_ID, HIDDEN_BUTTON_ID, buttonId, GumpButtonType.Reply, 0);
+				}
+
+				AddBackground(x, y + (i * HEIGHT_PER_ITEM), CATEGORY_WIDTH, HEIGHT_PER_ITEM - 6, 2620);
+
+				var gemGraphic = isSelected ? 1210 : 1209;
+				var gemHue = isSelected ? 1152 : 0;
+				AddImage(x + 17, y + 10 + (i * HEIGHT_PER_ITEM), gemGraphic, gemHue);
+
+				var color = isSelected ? HtmlColors.ORANGE : HtmlColors.COOL_BLUE;
+
+				string categoryName;
+				switch (category)
+				{
+					case Categories.PrimaryBoosts:
+						categoryName = "Primary Skills";
+						break;
+
+					case Categories.SecondaryBoosts:
+						categoryName = "Secondary Skills";
+						break;
+
+					case Categories.FullSkillArchive:
+						categoryName = "Skill Archive";
+						break;
+
+					case Categories.Information:
+					case Categories.Ascensions:
+					case Categories.Templates:
+					case Categories.Items:
+					case Categories.Statistics:
+					default:
+						categoryName = category.ToString();
+						break;
+				}
+
+				TextDefinition.AddHtmlText(this, x + LEFT_PADDING, y + 7 + (i * HEIGHT_PER_ITEM), CATEGORY_WIDTH - LEFT_PADDING, 16, categoryName, color);
+				++i;
+			}
+		}
+
+		private void AddCompactCard(int x, int y, string name, string value, bool canAct, int index, string tooltip = null, bool addBackground = true)
+		{
+			const int PADDING = 10;
+			const int COMPACT_CARD_HALF_WIDTH = COMPACT_CARD_WIDTH / 2;
+			const int CHECKED_BOX = 4017;
+			const int LOCK_ICON = 2092;
+
+			var leftColumnX = x + PADDING;
+			var leftColumnWidth = COMPACT_CARD_HALF_WIDTH - PADDING;
+			var rightColumnX = leftColumnX + leftColumnWidth + PADDING;
+			var rightColumnWidth = leftColumnWidth - PADDING;
+
+			if (addBackground)
+				AddBackground(x, y, COMPACT_CARD_WIDTH, COMPACT_CARD_HEIGHT, 2620);
+
+			y += PADDING;
+
+			TextDefinition.AddHtmlText(this, leftColumnX + 35, y, leftColumnWidth, 20, name, HtmlColors.COOL_BLUE);
+
+			if (!string.IsNullOrWhiteSpace(value))
+				TextDefinition.AddHtmlText(this, rightColumnX, y, rightColumnWidth, 20, string.Format("<DIV ALIGN=RIGHT>{0}</DIV>", value), HtmlColors.COOL_BLUE);
+
+			if (canAct)
+			{
+				AddButton(leftColumnX, y - 3, CHECKED_BOX, CHECKED_BOX, (int)_Actions.PurchaseBase + index, GumpButtonType.Reply, 0);
+			}
+			else
+			{
+				AddImage(leftColumnX + 8, y + 3, LOCK_ICON);
+				if (!string.IsNullOrWhiteSpace(tooltip))
+					AddTooltip(tooltip);
+			}
+		}
+
+		private void AddInformationCard(
+			int itemId,
+			string name,
+			string description,
+			int y,
+			string tooltip = null,
+			bool scrollable = false,
+			bool addBackground = true
+		)
+		{
+			AddCard(0, itemId, name, description, false, 0, 0, y, tooltip, scrollable, addBackground);
+		}
+
+		private void AddKeyValuePairsCard(int x, int y, bool addBackground, params _Metric[] metrics)
+		{
+			if (addBackground)
+				AddBackground(x, y, CARD_WIDTH, CARD_HEIGHT + 5, 2620);
+
+			int count = metrics.Length;
+			if (count < 1) return;
+
+			const int WIDTH_AVAILABLE = CARD_WIDTH;
+			var cardWidth = WIDTH_AVAILABLE / count;
+			x += (WIDTH_AVAILABLE - cardWidth * count) / 2;
+
+			var firstRowY = y + 20;
+			var secondRowY = firstRowY + 20;
+
+			foreach (var metric in metrics)
+			{
+				TextDefinition.AddHtmlText(this, x, firstRowY, cardWidth, 40, string.Format("<CENTER>{0}</CENTER>", metric.Value), HtmlColors.ORANGE);
+				TextDefinition.AddHtmlText(this, x, secondRowY, cardWidth, 40, string.Format("<CENTER>{0}</CENTER>", metric.Label), HtmlColors.COOL_BLUE);
+				if (!string.IsNullOrWhiteSpace(metric.Tooltip))
+					AddTooltip(metric.Tooltip);
+				x += cardWidth;
+			}
+		}
+
+		private struct _Metric
+		{
+			public string Label;
+			public string Tooltip;
+			public string Value;
+
+			public _Metric(string label, string value, string tooltip = null)
+			{
+				Label = label;
+				Value = value;
+				Tooltip = tooltip;
+			}
+		}
+	}
+}

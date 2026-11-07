@@ -1,0 +1,149 @@
+using System;
+using System.Collections;
+using Server.Targeting;
+using Server.Mobiles;
+
+namespace Server.Spells.DeathKnight
+{
+	public class WrathSpell : DeathKnightSpell
+	{
+		public static readonly SpellInfo SpellInfo = new SpellInfo(
+			new SpellDefinition
+			{
+				SpellID = 763,
+				IconGraphic = 0x2E,
+				Name = "Wrath",
+				PowerWords = "Zagan Ira",
+				Description = "The death knight unleashes the forces of hell unto his nearby enemies, causing much damage.",
+				ManaCost = 44,
+				TithingCost = 70,
+				MinSkill = 50,
+				TargetType = TargetFlags.Harmful
+			},
+			233,
+			9042,
+			false
+		);
+
+		public override TimeSpan CastDelayBase { get { return TimeSpan.FromSeconds( 1 ); } }
+		public override int RequiredTithing{ get{ return SpellInfo.SpellDefinition.TithingCost; } }
+		public override double RequiredSkill{ get{ return SpellInfo.SpellDefinition.MinSkill; } }
+		public override int RequiredMana{ get{ return SpellInfo.SpellDefinition.ManaCost; } }
+
+		public WrathSpell( Mobile caster, Item scroll ) : base( caster, scroll, SpellInfo )
+		{
+		}
+
+		public override void OnCast()
+		{
+			Caster.Target = new InternalTarget( this );
+		}
+
+		public override bool DelayedDamage{ get{ return true; } }
+
+		public void Target( IPoint3D p )
+		{
+			if ( !Caster.CanSee( p ) )
+			{
+				Caster.SendLocalizedMessage( 500237 ); // Target can not be seen.
+			}
+			else if ( SpellHelper.CheckTown( p, Caster ) && CheckSequence() )
+			{
+				SpellHelper.Turn( Caster, p );
+
+				if ( p is Item )
+					p = ((Item)p).GetWorldLocation();
+
+				ArrayList targets = new ArrayList();
+
+				Map map = Caster.Map;
+
+				bool playerVsPlayer = false;
+
+				if ( map != null )
+				{
+					IPooledEnumerable eable = map.GetMobilesInRange( new Point3D( p ), 5 );
+
+					foreach ( Mobile m in eable )
+					{
+						Mobile pet = m;
+
+						if ( Caster != m )
+						{
+							if ( m is BaseCreature )
+								pet = ((BaseCreature)m).GetMaster();
+
+							if ( Caster != pet )
+							{
+								targets.Add( m );
+
+								if ( m.Player )
+									playerVsPlayer = true;
+							}
+						}
+					}
+
+					eable.Free();
+				}
+
+				double damage;
+
+				int nBenefit = 0;
+				if ( Caster is PlayerMobile )
+				{
+					nBenefit = (int)( GetKarmaPower( Caster ) / 5 );
+				}
+
+				damage = GetNewAosDamage( 32, 1, 4, Caster.Player && playerVsPlayer ) + nBenefit;
+				DrainSoulsInLantern( Caster, RequiredTithing );
+
+				if ( targets.Count > 0 )
+				{
+					if (targets.Count > 1)
+						damage /= 2;
+
+					for ( int i = 0; i < targets.Count; ++i )
+					{
+						Mobile m = (Mobile)targets[i];
+						Region house = m.Region;
+
+						double toDeal = damage;
+
+						if( !(house is Regions.HouseRegion) )
+						{
+							Caster.DoHarmful( m );
+							SpellHelper.Damage( this, m, toDeal, 0, 0, 0, 0, 100 );
+
+							m.BoltEffect( 0 );
+						}
+					}
+				}
+			}
+
+			FinishSequence();
+		}
+
+		private class InternalTarget : Target
+		{
+			private WrathSpell m_Owner;
+
+			public InternalTarget( WrathSpell owner ) : base( 12, true, TargetFlags.None )
+			{
+				m_Owner = owner;
+			}
+
+			protected override void OnTarget( Mobile from, object o )
+			{
+				IPoint3D p = o as IPoint3D;
+
+				if ( p != null )
+					m_Owner.Target( p );
+			}
+
+			protected override void OnTargetFinish( Mobile from )
+			{
+				m_Owner.FinishSequence();
+			}
+		}
+	}
+}
