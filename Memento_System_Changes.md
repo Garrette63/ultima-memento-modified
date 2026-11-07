@@ -1,0 +1,91 @@
+# Memento System – Change Tracker
+
+Workspace root: `/home/Feesh/World`
+
+This document tracks every file created or edited for the Memento Coin / Artefact Book / Memento Collector feature set, plus later custom-shard changes (such as the Magery-powered magic carpet speed rule). Update it whenever further changes are made.
+
+---
+
+## Files Created
+
+| File (relative to `/home/Feesh/World`) | Kind | Purpose |
+|---|---|---|
+| `Source/Scripts/Items/Books/ArtefactBook.cs` | C# item + gump | `ArtefactBook` item (displayed as "Tome of Wondrous Artifacts") and `ArtefactBookGump`. Lists every standard artefact (`ArtifactLevel.StandardArtefact`) from `ArtifactQuestList` with no in-book title, 16 per page, prev/next arrows and just the page number at the bottom. Clicking an artefact opens a detail page with the icon on the left page and the stat sheet on the right page (`ItemProps.ItemProperties`), plus a curated "Unique Power" description for artefacts with special code-driven abilities. Uses shared `MementoCoin.MementoHue`. `ArtefactBook.ArtefactEntry` carries `Name`, `TypeName` and `Layer`. |
+| `Source/Scripts/Items/Misc/MementoCoin.cs` | C# item | `MementoCoin` stackable currency (graphic `0xEED`). Defines the shared `public const int MementoHue = 2141`. |
+| `Source/Scripts/Mobiles/Civilized/Merchants/MementoCollector.cs` | C# NPC | `MementoCollector : BaseNPC` (invulnerable / untargetable). Pays Memento Coins for dropped artefacts, trades 75 coins for an `ArtefactBook`, has a Talk gump, random male/female + name, leather outfit, cloak/sash/boots, lit lantern, idle emotes, random artefact gear swaps and a random one-handed artefact weapon. |
+
+## Files Edited
+
+| File (relative to `/home/Feesh/World`) | Change |
+|---|---|
+| `Source/Scripts/System/Misc/Talk.cs` | Added a `SpeechFunctions.SpeechText` branch for `sConversation == "MementoCollector"` (around line 202) explaining the coin payouts and the 75-coin → Artefact Book exchange. |
+| `Info/Spawns/Merchant.map` | Added one `MementoCollector` spawner beside each of the 34 custom-merchant stalls (same x/y/z/map as the merchant, home/walk 2, count 1). Applied on the next `[buildworld`. Original backed up as `Merchant.map.bak`. |
+| `Source/Scripts/Items/Boats/BaseBoat.cs` | `ApplySpeedBoost` selects the speed skill per vessel: `SkillName.Seafaring` for sailing vessels (Magery has no effect) and `SkillName.Magery` for magic carpets, detected with the existing `isCarpet( this )` (Seafaring has no effect). Same 50/75/100/125 tiers (1/2/3/4 boosts). `MAX_SPEED_BOOSTS` raised to 6 (Avatar "Fast Seaman" can reach 6); magic carpets are additionally clamped to `MAX_CARPET_SPEED_BOOSTS = 4`. Backed up as `Backup Files/BaseBoat.cs.2026-11-07-140056.bak` (first edit) and `Backup Files/BaseBoat.cs.2026-11-07-141352.bak` (this edit). |
+
+No other files were modified.
+
+---
+
+## Change History (newest last)
+
+1. **Artefact Book picker** — created `ArtefactBook.cs`: a book that opens a paginated gump listing every standard artefact and lets the player claim one. Default `Charges = 1` (negative = unlimited).
+2. **Memento Collector + currency** — created `MementoCoin.cs` and `MementoCollector.cs`. The NPC pays coins by artefact tier and the coin is a stackable item.
+3. **75 coins → Artefact Book + Talk dialogue** — `MementoCollector.OnDragDrop` now handles `MementoCoin` drops (75+ coins → `ArtefactBook`, extras refunded); added `TalkGumpTitle`/`TalkGumpSubject` and the `Talk.cs` dialogue branch.
+4. **Random name** — the NPC now takes a standard `NameList.RandomName(...)` name; title stays `"the artefact collector"`.
+5. **Gender / outfit pass** — random male or female (matching body + name); added a lit lantern; replaced robe/shoes with leather armour; added cloak, sash and boots; female bustiers used instead of the leather chest; no arm armour at that stage.
+6. **Hue + idle actions + random gear** — shared hue changed to `2141` for the book, coins, cloak, sash and lantern; leather cap removed; leather armour dyed dark gray (`0x83B`); added adventurer-style idle emotes (yawn, sigh, etc.); equipment randomly swapped for standard artefacts on spawn.
+7. **Cap/sleeves, wandering, no bustier rule, wieldable artefact** — re-added the leather cap and leather sleeves (`LeatherArms`); removed `CantWalk` so the NPC wanders; removed the female bustier special-case (everyone wears `LeatherChest`); the NPC now wields a random one-handed standard artefact weapon alongside the lantern.
+8. **Artefact detail page** — clicking an artefact in the `ArtefactBook` list no longer grants it immediately. It now opens a detail page showing the artefact's icon and full stats/powers (via `ItemProps.ItemProperties`), with Back and Claim buttons; Claim performs the actual grant and charge consumption.
+9. **Detail layout + unique powers** — the detail page now places the artefact picture on the left page and all information on the right page, and prepends a "UNIQUE POWER" description for artefacts with special behaviours (e.g., Merlin's Mystical Staff calls a dragon on double-click, Hammer of Thor casts lightning, Rod of Resurrection revives the fallen, etc.).
+10. **Detail title placement** — the artefact name is now centred at the top of the left page, directly over the artefact picture (instead of spanning the whole book).
+11. **Cloth hat** — the collector now wears a floppy cloth hat dyed the Memento hue (2141) to match the cloak and sash, replacing the dark-gray leather cap.
+12. **Random hat type** — the collector now picks any of several cloth hat styles (floppy, wide-brim, cap, skull cap, bandana, straw, tall straw, wizard, feathered, tricorne, pirate, hood, witch, bonnet), all dyed hue 2141.
+13. **Vendor team** — the collector is explicitly placed on the neutral team `0` used by town vendors, and re-asserts it in `OnAfterSpawn` so a spawner cannot move it to a different team.
+14. **Custom merchant spawns** — added one `MementoCollector` spawner per merchant/wagon stall in `Info/Spawns/Merchant.map` (34 total), so a collector stands beside every custom merchant. Applies on the next `[buildworld`.
+15. **Coin singular/plural** — a single `MementoCoin` now displays as "Memento Coin"; stacks of two or more display as "Memento Coins". The internal `Name` stays plural so stacks still merge.
+16. **Merchant name colour** — the collector's name now uses the innocent/vendor blue (`Notoriety.GetHue( Notoriety.Innocent )`) instead of the guard white (`1154`), matching the other merchants.
+17. **Vendor vulnerability** — removed the transient `Blessed` flag (which `OnThink` was clearing anyway) and turned off `AlwaysAttackable`; `NameHue` is back to the default so notoriety drives the colour. The collector is now vulnerable and Innocent exactly like a regular vendor.
+18. **Invulnerable / untargetable** — reverted the `BaseCreature` edit; `MementoCollector` now derives from `BaseNPC` (already in the always-invulnerable set), so its `Blessed` flag persists and it cannot be targeted or harmed. `Deserialize` re-asserts `Blessed`, and `NameHue` keeps the merchant blue.
+19. **Tome rename + page number** — the book is now named "Tome of Wondrous Artifacts"; the "STANDARD ARTEFACTS" heading inside the book was removed, and the page indicator is now just the page number at the bottom next to the arrows. The NPC dialogue/messages were updated to say "Tome of Wondrous Artifacts".
+20. **Page indicator position** — the page counter is now right-aligned as "Page X of Y" just left of the next-page arrow (bottom right).
+21. **Detail Claim button** — on the artefact detail page the Claim action now uses a checkmark-box button (`0x837`/`0x838`) in the arrow's place, with the "Claim" label right-aligned next to it.
+22. **Magery-powered magic carpets** — `BaseBoat.ApplySpeedBoost` now selects `SkillName.Magery` instead of `SkillName.Seafaring` when the boat is a magic carpet (`isCarpet( this )`); sailing vessels still use Seafaring. The 50/75/100/125 thresholds still grant 1/2/3/4 boosts and the maximum remains capped at 4 by `MAX_SPEED_BOOSTS`, so carpets can never gain more than 4 bonus speed steps. The Avatar "Fast Seaman" boat-speed upgrade still applies to both vessel types, but the combined result is clamped to 4.
+23. **Speed caps 6 / carpet 4 + explicit skill isolation** — `MAX_SPEED_BOOSTS` raised from 4 to 6, so the Avatar "Fast Seaman" upgrade (via `Constants.BOAT_SPEED_MAX_LEVEL`) can now reach 6 on regular boats; added `MAX_CARPET_SPEED_BOOSTS = 4` and a carpet-only clamp in `ApplySpeedBoost`, so magic carpets never exceed 4 bonus speed steps regardless of Magery or Avatar values. Boats are driven only by Seafaring (Magery has no effect) and carpets only by Magery (Seafaring has no effect).
+
+---
+
+## Current Behaviour
+
+### Artefact Book (`ArtefactBook`)
+- Item: `Tome of Wondrous Artifacts`, graphic `0x22C5`, hue `MementoCoin.MementoHue` (2141).
+- `Charges` default `1`; set negative for unlimited.
+- Catalogue = `ArtifactQuestList` entries filtered to `ArtefactLevel.StandardArtefact` (about 317 items), cached in `ArtefactBook.Entries`.
+- Gump: 16 artefacts per page, two columns, no in-book title, prev/next arrows with a right-aligned "Page X of Y" next to the next arrow. Clicking an artefact opens a detail page with the icon on the left page and, on the right page, a "UNIQUE POWER" description (for artefacts with special abilities) plus the full stat sheet (`ItemProps.ItemProperties`); Claim (a checkmark-box button with its label right-aligned beside it) grants the item and consumes a charge, Back returns to the list.
+
+### Memento Coin (`MementoCoin`)
+- Stackable, hue `2141`, `DefaultWeight 0.02`.
+- Displays as "Memento Coin" when the stack size is 1, and "Memento Coins" (with the amount) when 2 or more.
+
+### Memento Collector (`MementoCollector`)
+- Random male/female with matching `NameList` name; title `"the artefact collector"`. Name forced to the merchant blue (`Notoriety.GetHue(Notoriety.Innocent)`).
+- Team `0` (the same neutral team town vendors use), re-asserted in `OnAfterSpawn`.
+- Invulnerable / untargetable: derives from `BaseNPC` (always-invulnerable), so `Blessed` is kept; `Deserialize` re-asserts it. Cannot be targeted or harmed.
+- Wanders (`CantWalk` not set).
+- Wears dark-gray leather (`0x83B`): gorget, arms/sleeves, gloves, legs and chest; a random cloth hat (floppy, wide-brim, cap, skull cap, bandana, straw, tall straw, wizard, feathered, tricorne, pirate, hood, witch or bonnet), cloak and sash in hue `2141`; dark boots; a lit lantern (hue `2141`) in hand.
+- On spawn each armour slot has a 50% chance to be replaced by a random standard artefact of the same `Layer` (at least one swap is guaranteed; gender-specific pieces are skipped). It also wields a random one-handed standard artefact weapon (`Layer.OneHanded`), which coexists with the lantern (`Layer.TwoHanded`).
+- Idle emotes (yawn, sigh, cough, etc.) play when a player is within 12 tiles, on a 20–45s cooldown.
+- Coin payouts by artefact tier: Legendary `15`, Standard `11`, Artifact `7`, Decorative `3`; non-artefacts are refused.
+- Spawns: one collector per custom-merchant stall via `Info/Spawns/Merchant.map` (34 entries), loaded on `[buildworld` when `MySettings.S_CustomMerchant` is true.
+
+### Talk / trade rules
+- Dropping an artefact: deletes it and gives the tier payout in `MementoCoin`s.
+- Dropping 75+ `MementoCoin`s: consumes 75 (refunds the remainder) and gives an `ArtefactBook`.
+
+### Boat / Magic Carpet speed (`BaseBoat.ApplySpeedBoost`)
+- Sailing vessels: driven only by `SkillName.Seafaring` (Magery has no effect) — 50/75/100/125 skill gives 1/2/3/4 boosts (25 ms per boost off the 250 ms fast interval).
+- Magic carpets (`MagicCarpetA`–`MagicCarpetI`, detected by `BaseBoat.isCarpet`): driven only by `SkillName.Magery` (Seafaring has no effect); the same 50/75/100/125 tier table applies to the carpet owner's Magery.
+- Overall maximum is `BaseBoat.MAX_SPEED_BOOSTS = 6` (also `Constants.BOAT_SPEED_MAX_LEVEL`), so the Avatar "Fast Seaman" upgrade and other sources can reach 6 on sailing vessels.
+- Magic carpets are additionally clamped to `BaseBoat.MAX_CARPET_SPEED_BOOSTS = 4`, so a carpet can never exceed 4 bonus speed steps no matter what the Magery or Avatar values are.
+- Slow movement and slow drift are unchanged (no skill boost applied).
+
+
