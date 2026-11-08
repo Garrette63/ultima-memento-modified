@@ -74,7 +74,30 @@ namespace Server.Misc
 				return false;
 			}
 
+			// Keep the yard range restriction: the target must fall within the house
+			// footprint plus the Remodeling margin (15 tiles per side). No region check.
+			if ( !IsWithinHouseLand( m_House, loc ) )
+			{
+				m_From.SendMessage("You will have to get closer and place within your land!");
+				return false;
+			}
+
 			return true;
+		}
+
+		private static bool IsWithinHouseLand( BaseHouse house, Point3D loc )
+		{
+			if ( house == null )
+				return false;
+
+			MultiComponentList mcl = house.Components;
+
+			int minX = house.X + mcl.Min.X - Remodeling.Left;
+			int minY = house.Y + mcl.Min.Y - Remodeling.Back;
+			int maxX = house.X + mcl.Min.X + mcl.Width + Remodeling.Right;
+			int maxY = house.Y + mcl.Min.Y + mcl.Height + Remodeling.Front;
+
+			return ( loc.X >= minX && loc.X <= maxX && loc.Y >= minY && loc.Y <= maxY );
 		}
 
 		public void EndPlace(Point3D loc)
