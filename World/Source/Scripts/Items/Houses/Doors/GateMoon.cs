@@ -117,7 +117,7 @@ namespace Server.Items
 						AddHtml( x+50, y, 180, 20, @"<BODY><BASEFONT Color=" + color + ">" + sPlace + "</BASEFONT></BODY>", (bool)false, (bool)false);
 						if ( sPlace == PLACEHOLDER_TEXT )
 							AddImage(x, y, UNCHECKED_BOX);
-						else if ( GateNumber == DYNAMIC_GATE_ID && ShowGlade( from ) && ( from.Karma < 0 || 0 < from.Kills ) )
+						else if ( GateNumber == DYNAMIC_GATE_ID && sPlace == "Woodlands - Druid's Glade" && ShowGlade( from ) && ( from.Karma < 0 || 0 < from.Kills ) )
 						{
 							AddImage(x, y, CANCEL_ICON);
 							AddTooltip("Your decisions preclude you from accessing this destination.");
@@ -229,6 +229,10 @@ namespace Server.Items
 						{
 							gX = 2513; gY = 995; gZ = 5; map = Map.SerpentIsland;
 						}
+						else if ( from.Karma < 0 )
+						{
+							gX = 5254; gY = 1063; gZ = 5; map = Map.Sosaria; // negative karma: fall back to the Umbra Cave vortex
+						}
 					}
 
 					if ( gX > 0 )
@@ -287,9 +291,12 @@ namespace Server.Items
 
 			else if ( gate == 30 )
 			{
-				if ( ShowGlade( m) )
+				if ( ShowGlade( m ) )
 				{
-					sGate = PlayerSettings.GetDiscovered( m, Land.Sosaria ) ? "Woodlands - Druid's Glade" : PLACEHOLDER_TEXT;
+					if ( m.Karma < 0 )
+						sGate = "Vortex - Umbra Cave"; // negative karma, no Glade access: fall back to the Umbra Cave vortex
+					else
+						sGate = PlayerSettings.GetDiscovered( m, Land.Sosaria ) ? "Woodlands - Druid's Glade" : PLACEHOLDER_TEXT;
 				}
 				else if ( Server.Items.BaseRace.IsEvilSeaCreature( m ) && m.RaceHomeLand == 2 )
 				{
@@ -311,6 +318,10 @@ namespace Server.Items
 				{
 					sGate = "Vortex - Furnace Eye Cave";
 				}
+				else if ( m.Karma < 0 )
+				{
+					sGate = "Vortex - Umbra Cave"; // negative karma, no other Vortex gate available
+				}
 			}
 
 			return sGate;
@@ -319,6 +330,13 @@ namespace Server.Items
 		private static bool ShowGlade( Mobile m )
 		{
 			return !Server.Items.BaseRace.IsEvil( m );
+		}
+
+		// True when the player may reach the "Vortex - Umbra Cave" moongate destination.
+		// The Umbra door (RaceTeleporter) reuses this so the two stay in sync.
+		public static bool CanUseUmbraCave( Mobile m )
+		{
+			return m != null && GetGateName( DYNAMIC_GATE_ID, m ) == "Vortex - Umbra Cave";
 		}
 
 		public static void GateMoonTeleport( Mobile m, Point3D loc, Map map )

@@ -104,7 +104,7 @@ namespace Server.Items
 			{
 				m.SendMessage( "The doors seem to be rusted shut!" );
 			}
-			else if ( this.Name == "umbra" && m is PlayerMobile && Server.Items.BaseRace.IsEvilDeadCreature( m ) && m.RaceHomeLand == 1 )
+			else if ( this.Name == "umbra" && m is PlayerMobile && GateMoon.CanUseUmbraCave( m ) )
 			{
 				loc = new Point3D(cur.X, cur.Y-1, cur.Z);
 					if ( m.Y < cur.Y )
