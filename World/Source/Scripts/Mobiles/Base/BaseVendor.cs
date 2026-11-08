@@ -2150,6 +2150,9 @@ namespace Server.Mobiles
 			if ( from.Region.IsPartOf( typeof( NecromancerRegion ) ) && GetPlayerInfo.EvilPlayer( from ) )
 				publicRegion = true;
 
+			if ( from.Region.IsPartOf( typeof( UmbraRegion ) ) )
+				publicRegion = true;
+
 			if ( !publicRegion && ( from.Criminal || from.Kills > 0 ) )
 				return false;
 

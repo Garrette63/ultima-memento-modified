@@ -1095,6 +1095,9 @@ namespace Server.Misc
 			if ( m is PlayerMobile && !m.Criminal && m.Kills < 1 )
 				enemy = false;
 
+			if ( m is PlayerMobile && m.Region.IsPartOf( typeof( UmbraRegion ) ) && ( m.Criminal || m.Kills > 0 ) )
+				enemy = false; // UMBRA: guards don't attack murderers/criminals; NPCs still serve them
+
 			if ( checkDisguise || (m.Region).Name == "the Castle of Knowledge" )
 			{
 				if ( DisguiseTimers.IsDisguised( m ) )
