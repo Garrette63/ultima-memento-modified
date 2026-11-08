@@ -182,18 +182,17 @@ namespace Server.Mobiles
 
 			bool isFemale = ( from.Female || from.Body.IsFemale );
 
-			int balance = from.TotalGold;
-			int canAfford = 0;
+			int showCount = 0;
 
 			for ( int i = 0; i < sellList.Length; ++i )
 			{
-				if ( balance >= sellList[i].Price && (!sellList[i].FacialHair || !isFemale) )
-						++canAfford;
+				if ( !sellList[i].FacialHair || !isFemale )
+					++showCount;
 			}
 
 			AddPage( 0 );
 
-			AddBackground( 50, 10, 450, 100 + (canAfford * 25), 2600 );
+			AddBackground( 50, 10, 450, 100 + (showCount * 25), 2600 );
 
 			AddHtmlLocalized( 100, 40, 350, 20, 1018356, false, false ); // Choose your hairstyle change:
 
@@ -201,7 +200,7 @@ namespace Server.Mobiles
 
 			for ( int i = 0; i < sellList.Length; ++i )
 			{
-				if ( balance >= sellList[i].Price && (!sellList[i].FacialHair || !isFemale) )
+				if ( !sellList[i].FacialHair || !isFemale )
 				{
 					if ( sellList[i].TitleString != null )
 						AddHtml( 140, 75 + (index * 25), 300, 20, sellList[i].TitleString, false, false );
