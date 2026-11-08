@@ -81,12 +81,7 @@ namespace Server.Misc
 				m_From.SendMessage("You must be standing in your house to place this!");
 				return false;
 			}
-			else if ( loc.Y > m_From.Location.Y + Remodeling.Front || loc.Y < m_From.Location.Y - Remodeling.Back )
-			{
-				m_From.SendMessage("You will have to get closer and place within your land!");
-				return false;
-			}
-			else if ( loc.X > m_From.Location.X + Remodeling.Right || loc.X < m_From.Location.X - Remodeling.Left )
+			else if ( !IsWithinHouseLand( m_House, loc ) )
 			{
 				m_From.SendMessage("You will have to get closer and place within your land!");
 				return false;
@@ -98,6 +93,41 @@ namespace Server.Misc
 			}
 
 			return true;
+		}
+
+		// Allow placing anywhere within the house's footprint plus the yard margin,
+		// independent of exactly where the player is standing (they only need to be
+		// inside the house, which is validated above). This keeps the "space around
+		// the house" restriction but is no longer tied to the player's position.
+		private static bool IsWithinHouseLand( BaseHouse house, Point3D loc )
+		{
+			if ( house == null )
+				return false;
+
+			int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+
+			foreach ( Rectangle2D rect in house.Area )
+			{
+				int x0 = house.X + rect.Start.X;
+				int y0 = house.Y + rect.Start.Y;
+				int x1 = x0 + rect.Width;
+				int y1 = y0 + rect.Height;
+
+				if ( x0 < minX ) minX = x0;
+				if ( y0 < minY ) minY = y0;
+				if ( x1 > maxX ) maxX = x1;
+				if ( y1 > maxY ) maxY = y1;
+			}
+
+			if ( minX > maxX || minY > maxY )
+				return false;
+
+			minX -= Remodeling.Left;
+			minY -= Remodeling.Back;
+			maxX += Remodeling.Right;
+			maxY += Remodeling.Front;
+
+			return ( loc.X >= minX && loc.X <= maxX && loc.Y >= minY && loc.Y <= maxY );
 		}
 
 		public void EndPlace(Point3D loc)

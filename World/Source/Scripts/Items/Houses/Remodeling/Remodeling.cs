@@ -13,16 +13,16 @@ namespace Server.Misc
         //Set all to 0 if you only want the player to place inside their house.
 
         // Spaces to left of house allowed for placement.
-        public static int Left = 15;
+        public static int Left = 30;
         
         // Spaces to right of house allowed for placement.
-        public static int Right = 15;
+        public static int Right = 30;
 
         // Spaces to front of house allowed for placement.
-        public static int Front = 15;
+        public static int Front = 30;
 
         // Spaces to back of house allowed for placement.
-        public static int Back = 15;
+        public static int Back = 30;
 
         //This variable is used to tell the system how many seconds after 
         //the World.Save the cleanup of any orphaned LawnItems happens.
