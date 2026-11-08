@@ -103,6 +103,9 @@ No other files were modified.
 53. **Exodus barrier: removed Fire Field, kept Meteor** — deleted the `CastFireFieldOn` helper and its call in `OnDamagedBySpell`; the 40% spell retaliation now casts only **Meteor Swarm** on the caster. Backed up as `Backups/Exodus.cs.2026-11-08-135634.bak`.
 54. **Exodus bleeds burning blood when struck** — added a `MonsterSplatter` burning-blood splash in `OnGotMeleeAttack`, following the MagmaElemental/Daemon pattern: name "burning blood", hue `0x489`, glowing, 1-in-4 chance, and only one splatter within 10 tiles at a time. Backed up as `Backups/Exodus.cs.2026-11-08-140142.bak`.
 55. **Exodus periodic greater-explosion strikes** — added a repeating `ExplosionTimer` (3s interval). While a player is within 20 tiles, it picks a random point within 5 tiles of Exodus, draws a temporary fiery landing indicator (`Effects` `0x3709`, fire hue), then 1.5s later detonates a greater-explosion blast there (`0x36B0`/`0x307`) dealing **70–80 fire** (split among >2 targets) to **PlayerMobiles only** — Exodus and other NPCs are never hit. Timer starts in the ctor and `Deserialize`, and is stopped in `OnAfterDelete`. Backed up as `Backups/Exodus.cs.2026-11-08-141141.bak`.
+56. **Exodus buffs: potion range/rate + meteor damage** — (a) periodic greater-explosion blast radius doubled (`GetMobilesInRange` 2→4). (b) potion rate upped to ~10 per 3 s (`ExplosionTimer` interval 3.0s→0.3s, priority OneSecond→FiftyMS). (c) barrier Meteor Swarm damage 25–40→**125–200** (5×). Backed up as `Backups/Exodus.cs.2026-11-08-141936.bak`.
+57. **Exodus potion burst corrected (landing spread, simultaneous 10)** — reverted the blast radius (back to 2) and the 0.3s cadence. Instead doubled the **landing spread** (offsets −10..10, clamp 100 = within 10 tiles) and made the timer fire a **burst of 10 potions at once** every 3 s (`ExplosionTimer` back to 3.0s/OneSecond; `DropExplosion` now loops 10× `LaunchExplosion`). Backed up as `Backups/Exodus.cs.2026-11-08-142142.bak`.
+58. **Exodus potions now come in 3×3 blocks (5 per burst)** — `DropExplosion` releases **5 blocks** per 3 s; each `LaunchBlock` picks a center within 10 tiles, then spawns a filled **3×3** (9 tiles) via `LaunchExplosion( map, x, y )` = **45 simultaneous blasts** per burst, all telegraphed 1.5 s ahead, still radius 2, players-only. Backed up as `Backups/Exodus.cs.2026-11-08-142352.bak`.
 
 ---
 
@@ -195,8 +198,8 @@ No other files were modified.
 - Hitting the barrier with melee reduces that hit to 75%; pets are no longer one-shot.
 - Spells are **no longer reflected**.
 - **Burning blood:** when struck in melee, Exodus splashes glowing burning blood (`MonsterSplatter`, hue `0x489`) — 1-in-4 chance, one puddle within 10 tiles at a time (like magma elementals / daemons).
-- **Periodic explosion:** every 3s (while a player is within 20 tiles) a fiery indicator appears at a random spot within 5 tiles of Exodus, and 1.5s later a **greater-explosion blast** hits that area for 70–80 fire — **players only** (Exodus is never damaged).
-- 40% of the time a spell lands, Exodus drops a **Meteor Swarm** on the caster (damage + effects reproduced directly). Fire Field was removed.
+- **Periodic explosion:** every 3 s (while a player is within 20 tiles) he drops **5 blocks of 3×3** greater-explosion potions at once (45 tiles total), each block centered within 10 tiles of Exodus, telegraphed 1.5 s earlier — each blast (radius 2) hits its area for 70–80 fire — **players only** (Exodus is never damaged).
+- 40% of the time a spell lands, Exodus drops a **Meteor Swarm** on the caster (125–200 fire; damage + effects reproduced directly). Fire Field was removed.
 - **Spawning (TEMPORARY — testing):** Exodus no longer relocates to a random dungeon on spawn (`Worlds.MoveToRandomDungeon` is commented out in `OnAfterSpawn`); it stays where spawned. Uncomment to restore.
 - **Stats (TEMPORARY — testing):** core stat block tripled — STR 1500-2100, DEX 531-765, INT 453-750, Hits 2400-3000 (~6× original), Damage 27-34.
 - **Skills (TEMPORARY — testing):** Anatomy/Psychology/MagicResist/Tactics/FistFighting = **125**.

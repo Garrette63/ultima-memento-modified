@@ -235,7 +235,7 @@ namespace Server.Mobiles
 
 			Effects.PlaySound( p, this.Map, 0x160 );
 
-			int damage = Utility.RandomMinMax( 25, 40 );
+			int damage = Utility.RandomMinMax( 125, 200 ); // 5x the old 25-40
 
 			this.DoHarmful( target );
 			AOS.Damage( target, this, damage, 0, 100, 0, 0, 0 );
@@ -266,8 +266,8 @@ namespace Server.Mobiles
 			m_ExplosionTimer.Start();
 		}
 
-		// Every few seconds, mark a random spot near Exodus and then drop a greater-explosion-pot
-		// blast there (players only - never Exodus himself).
+		// Every few seconds, release a burst of greater-explosion potions at random spots near
+		// Exodus, all at once (players only - never Exodus himself).
 		private void DropExplosion()
 		{
 			Map map = this.Map;
@@ -293,16 +293,37 @@ namespace Server.Mobiles
 			if ( !nearby )
 				return;
 
+			// Five 3x3 blocks, all released at the same moment, each block within 10 tiles of Exodus.
+			for ( int i = 0; i < 5; ++i )
+				LaunchBlock( map );
+		}
+
+		private void LaunchBlock( Map map )
+		{
 			int offX, offY;
 
 			do
 			{
-				offX = Utility.RandomMinMax( -5, 5 );
-				offY = Utility.RandomMinMax( -5, 5 );
+				offX = Utility.RandomMinMax( -10, 10 );
+				offY = Utility.RandomMinMax( -10, 10 );
 			}
-			while ( ( offX * offX + offY * offY ) > 25 );
+			while ( ( offX * offX + offY * offY ) > 100 );
 
-			IPoint3D p = new Point3D( this.X + offX, this.Y + offY, this.Z );
+			int centerX = this.X + offX;
+			int centerY = this.Y + offY;
+
+			for ( int dx = -1; dx <= 1; ++dx )
+			{
+				for ( int dy = -1; dy <= 1; ++dy )
+				{
+					LaunchExplosion( map, centerX + dx, centerY + dy );
+				}
+			}
+		}
+
+		private void LaunchExplosion( Map map, int x, int y )
+		{
+			IPoint3D p = new Point3D( x, y, this.Z );
 			Server.Spells.SpellHelper.GetSurfaceTop( ref p );
 			Point3D loc = new Point3D( p );
 
