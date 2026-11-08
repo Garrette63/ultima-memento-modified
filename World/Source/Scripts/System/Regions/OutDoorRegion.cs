@@ -7,6 +7,7 @@ using System.IO;
 using Server.Network;
 using Server.Misc;
 using Server.Items;
+using Server.Multis;
 
 namespace Server.Regions
 {
@@ -20,6 +21,12 @@ namespace Server.Regions
 		{
 			if ( from.Region.IsPartOf( "the Ranger Outpost" ) )
 			{
+				// A player who already owns/co-owns a home here may build/decorate on their own land,
+				// regardless of their Camping/Tracking. The skill check below still gates *new* homes.
+				BaseHouse owned = BaseHouse.FindHouseAt( from );
+				if ( owned != null && owned.IsCoOwner( from ) && InHouseLand( owned, p ) )
+					return true;
+
 				if ( from.Skills[SkillName.Camping].Base >= 90 || from.Skills[SkillName.Tracking].Base >= 90 )
 				{
 					return true;
@@ -32,6 +39,39 @@ namespace Server.Regions
 			}
 
 			return false;
+		}
+
+		// True when p falls within the house footprint (union of house.Area) plus the
+		// Remodeling yard margin. Lets owners decorate their own land.
+		private static bool InHouseLand( BaseHouse house, Point3D p )
+		{
+			if ( house == null )
+				return false;
+
+			int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+
+			foreach ( Rectangle2D rect in house.Area )
+			{
+				int x0 = house.X + rect.Start.X;
+				int y0 = house.Y + rect.Start.Y;
+				int x1 = x0 + rect.Width;
+				int y1 = y0 + rect.Height;
+
+				if ( x0 < minX ) minX = x0;
+				if ( y0 < minY ) minY = y0;
+				if ( x1 > maxX ) maxX = x1;
+				if ( y1 > maxY ) maxY = y1;
+			}
+
+			if ( minX > maxX || minY > maxY )
+				return false;
+
+			minX -= Remodeling.Left;
+			minY -= Remodeling.Back;
+			maxX += Remodeling.Right;
+			maxY += Remodeling.Front;
+
+			return ( p.X >= minX && p.X <= maxX && p.Y >= minY && p.Y <= maxY );
 		}
 
 		public override void OnEnter( Mobile m )
