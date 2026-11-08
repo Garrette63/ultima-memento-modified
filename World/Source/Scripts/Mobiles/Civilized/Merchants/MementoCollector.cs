@@ -72,23 +72,24 @@ namespace Server.Mobiles
 			Karma = 10000;
 			VirtualArmor = 30;
 
-			// Leather armour, with random artefact swaps.
+			// Standard-artefact armour across the armour, boot and helm slots. The hued
+			// cloak and sash below are kept as the collector's identity pieces.
 			DressArmour();
 
-			// Random cloth hat matching the cloak and sash.
 			AddThemeHat();
 
 			AddItem( new Cloak( MementoCoin.MementoHue ) );
 			AddItem( new BodySash( MementoCoin.MementoHue ) );
-			AddItem( new Boots( DarkLeatherHue ) );
 
-			// Hold a lit lantern by default.
+			WieldRandomArtefact();
+
+			// Always hold a lit lantern. It is added after the weapon so it can never be
+			// displaced; the lantern uses the two-handed layer while the artefact weapon is
+			// one-handed, so the collector carries both at once.
 			Lantern lantern = new Lantern();
 			lantern.Hue = MementoCoin.MementoHue;
 			AddItem( lantern );
 			lantern.Ignite();
-
-			WieldRandomArtefact();
 
 			Utility.AssignRandomHair( this );
 
@@ -139,66 +140,61 @@ namespace Server.Mobiles
 
 		private void DressArmour()
 		{
-			List<Item> pieces = new List<Item>();
-
-			pieces.Add( AddLeather( new LeatherGorget() ) );
-			pieces.Add( AddLeather( new LeatherArms() ) );
-			pieces.Add( AddLeather( new LeatherGloves() ) );
-			pieces.Add( AddLeather( new LeatherLegs() ) );
-			pieces.Add( AddLeather( new LeatherChest() ) );
-
-			int swapped = 0;
-
-			for ( int i = 0; i < pieces.Count; ++i )
-			{
-				if ( Utility.Random( 2 ) == 1 && SwapWithArtefact( pieces[i] ) )
-					++swapped;
-			}
-
-			// Guarantee at least one artefact piece so the swap is visible.
-			if ( swapped == 0 )
-			{
-				int start = Utility.Random( pieces.Count );
-
-				for ( int i = 0; i < pieces.Count; ++i )
-				{
-					if ( SwapWithArtefact( pieces[(start + i) % pieces.Count] ) )
-						break;
-				}
-			}
+			// Dress every worn body/boot slot with a standard artefact. The plain leather
+			// (dark hue) is only used as a fallback for layers the catalogue does not cover.
+			DressSlot( new LeatherGorget() );
+			DressSlot( new LeatherArms() );
+			DressSlot( new LeatherGloves() );
+			DressSlot( new LeatherLegs() );
+			DressSlot( new LeatherChest() );
+			DressSlot( new Boots() );
 		}
 
-		private Item AddLeather( Item leather )
+		private void DressSlot( Item baseItem )
 		{
-			leather.Hue = DarkLeatherHue;
-			AddItem( leather );
-			return leather;
+			if ( baseItem == null )
+				return;
+
+			// Swap the plain item for a random standard artefact on the same layer.
+			if ( SwapWithArtefact( baseItem ) )
+				return;
+
+			baseItem.Hue = DarkLeatherHue;
+			AddItem( baseItem );
 		}
 
 		private void AddThemeHat()
 		{
-			Item hat;
+			// Prefer a standard helm artefact; fall back to a plain themed hat only if the
+			// catalogue has nothing wearable for the helm layer.
+			Item hat = CreateThemeHat();
 
+			if ( SwapWithArtefact( hat ) )
+				return;
+
+			AddItem( hat );
+		}
+
+		private Item CreateThemeHat()
+		{
 			switch ( Utility.Random( 14 ) )
 			{
 				default:
-				case 0:  hat = new FloppyHat( MementoCoin.MementoHue ); break;
-				case 1:  hat = new WideBrimHat( MementoCoin.MementoHue ); break;
-				case 2:  hat = new Cap( MementoCoin.MementoHue ); break;
-				case 3:  hat = new SkullCap( MementoCoin.MementoHue ); break;
-				case 4:  hat = new Bandana( MementoCoin.MementoHue ); break;
-				case 5:  hat = new StrawHat( MementoCoin.MementoHue ); break;
-				case 6:  hat = new TallStrawHat( MementoCoin.MementoHue ); break;
-				case 7:  hat = new WizardsHat( MementoCoin.MementoHue ); break;
-				case 8:  hat = new FeatheredHat( MementoCoin.MementoHue ); break;
-				case 9:  hat = new TricorneHat( MementoCoin.MementoHue ); break;
-				case 10: hat = new PirateHat( MementoCoin.MementoHue ); break;
-				case 11: hat = new ClothHood( MementoCoin.MementoHue ); break;
-				case 12: hat = new WitchHat( MementoCoin.MementoHue ); break;
-				case 13: hat = new Bonnet( MementoCoin.MementoHue ); break;
+				case 0:  return new FloppyHat( MementoCoin.MementoHue );
+				case 1:  return new WideBrimHat( MementoCoin.MementoHue );
+				case 2:  return new Cap( MementoCoin.MementoHue );
+				case 3:  return new SkullCap( MementoCoin.MementoHue );
+				case 4:  return new Bandana( MementoCoin.MementoHue );
+				case 5:  return new StrawHat( MementoCoin.MementoHue );
+				case 6:  return new TallStrawHat( MementoCoin.MementoHue );
+				case 7:  return new WizardsHat( MementoCoin.MementoHue );
+				case 8:  return new FeatheredHat( MementoCoin.MementoHue );
+				case 9:  return new TricorneHat( MementoCoin.MementoHue );
+				case 10: return new PirateHat( MementoCoin.MementoHue );
+				case 11: return new ClothHood( MementoCoin.MementoHue );
+				case 12: return new WitchHat( MementoCoin.MementoHue );
+				case 13: return new Bonnet( MementoCoin.MementoHue );
 			}
-
-			AddItem( hat );
 		}
 
 		private static Dictionary<Layer, List<string>> m_ArtifactsByLayer;
@@ -229,30 +225,46 @@ namespace Server.Mobiles
 			}
 		}
 
-		private bool SwapWithArtefact( Item leather )
+		private bool SwapWithArtefact( Item baseItem )
 		{
-			if ( leather == null || leather.Deleted )
+			if ( baseItem == null || baseItem.Deleted )
 				return false;
 
 			List<string> options;
 
-			if ( !ArtifactsByLayer.TryGetValue( leather.Layer, out options ) || options.Count == 0 )
+			if ( !ArtifactsByLayer.TryGetValue( baseItem.Layer, out options ) || options.Count == 0 )
 				return false;
 
-			string typeName = options[Utility.Random( options.Count )];
-			Item artefact = ArtefactBook.CreateArtefact( typeName );
+			// Try the layer's artefacts in random order so a gender-locked or otherwise
+			// unusable entry does not leave the collector in plain leather.
+			List<string> shuffled = new List<string>( options );
 
-			if ( artefact == null || artefact.Deleted || artefact.Layer != leather.Layer || !CanWear( artefact ) )
+			for ( int i = shuffled.Count - 1; i > 0; --i )
 			{
-				if ( artefact != null )
-					artefact.Delete();
-
-				return false;
+				int j = Utility.Random( i + 1 );
+				string swap = shuffled[i];
+				shuffled[i] = shuffled[j];
+				shuffled[j] = swap;
 			}
 
-			leather.Delete();
-			AddItem( artefact );
-			return true;
+			for ( int i = 0; i < shuffled.Count; ++i )
+			{
+				Item artefact = ArtefactBook.CreateArtefact( shuffled[i] );
+
+				if ( artefact == null || artefact.Deleted || artefact.Layer != baseItem.Layer || !CanWear( artefact ) )
+				{
+					if ( artefact != null )
+						artefact.Delete();
+
+					continue;
+				}
+
+				baseItem.Delete();
+				AddItem( artefact );
+				return true;
+			}
+
+			return false;
 		}
 
 		private bool CanWear( Item artefact )
