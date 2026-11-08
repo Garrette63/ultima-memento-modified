@@ -13,6 +13,8 @@ This document tracks every file created or edited for the Memento Coin / Artefac
 | `Source/Scripts/Items/Books/ArtefactBook.cs` | C# item + gump | `ArtefactBook` item (displayed as "Tome of Wondrous Artifacts") and `ArtefactBookGump`. Lists every standard artefact (`ArtifactLevel.StandardArtefact`) from `ArtifactQuestList` with no in-book title, 16 per page, prev/next arrows and just the page number at the bottom. Clicking an artefact opens a detail page with the icon on the left page and the stat sheet on the right page (`ItemProps.ItemProperties`), plus a curated "Unique Power" description for artefacts with special code-driven abilities. Uses shared `MementoCoin.MementoHue`. `ArtefactBook.ArtefactEntry` carries `Name`, `TypeName` and `Layer`. |
 | `Source/Scripts/Items/Misc/MementoCoin.cs` | C# item | `MementoCoin` stackable currency (graphic `0xEED`). Defines the shared `public const int MementoHue = 2141`. |
 | `Source/Scripts/Mobiles/Civilized/Merchants/MementoCollector.cs` | C# NPC | `MementoCollector : BaseNPC` (invulnerable / untargetable). Pays Memento Coins for dropped artefacts, trades 75 coins for an `ArtefactBook`, has a Talk gump, random male/female + name, leather outfit, cloak/sash/boots, lit lantern, idle emotes, random artefact gear swaps and a random one-handed artefact weapon. |
+| `Compile-Linux.sh` | Shell script (shortcut) | Linux shortcut in the `World` folder. Resolves the repo base folder (parent of `World`), runs `git pull` there, then `cd`s to `Source/Tools` and runs `compile-world-linux.sh` (Mono `mcs` → `WorldLinux.exe`). Aborts before compiling if the pull fails. Marked executable (`+x`). |
+| `Compile-Windows.bat` | Batch script (shortcut) | Windows shortcut in the `World` folder. Resolves the repo base folder (parent of `World`) via `%~dp0..`, runs `git pull` there, then `pushd`s to `Source\Tools` and `call`s `compile-world-win.bat` (.NET 4.0 `csc` → `World.exe`). Aborts before compiling if the pull fails. |
 
 ## Files Edited
 
@@ -51,6 +53,7 @@ No other files were modified.
 21. **Detail Claim button** — on the artefact detail page the Claim action now uses a checkmark-box button (`0x837`/`0x838`) in the arrow's place, with the "Claim" label right-aligned next to it.
 22. **Magery-powered magic carpets** — `BaseBoat.ApplySpeedBoost` now selects `SkillName.Magery` instead of `SkillName.Seafaring` when the boat is a magic carpet (`isCarpet( this )`); sailing vessels still use Seafaring. The 50/75/100/125 thresholds still grant 1/2/3/4 boosts and the maximum remains capped at 4 by `MAX_SPEED_BOOSTS`, so carpets can never gain more than 4 bonus speed steps. The Avatar "Fast Seaman" boat-speed upgrade still applies to both vessel types, but the combined result is clamped to 4.
 23. **Speed caps 6 / carpet 4 + explicit skill isolation** — `MAX_SPEED_BOOSTS` raised from 4 to 6, so the Avatar "Fast Seaman" upgrade (via `Constants.BOAT_SPEED_MAX_LEVEL`) can now reach 6 on regular boats; added `MAX_CARPET_SPEED_BOOSTS = 4` and a carpet-only clamp in `ApplySpeedBoost`, so magic carpets never exceed 4 bonus speed steps regardless of Magery or Avatar values. Boats are driven only by Seafaring (Magery has no effect) and carpets only by Magery (Seafaring has no effect).
+24. **Compile shortcuts (Linux + Windows)** — added `Compile-Linux.sh` and `Compile-Windows.bat` in the `World` folder. Each computes the repository base folder (the parent of `World`), runs `git pull` there, then runs the matching compiler from `Source/Tools` (`compile-world-linux.sh` / `compile-world-win.bat`). If `git pull` fails the shortcut stops before compiling so stale/conflicting code is never built. The Linux shortcut is executable; `git pull` is best run with a clean working tree.
 
 ---
 
@@ -87,5 +90,13 @@ No other files were modified.
 - Overall maximum is `BaseBoat.MAX_SPEED_BOOSTS = 6` (also `Constants.BOAT_SPEED_MAX_LEVEL`), so the Avatar "Fast Seaman" upgrade and other sources can reach 6 on sailing vessels.
 - Magic carpets are additionally clamped to `BaseBoat.MAX_CARPET_SPEED_BOOSTS = 4`, so a carpet can never exceed 4 bonus speed steps no matter what the Magery or Avatar values are.
 - Slow movement and slow drift are unchanged (no skill boost applied).
+
+### Compile shortcuts (`Compile-Linux.sh` / `Compile-Windows.bat`)
+- Both live directly in the `World` folder, next to `Data`, `Info`, `Saves`, `Source`, etc.
+- Base folder = the parent of `World` (the git repository root). Each shortcut runs `git pull` there first, then runs the compiler from `Source/Tools`.
+  - Linux: `Compile-Linux.sh` → `bash Source/Tools/compile-world-linux.sh` (Mono `mcs`, output `World/WorldLinux.exe`). Run with `./Compile-Linux.sh`, `bash Compile-Linux.sh`, or double-click.
+  - Windows: `Compile-Windows.bat` → `call Source\Tools\compile-world-win.bat` (.NET 4.0 `csc`, output `World\World.exe`). Double-click to run.
+- Flow: `git pull` (base folder) → if it fails, abort with a message → otherwise compile from `Source/Tools` → report done.
+- Both compilers use paths relative to `Source/Tools`, hence the shortcuts `cd`/`pushd` into that folder before invoking them.
 
 
