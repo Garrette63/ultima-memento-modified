@@ -60,10 +60,6 @@ namespace Server.Misc
 			if ( (from is BaseCreature && ((BaseCreature)from).IsParagon) || from is Leviathan )
 				points += 40;
 
-			// Exodus boss: near-instant natural hit-point regeneration (TEMP - testing)
-			if ( from is Exodus )
-				points += 200;
-
 			if( Core.ML && from.Race == Race.Human )	//Is this affected by the cap?
 				points += 2;
 

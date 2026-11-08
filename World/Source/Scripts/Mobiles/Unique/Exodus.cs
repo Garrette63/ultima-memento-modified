@@ -14,7 +14,7 @@ namespace Server.Mobiles
 		private bool m_FieldActive;
 		private ExplosionTimer m_ExplosionTimer;
 		public bool FieldActive{ get{ return m_FieldActive; } }
-		public bool CanUseField{ get{ return Hits >= HitsMax * 5 / 10; } } // barrier is up while the creature is at/above 50% health
+		public bool CanUseField{ get{ return Hits >= HitsMax * 9 / 10; } } // TODO: an OSI bug prevents to verify this
 		public override bool IsScaredOfScaryThings{ get{ return false; } }
 		public override bool IsScaryToPets{ get{ return true; } }
 		public override bool BleedImmune{ get{ return true; } }
@@ -45,7 +45,7 @@ namespace Server.Mobiles
 
 			SetHits( 2400, 3000 );
 
-			SetDamage( 27, 34 );
+			SetDamage( 12, 15 );
 
 			SetDamageType( ResistanceType.Physical, 50 );
 			SetDamageType( ResistanceType.Energy, 50 );
@@ -103,11 +103,17 @@ namespace Server.Mobiles
 				damage = (int)( damage * 0.75 ); // no spell damage when the field is down
 		}
 
+		public override void CheckReflect( Mobile caster, ref bool reflect )
+		{
+			if ( Utility.RandomMinMax( 1, 4 ) == 1 ){ reflect = true; } // 25% spells are reflected back to the caster
+			else { reflect = false; }
+		}
+
 		public override void OnDamagedBySpell( Mobile from )
 		{
 			if( from != null && from.Alive && 0.4 > Utility.RandomDouble() )
 			{
-				CastMeteorOn( from );
+				SendEBolt( from );
 			}
 
 			if ( !m_FieldActive )
@@ -134,19 +140,6 @@ namespace Server.Mobiles
 		{
 			base.OnGotMeleeAttack( attacker );
 
-			// Burning blood splashes from the wound when struck.
-			if ( Utility.RandomMinMax( 1, 4 ) == 1 )
-			{
-				int goo = 0;
-
-				foreach ( Item splash in this.GetItemsInRange( 10 ) ){ if ( splash is MonsterSplatter && splash.Name == "burning blood" ){ goo++; } }
-
-				if ( goo == 0 )
-				{
-					MonsterSplatter.AddSplatter( this.X, this.Y, this.Z, this.Map, this.Location, this, "burning blood", 0x489, 1 );
-				}
-			}
-
 			if ( m_FieldActive )
 			{
 				this.FixedParticles( 0x376A, 20, 10, 0x2530, EffectLayer.Waist );
@@ -154,6 +147,15 @@ namespace Server.Mobiles
 				PlaySound( 0x2F4 );
 
 				attacker.SendAsciiMessage( "Your weapon is less effective with the creature's magical barrier up!" );
+
+				if ( attacker is BaseCreature ) // KILL ANY PETS PLAYERS FOOLISHLY BROUGHT WITH THEM
+				{
+					BaseCreature pet = (BaseCreature)attacker;
+					if ( BaseCreature.IsPet( attacker ) )
+					{
+						SendEBoltOnPet( attacker );
+					}
+				}
 			}
 
 			if( attacker != null && attacker.Alive && attacker.Weapon is BaseRanged && 0.4 > Utility.RandomDouble() )
@@ -203,7 +205,7 @@ namespace Server.Mobiles
 		{
 			base.OnThink();
 
-			if ( !m_FieldActive && CanUseField )
+			if ( !m_FieldActive && !IsHurt() )
 				m_FieldActive = true;
 		}
 
@@ -225,58 +227,12 @@ namespace Server.Mobiles
 			AOS.Damage( to, this, 50, 0, 0, 0, 0, 100 );
 		}
 
-		// Drops a Meteor Swarm on the spell caster (damage + blast visuals, mirroring the spell).
-		private void CastMeteorOn( Mobile target )
+		public void SendEBoltOnPet( Mobile to )
 		{
-			if ( target == null || target.Deleted || this.Map == null || target.Map != this.Map )
-				return;
-
-			Map map = this.Map;
-
-			// Aim at the ground beneath the attacker, not the mobile itself.
-			IPoint3D gp = new Point3D( target.X, target.Y, target.Z );
-			Server.Spells.SpellHelper.GetSurfaceTop( ref gp );
-			Point3D loc = new Point3D( gp );
-
-			// Warning marker on the ground (same style as the explosion indicator, but a different hue).
-			Effects.SendLocationEffect( loc, map, 0x3709, 30, 10, 0x480, 0 );
-			Effects.PlaySound( loc, map, 0x20C );
-
-			// The meteor falls onto that ground spot a moment later.
-			Timer.DelayCall( TimeSpan.FromSeconds( 1.5 ), () => MeteorImpact( loc, map, target ) );
-		}
-
-		private void MeteorImpact( Point3D loc, Map map, Mobile originalTarget )
-		{
-			if ( map == null || map == Map.Internal || this.Deleted )
-				return;
-
-			Effects.PlaySound( loc, map, 0x160 );
-
-			// Hit the attacker where it lands - they can dodge by stepping away during the warning.
-			if ( originalTarget != null && !originalTarget.Deleted && originalTarget.Alive && originalTarget.Map == map )
-			{
-				int dx = originalTarget.X - loc.X;
-				int dy = originalTarget.Y - loc.Y;
-
-				if ( ( dx * dx + dy * dy ) <= 9 )
-				{
-					int damage = Utility.RandomMinMax( 125, 200 ); // 5x the old 25-40
-
-					this.DoHarmful( originalTarget );
-					AOS.Damage( originalTarget, this, damage, 0, 100, 0, 0, 0 );
-				}
-			}
-
-			int hue = PlayerSettings.GetMySpellHue( true, this, 0 );
-
-			Effects.SendLocationEffect( loc, map, Utility.RandomList( 0x33E5, 0x33F5 ), 85, 10, hue, 0 );
-			Effects.PlaySound( loc, map, 0x15F );
-
-			// Meteor impact ignites a 5x5 conflagration field where it lands.
-			ConflagrationPotion conflag = new ConflagrationPotion();
-			conflag.Explode( this, loc, map, false );
-			conflag.Delete();
+			this.MovingParticles( to, 0x3818, 7, 0, false, true, 0xBE3, 0xFCB, 0x211 );
+			to.PlaySound( 0x229 );
+			this.DoHarmful( to );
+			AOS.Damage( to, this, 10000, 0, 0, 0, 0, 100 );
 		}
 
 		public override void OnAfterDelete()
@@ -309,24 +265,26 @@ namespace Server.Mobiles
 			if ( map == null || map == Map.Internal || !this.Alive || this.Combatant == null )
 				return;
 
-			// Five 3x3 blocks, all released at the same moment, each block within 10 tiles of Exodus.
-			for ( int i = 0; i < 5; ++i )
-				LaunchBlock( map );
-		}
+			// Target a random player within 20 tiles and drop a single 3x3 block on them.
+			List<Mobile> players = new List<Mobile>();
 
-		private void LaunchBlock( Map map )
-		{
-			int offX, offY;
+			IPooledEnumerable eable = this.GetMobilesInRange( 20 );
 
-			do
+			foreach ( Mobile m in eable )
 			{
-				offX = Utility.RandomMinMax( -10, 10 );
-				offY = Utility.RandomMinMax( -10, 10 );
+				if ( m is PlayerMobile && m.Alive && m.Map == map && this.CanBeHarmful( m, false ) )
+					players.Add( m );
 			}
-			while ( ( offX * offX + offY * offY ) > 100 );
 
-			int centerX = this.X + offX;
-			int centerY = this.Y + offY;
+			eable.Free();
+
+			if ( players.Count == 0 )
+				return;
+
+			Mobile target = players[Utility.Random( players.Count )];
+
+			int centerX = target.X;
+			int centerY = target.Y;
 
 			for ( int dx = -1; dx <= 1; ++dx )
 			{
@@ -347,7 +305,7 @@ namespace Server.Mobiles
 			Effects.SendLocationEffect( loc, map, 0x3709, 30, 10, 0x489, 0 );
 			Effects.PlaySound( loc, map, 0x20C );
 
-			Timer.DelayCall( TimeSpan.FromSeconds( 1.5 ), () => ExplodeArea( loc, map ) );
+			Timer.DelayCall( TimeSpan.FromSeconds( 2.0 ), () => ExplodeArea( loc, map ) );
 		}
 
 		private void ExplodeArea( Point3D loc, Map map )
@@ -392,7 +350,7 @@ namespace Server.Mobiles
 		{
 			private readonly Exodus m_Owner;
 
-			public ExplosionTimer( Exodus owner ) : base( TimeSpan.FromSeconds( 3.0 ), TimeSpan.FromSeconds( 3.0 ) )
+			public ExplosionTimer( Exodus owner ) : base( TimeSpan.FromSeconds( 10.0 ), TimeSpan.FromSeconds( 10.0 ) )
 			{
 				Priority = TimerPriority.OneSecond;
 				m_Owner = owner;

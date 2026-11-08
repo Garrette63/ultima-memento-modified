@@ -40,8 +40,8 @@ This document tracks every file created or edited for the Memento Coin / Artefac
 | `Source/Scripts/Items/Houses/Remodeling/LawnRemoveTarget.cs` | The lawn decor **removal** target now sets `CheckLOS = false`, matching the placement `LawnTarget`. You can refund/delete lawn decorations that are out of line of sight (behind a wall/corner) as long as they belong to the house. Backed up as `Backups/LawnRemoveTarget.cs.2026-11-08-122014.bak`. |
 | `Source/Scripts/Items/Houses/Remodeling/ShantyRemoveTarget.cs` | Same LOS fix for the shanty decor **removal** target (`CheckLOS = false`), so out-of-LOS shanty decorations can be removed too. Backed up as `Backups/ShantyRemoveTarget.cs.2026-11-08-122014.bak`. |
 | `Source/Scripts/Mobiles/Civilized/Merchants/MementoCollector.cs` | Re-geared the collector: **all worn armour/boot/helm slots are now standard artefacts** (`DressSlot` always swaps the leather piece for a same-layer `StandardArtefact` from the catalogue, falling back to dark leather only if a layer has none), the **hued cloak and sash are kept**, and the **lit lantern is always carried** (added after the weapon; it sits on the two-handed layer while the one-handed artefact weapon occupies the other hand). `SwapWithArtefact` now tries the whole layer list in random order so gender-locked entries don't leave plain leather. Backed up as `Backups/MementoCollector.cs.2026-11-08-124115.bak`. |
-| `Source/Scripts/Mobiles/Unique/Exodus.cs` | Reworked the Exodus boss's barrier/retaliation: **removed the pet-kill EBolt** (`SendEBoltOnPet`) that one-shot pets touching the barrier; lowered the barrier threshold from **90% to 50%** HP (`CanUseField`, and `OnThink` now re-raises at 50%); **removed spell reflection** (`CheckReflect`); and replaced the retaliatory EBolt-on-spell with a **Meteor Swarm cast on the caster** (`CastMeteorOn`, on the 40% roll; Fire Field was later removed — see #53). The ranged-attacker EBolt is unchanged. Backed up as `Backups/Exodus.cs.2026-11-08-132834.bak`. |
-| `Source/Scripts/System/Misc/RegenRates.cs` | Added an Exodus case to `Mobile_HitsRegenRate` (`points += 200`) so Exodus has **near-instant natural hit-point regen** (~1 HP every ~50 ms, ≈20 HP/s) — mirrors the existing `Leviathan` special-case. **TEMP (testing).** Backed up as `Backups/RegenRates.cs.2026-11-08-135201.bak`. |
+| `Source/Scripts/Mobiles/Unique/Exodus.cs` | Reworked the Exodus boss's barrier/retaliation: **removed the pet-kill EBolt** (`SendEBoltOnPet`) that one-shot pets touching the barrier; lowered the barrier threshold from **90% to 50%** HP (`CanUseField`, and `OnThink` now re-raises at 50%); **removed spell reflection** (`CheckReflect`); and replaced the retaliatory EBolt-on-spell with a Meteor Swarm (Fire Field removed in #53; the Meteor itself was later removed in #64). The ranged-attacker EBolt is unchanged. Backed up as `Backups/Exodus.cs.2026-11-08-132834.bak`. |
+| `Source/Scripts/System/Misc/RegenRates.cs` | Had an Exodus case added to `Mobile_HitsRegenRate` (`points += 200`, near-instant regen) — **fully reverted in #68**; file is back to original. Backed up as `Backups/RegenRates.cs.2026-11-08-135201.bak`. |
 
 No other files were modified.
 
@@ -110,6 +110,13 @@ No other files were modified.
 60. **Exodus explosions gated to combat** — `DropExplosion` now only fires while `Combatant != null` (i.e. he's fighting someone), replacing the previous "player within 20 tiles" gate. Backed up as `Backups/Exodus.cs.2026-11-08-143434.bak`.
 61. **Meteor leaves a 5×5 conflagration field** — `CastMeteorOn` now spawns a `ConflagrationPotion.Explode` (5×5 burning fire field, ~10 s, spares the thrower/Exodus) centered on the meteor's landing spot. Backed up as `Backups/Exodus.cs.2026-11-08-143633.bak`.
 62. **Meteor: ground-target with warning (distinct hue)** — `CastMeteorOn` now aims at the **ground beneath** the attacker (`GetSurfaceTop`), shows a warning at that tile (`0x3709`, hue **0x480** — deliberately different from the explosion indicator's `0x489`), then after 1.5 s `MeteorImpact` lands there: **125–200 fire** to the original attacker if still within ~3 tiles (dodgeable), plus the 5×5 conflagration. Backed up as `Backups/Exodus.cs.2026-11-08-144022.bak`.
+63. **Removed the burning blood** — deleted the `MonsterSplatter` "burning blood" splash from `OnGotMeleeAttack` (it fell through to the splatter's damaging default, so it hurt anyone stepping on it). Backed up as `Backups/Exodus.cs.2026-11-08-151527.bak`.
+64. **Removed the meteor (and conflagration) retaliation** — deleted the `CastMeteorOn`/`MeteorImpact` methods and the `OnDamagedBySpell` trigger that cast them, so spell hits no longer drop a meteor + 5×5 conflagration. `OnDamagedBySpell` now only handles the barrier drop. Backed up as `Backups/Exodus.cs.2026-11-08-151848.bak`.
+65. **Exodus explosion retuned** — warning delay 1.5s→**2s**; cadence 3s→**10s** (`ExplosionTimer`); now casts a **single 3×3 block** centered on a **random player within 20 tiles** (removed the five random-spot blocks and `LaunchBlock`). Backed up as `Backups/Exodus.cs.2026-11-08-152339.bak`.
+66. **Barrier spell reflect (40%) + damage −⅓** — re-added `CheckReflect` so the barrier reflects **40%** of incoming spells back at the caster (only while `m_FieldActive`); base damage lowered by a third: `SetDamage` 27–34 → **18–23**. Backed up as `Backups/Exodus.cs.2026-11-08-152512.bak`.
+67. **Reverted ALL barrier changes** — restored the original barrier: `CanUseField` **90%** (was 50%), `OnThink` re-raise only at full HP (`!IsHurt`), `CheckReflect` **25% unconditional** (was 40% barrier-gated), and the **EBolt-on-spell** + **pet-kill** (`SendEBoltOnPet`) retaliations and their methods. Non-barrier changes (stats, explosions, spawn, regen, base damage) untouched. Backed up as `Backups/Exodus.cs.2026-11-08-152750.bak`.
+68. **Reverted the near-instant regen** — removed the `if ( from is Exodus ) points += 200;` special-case from `RegenRates.Mobile_HitsRegenRate`, restoring normal creature regeneration. Backed up as `Backups/RegenRates.cs.2026-11-08-152927.bak`.
+69. **Exodus base damage −⅓ (again)** — `SetDamage` 18–23 → **12–15**. Backed up as `Backups/Exodus.cs.2026-11-08-153230.bak`.
 
 ---
 
@@ -198,15 +205,12 @@ No other files were modified.
 - A **lit lantern is always carried** (added after the one-handed artefact weapon; the lantern uses the two-handed layer, so both are held).
 
 ### Exodus boss — barrier & spell retaliation
-- The magic barrier is up while Exodus is at/above **50%** HP (`CanUseField`); `OnThink` re-raises it once healed back to 50%.
-- Hitting the barrier with melee reduces that hit to 75%; pets are no longer one-shot.
-- Spells are **no longer reflected**.
-- **Burning blood:** when struck in melee, Exodus splashes glowing burning blood (`MonsterSplatter`, hue `0x489`) — 1-in-4 chance, one puddle within 10 tiles at a time (like magma elementals / daemons).
-- **Periodic explosion:** every 3 s (while he is **in combat**) he drops **5 blocks of 3×3** greater-explosion potions at once (45 tiles total), each block centered within 10 tiles of Exodus, telegraphed 1.5 s earlier — each blast (radius 2) hits its area for 35–40 fire — **players only** (Exodus is never damaged).
-- 40% of the time a spell lands, Exodus telegraphs a **Meteor** on the **ground beneath** the caster (a `0x3709` warning in hue `0x480`, distinct from the explosion's `0x489`); ~1.5 s later it lands there for **125–200 fire** to the caster if they stayed within ~3 tiles, igniting a **5×5 conflagration** fire field (~10 s).
+- The magic barrier is up while Exodus is at/above **90%** HP (`CanUseField`); `OnThink` re-raises it only when he's back at full HP (`!IsHurt`).
+- Hitting the barrier with melee reduces that hit to 75%, and pets that melee the barrier are one-shot by `SendEBoltOnPet`.
+- **Spell reflect / retaliation:** 25% of incoming spells are reflected back at the caster (`CheckReflect`), and 40% of the time a spell hits he fires an EBolt retaliation (`SendEBolt`).
+- **Periodic explosion:** every **10 s** (while he is **in combat**) he targets a **random player within 20 tiles** and drops a single **3×3** block (9 tiles) centered on them, each tile telegraphed **2 s** earlier — each blast (radius 2) hits its area for 35–40 fire — **players only** (Exodus is never damaged).
 - **Spawning (TEMPORARY — testing):** Exodus no longer relocates to a random dungeon on spawn (`Worlds.MoveToRandomDungeon` is commented out in `OnAfterSpawn`); it stays where spawned. Uncomment to restore.
-- **Stats (TEMPORARY — testing):** core stat block tripled — STR 1500-2100, DEX 531-765, INT 453-750, Hits 2400-3000 (~6× original), Damage 27-34.
+- **Stats (TEMPORARY — testing):** core stat block tripled — STR 1500-2100, DEX 531-765, INT 453-750, Hits 2400-3000 (~6× original), Damage 12-15.
 - **Skills (TEMPORARY — testing):** Anatomy/Psychology/MagicResist/Tactics/FistFighting = **125**.
-- **Health regen (TEMPORARY — testing):** near-instant natural regen — ~1 HP every ~50 ms (≈20 HP/s) via a +200 regen-points bonus for Exodus in `RegenRates.Mobile_HitsRegenRate`.
 
 
