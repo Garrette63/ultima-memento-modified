@@ -11,6 +11,37 @@
 # stale/conflicting code.
 set -euo pipefail
 
+# --- Environment setup for GUI / double-click launches ----------------------
+# When Dolphin executes this script (double-click) it does NOT read ~/.bashrc,
+# so PATH can be minimal and miss Homebrew/Linuxbrew (where mcs / mono / csc
+# live). Add the usual locations when they exist and are not already present.
+_add_path() {
+    [ -d "$1" ] || return 0
+    case ":${PATH}:" in
+        *":$1:"*) ;;
+        *) PATH="$1:${PATH}" ;;
+    esac
+}
+if [ -n "${HOMEBREW_PREFIX:-}" ]; then _add_path "${HOMEBREW_PREFIX}/bin"; fi
+_add_path "${HOME}/linuxbrew/.linuxbrew/bin"
+_add_path "/home/linuxbrew/.linuxbrew/bin"
+_add_path "/home/linuxbrew/.linuxbrew/sbin"
+_add_path "/usr/local/bin"
+_add_path "/usr/bin"
+_add_path "/bin"
+export PATH
+
+# --- Re-open in Konsole when launched without a terminal --------------------
+# A file-manager "execute" launch has no TTY, so build output would be invisible
+# and no window would exist. In that case re-run ourselves inside Konsole and
+# keep the window open afterwards. Console runs already have a TTY and skip this.
+if [ ! -t 1 ] && [ -z "${MEMENTO_IN_TERMINAL:-}" ] \
+   && { [ -n "${WAYLAND_DISPLAY:-}" ] || [ -n "${DISPLAY:-}" ]; } \
+   && command -v konsole >/dev/null 2>&1; then
+    _self="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)/$(basename -- "${BASH_SOURCE[0]}")"
+    MEMENTO_IN_TERMINAL=1 exec konsole --hold -e bash "$_self" "$@"
+fi
+
 # Folder that contains this shortcut == the World folder.
 WORLD_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 # Repository base folder == parent of the World folder.
