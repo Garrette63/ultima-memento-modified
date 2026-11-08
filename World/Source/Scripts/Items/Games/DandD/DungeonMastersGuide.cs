@@ -62,7 +62,7 @@ namespace Server.Items
 
 				string color = "DC7676";
 
-				while ( cyc < 85 )
+				while ( cyc < Server.Misc.Worlds.DungeonCount )
 				{
 					cyc++;
 
@@ -106,7 +106,10 @@ namespace Server.Items
 
 					string dungeon = Server.Misc.Worlds.GetDungeonListing( info.ButtonID, out world, out location, out placer, out xc, out yc );
 
-					from.SendGump( new Sextants.MapGump( from, placer, xc, yc, null ) );
+					if ( Sextants.HasSextant( from ) )
+						from.SendGump( new Sextants.MapGump( from, placer, xc, yc, null ) );
+					else
+						from.SendMessage( "You need a sextant to locate this dungeon." );
 				}
 				else
 				{

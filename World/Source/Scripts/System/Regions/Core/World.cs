@@ -29,6 +29,8 @@ namespace Server.Misc
 {
     class Worlds
     {
+		public const int DungeonCount = 85;
+
 		public static void EnteredTheLand( Mobile from )
 		{
 			if ( from is PlayerMobile )
@@ -1154,8 +1156,8 @@ namespace Server.Misc
 				case 58: dungeon = "the Sanctum of Saltmarsh"; break;
 				case 59: dungeon = "the Scurvy Reef"; break;
 				case 60: dungeon = "the Temple of Osirus"; break;
-				case 61: dungeon = "Dungeon of the Lich King"; break;
-				case 62: dungeon = "Dungeon of the Mad Archmage"; break;
+				case 61: dungeon = "the Dungeon of the Lich King"; break;
+				case 62: dungeon = "the Dungeon of the Mad Archmage"; break;
 				case 63: dungeon = "Dungeon Rock"; break;
 				case 64: dungeon = "the Azure Castle"; break;
 				case 65: dungeon = "the Catacombs of Azerok"; break;
