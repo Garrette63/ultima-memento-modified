@@ -125,6 +125,11 @@ No other files were modified.
 75. **Exodus no longer flees** — added `!(m_Mobile is Exodus)` to the low-health flee condition in `MeleeAI.DoActionCombat` (`Behavior.cs`), so Exodus never sets `ActionType.Flee` and keeps fighting instead of running when below ~20% HP. Backed up as `Backups/Behavior.cs.2026-11-08-161519.bak`.
 76. **Exodus gains Magery 125** — added `SetSkill( SkillName.Magery, 125.0 )`. Backed up as `Backups/Exodus.cs.2026-11-08-161757.bak`.
 77. **Exodus is now a mage** — `AIType.AI_Melee` → **`AIType.AI_Mage`** (`FightMode.Closest, 10, 1, 0.2, 0.4` unchanged), so he now actively casts spells with his 125 Magery. Backed up as `Backups/Exodus.cs.2026-11-08-162041.bak`.
+78. **Removed the conflagration ring** — deleted the 25%-HP conflagration ring entirely: `m_RingBands`/`m_NextRingAllowed` fields, the `OnThink` trigger, `StartConflagrationRing`, `RingTimer`, and `IgniteRingFire`. Backed up as `Backups/Exodus.cs.2026-11-08-162619.bak`.
+79. **Melee damage −20%** — `SetDamage` 54–69 → **43–55**. Backed up as `Backups/Exodus.cs.2026-11-08-162816.bak`.
+80. **Explosion cooldown 10 s → 8 s** — `ExplosionTimer` interval 10.0 s → **8.0 s** (periodic 3×3 greater-explosion burst). Backed up as `Backups/Exodus.cs.2026-11-08-162927.bak`.
+81. **Exodus drops champion-style gold on death** — `OnBeforeDeath` now calls `SpawnChampGold()`, mirroring `BaseChampion`: it starts a `GoldTimer` for every tile within a 12-tile radius, each spawning a `Gold(300–800 × GetGoldCutRate)` pile after a random 0–10 s delay with a burst effect. Backed up as `Backups/Exodus.cs.2026-11-08-163202.bak`.
+82. **Two horde minion items on death** — `OnDeath` now drops **two `HoardMinionFamiliarItem`** into his corpse (like a champion's minion drop). Backed up as `Backups/Exodus.cs.2026-11-08-163421.bak`.
 
 ---
 
@@ -216,11 +221,12 @@ No other files were modified.
 - The magic barrier is up while Exodus is at/above **90%** HP (`CanUseField`); `OnThink` re-raises it only when he's back at full HP (`!IsHurt`).
 - Hitting the barrier with melee reduces that hit to 75%, and pets that melee the barrier are one-shot by `SendEBoltOnPet`.
 - **Spell reflect / retaliation:** 25% of incoming spells are reflected back at the caster (`CheckReflect`), and 40% of the time a spell hits he fires an EBolt retaliation (`SendEBolt`).
-- **Periodic explosion:** every **10 s** (while he is **in combat**) he targets a **random player within 20 tiles** and drops a single **3×3** block (9 tiles) centered on them, each tile telegraphed **2 s** earlier — each blast (radius 2) hits its area for 35–40 fire — **players only** (Exodus is never damaged).
-- **Conflagration ring:** each time he loses another 25% HP (at 75%/50%/25%), **at most once every 10 s**, a ring of conflagration fire expands from his position — one ring per second out to 15 tiles, with **one empty tile between each fire**, each tile telegraphed 1 s (`0x3709`) then igniting and burning for 3 s at **Greater Conflagration damage (20–30)**.
+- **Periodic explosion:** every **8 s** (while he is **in combat**) he targets a **random player within 20 tiles** and drops a single **3×3** block (9 tiles) centered on them, each tile telegraphed **2 s** earlier — each blast (radius 2) hits its area for 35–40 fire — **players only** (Exodus is never damaged).
 - **Never flees:** at low HP Exodus keeps fighting (excluded from `MeleeAI`'s flee check in `DoActionCombat`).
+- **Gold on death (champion-style):** when he dies he scatters gold across a 12-tile radius — one `Gold(300–800 × goldCutRate)` pile per tile, each after a random 0–10 s delay, with a small burst effect.
+- **Horde minions:** his corpse also drops **two `HoardMinionFamiliarItem`** (champion-style).
 - **Spawning (TEMPORARY — testing):** Exodus no longer relocates to a random dungeon on spawn (`Worlds.MoveToRandomDungeon` is commented out in `OnAfterSpawn`); it stays where spawned. Uncomment to restore.
-- **Stats (TEMPORARY — testing):** core stat block tripled — STR 1500-2100, DEX 531-765, INT 453-750, Hits 2400-3000 (~6× original), Damage 54-69 (3× original).
+- **Stats (TEMPORARY — testing):** core stat block tripled — STR 1500-2100, DEX 531-765, INT 453-750, Hits 2400-3000 (~6× original), Damage 43-55 (was 54-69).
 - **Skills (TEMPORARY — testing):** Anatomy/Psychology/MagicResist/**Magery**/Tactics/FistFighting = **125**.
 
 
