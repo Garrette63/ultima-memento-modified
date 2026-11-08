@@ -13,7 +13,7 @@ namespace Server.Mobiles
 	{
 		private bool m_FieldActive;
 		public bool FieldActive{ get{ return m_FieldActive; } }
-		public bool CanUseField{ get{ return Hits >= HitsMax * 9 / 10; } } // TODO: an OSI bug prevents to verify this
+		public bool CanUseField{ get{ return Hits >= HitsMax * 5 / 10; } } // barrier is up while the creature is at/above 50% health
 		public override bool IsScaredOfScaryThings{ get{ return false; } }
 		public override bool IsScaryToPets{ get{ return true; } }
 		public override bool BleedImmune{ get{ return true; } }
@@ -100,17 +100,12 @@ namespace Server.Mobiles
 				damage = (int)( damage * 0.75 ); // no spell damage when the field is down
 		}
 
-		public override void CheckReflect( Mobile caster, ref bool reflect )
-		{
-			if ( Utility.RandomMinMax( 1, 4 ) == 1 ){ reflect = true; } // 25% spells are reflected back to the caster
-			else { reflect = false; }
-		}
-
 		public override void OnDamagedBySpell( Mobile from )
 		{
 			if( from != null && from.Alive && 0.4 > Utility.RandomDouble() )
 			{
-				SendEBolt( from );
+				CastFireFieldOn( from );
+				CastMeteorOn( from );
 			}
 
 			if ( !m_FieldActive )
@@ -143,15 +138,6 @@ namespace Server.Mobiles
 				PlaySound( 0x2F4 );
 
 				attacker.SendAsciiMessage( "Your weapon is less effective with the creature's magical barrier up!" );
-
-				if ( attacker is BaseCreature ) // KILL ANY PETS PLAYERS FOOLISHLY BROUGHT WITH THEM
-				{
-					BaseCreature pet = (BaseCreature)attacker;
-					if ( BaseCreature.IsPet( attacker ) )
-					{
-						SendEBoltOnPet( attacker );
-					}
-				}
 			}
 
 			if( attacker != null && attacker.Alive && attacker.Weapon is BaseRanged && 0.4 > Utility.RandomDouble() )
@@ -201,7 +187,7 @@ namespace Server.Mobiles
 		{
 			base.OnThink();
 
-			if ( !m_FieldActive && !IsHurt() )
+			if ( !m_FieldActive && CanUseField )
 				m_FieldActive = true;
 		}
 
@@ -223,12 +209,64 @@ namespace Server.Mobiles
 			AOS.Damage( to, this, 50, 0, 0, 0, 0, 100 );
 		}
 
-		public void SendEBoltOnPet( Mobile to )
+		// Drops a Fire Field on the spell caster (mirrors FireFieldSpell.Target, which cannot be
+		// used directly on an NPC because the spell cast sequence will not resolve a target).
+		private void CastFireFieldOn( Mobile target )
 		{
-			this.MovingParticles( to, 0x3818, 7, 0, false, true, 0xBE3, 0xFCB, 0x211 );
-			to.PlaySound( 0x229 );
-			this.DoHarmful( to );
-			AOS.Damage( to, this, 10000, 0, 0, 0, 0, 100 );
+			if ( target == null || target.Deleted || this.Map == null || target.Map != this.Map )
+				return;
+
+			Point3D p = target.Location;
+
+			int dx = this.Location.X - p.X;
+			int dy = this.Location.Y - p.Y;
+			int rx = ( dx - dy ) * 44;
+			int ry = ( dx + dy ) * 44;
+
+			bool eastToWest;
+
+			if ( rx >= 0 && ry >= 0 )
+				eastToWest = false;
+			else if ( rx >= 0 )
+				eastToWest = true;
+			else if ( ry >= 0 )
+				eastToWest = true;
+			else
+				eastToWest = false;
+
+			Effects.PlaySound( p, this.Map, 0x20C );
+
+			int itemID = eastToWest ? 0x398C : 0x3996;
+			int damage = Utility.RandomMinMax( 15, 25 );
+			TimeSpan duration = TimeSpan.FromSeconds( 12.0 );
+
+			for ( int i = -2; i <= 2; ++i )
+			{
+				Point3D loc = new Point3D( eastToWest ? p.X + i : p.X, eastToWest ? p.Y : p.Y + i, p.Z );
+
+				new Server.Spells.Fourth.FireFieldSpell.FireFieldItem( itemID, loc, this, this.Map, duration, i, damage );
+			}
+		}
+
+		// Drops a Meteor Swarm on the spell caster (damage + blast visuals, mirroring the spell).
+		private void CastMeteorOn( Mobile target )
+		{
+			if ( target == null || target.Deleted || this.Map == null || target.Map != this.Map )
+				return;
+
+			Point3D p = target.Location;
+
+			Effects.PlaySound( p, this.Map, 0x160 );
+
+			int damage = Utility.RandomMinMax( 25, 40 );
+
+			this.DoHarmful( target );
+			AOS.Damage( target, this, damage, 0, 100, 0, 0, 0 );
+
+			int hue = PlayerSettings.GetMySpellHue( true, this, 0 );
+
+			Effects.SendLocationEffect( p, this.Map, Utility.RandomList( 0x33E5, 0x33F5 ), 85, 10, hue, 0 );
+			Effects.PlaySound( p, this.Map, 0x15F );
 		}
 
 		public Exodus( Serial serial ) : base( serial )
