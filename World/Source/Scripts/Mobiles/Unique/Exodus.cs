@@ -12,6 +12,7 @@ namespace Server.Mobiles
 	public class Exodus : BaseCreature
 	{
 		private bool m_FieldActive;
+		private ExplosionTimer m_ExplosionTimer;
 		public bool FieldActive{ get{ return m_FieldActive; } }
 		public bool CanUseField{ get{ return Hits >= HitsMax * 5 / 10; } } // barrier is up while the creature is at/above 50% health
 		public override bool IsScaredOfScaryThings{ get{ return false; } }
@@ -44,7 +45,7 @@ namespace Server.Mobiles
 
 			SetHits( 2400, 3000 );
 
-			SetDamage( 54, 69 );
+			SetDamage( 27, 34 );
 
 			SetDamageType( ResistanceType.Physical, 50 );
 			SetDamageType( ResistanceType.Energy, 50 );
@@ -74,6 +75,8 @@ namespace Server.Mobiles
 			PackItem( new Gears( Utility.RandomMinMax( 3, 8 ) ) );
 
 			m_FieldActive = CanUseField;
+
+			StartExplosionTimer();
 		}
 
 		public override void GenerateLoot()
@@ -104,7 +107,6 @@ namespace Server.Mobiles
 		{
 			if( from != null && from.Alive && 0.4 > Utility.RandomDouble() )
 			{
-				CastFireFieldOn( from );
 				CastMeteorOn( from );
 			}
 
@@ -131,6 +133,19 @@ namespace Server.Mobiles
 		public override void OnGotMeleeAttack( Mobile attacker )
 		{
 			base.OnGotMeleeAttack( attacker );
+
+			// Burning blood splashes from the wound when struck.
+			if ( Utility.RandomMinMax( 1, 4 ) == 1 )
+			{
+				int goo = 0;
+
+				foreach ( Item splash in this.GetItemsInRange( 10 ) ){ if ( splash is MonsterSplatter && splash.Name == "burning blood" ){ goo++; } }
+
+				if ( goo == 0 )
+				{
+					MonsterSplatter.AddSplatter( this.X, this.Y, this.Z, this.Map, this.Location, this, "burning blood", 0x489, 1 );
+				}
+			}
 
 			if ( m_FieldActive )
 			{
@@ -210,45 +225,6 @@ namespace Server.Mobiles
 			AOS.Damage( to, this, 50, 0, 0, 0, 0, 100 );
 		}
 
-		// Drops a Fire Field on the spell caster (mirrors FireFieldSpell.Target, which cannot be
-		// used directly on an NPC because the spell cast sequence will not resolve a target).
-		private void CastFireFieldOn( Mobile target )
-		{
-			if ( target == null || target.Deleted || this.Map == null || target.Map != this.Map )
-				return;
-
-			Point3D p = target.Location;
-
-			int dx = this.Location.X - p.X;
-			int dy = this.Location.Y - p.Y;
-			int rx = ( dx - dy ) * 44;
-			int ry = ( dx + dy ) * 44;
-
-			bool eastToWest;
-
-			if ( rx >= 0 && ry >= 0 )
-				eastToWest = false;
-			else if ( rx >= 0 )
-				eastToWest = true;
-			else if ( ry >= 0 )
-				eastToWest = true;
-			else
-				eastToWest = false;
-
-			Effects.PlaySound( p, this.Map, 0x20C );
-
-			int itemID = eastToWest ? 0x398C : 0x3996;
-			int damage = Utility.RandomMinMax( 15, 25 );
-			TimeSpan duration = TimeSpan.FromSeconds( 12.0 );
-
-			for ( int i = -2; i <= 2; ++i )
-			{
-				Point3D loc = new Point3D( eastToWest ? p.X + i : p.X, eastToWest ? p.Y : p.Y + i, p.Z );
-
-				new Server.Spells.Fourth.FireFieldSpell.FireFieldItem( itemID, loc, this, this.Map, duration, i, damage );
-			}
-		}
-
 		// Drops a Meteor Swarm on the spell caster (damage + blast visuals, mirroring the spell).
 		private void CastMeteorOn( Mobile target )
 		{
@@ -270,6 +246,133 @@ namespace Server.Mobiles
 			Effects.PlaySound( p, this.Map, 0x15F );
 		}
 
+		public override void OnAfterDelete()
+		{
+			if ( m_ExplosionTimer != null )
+			{
+				m_ExplosionTimer.Stop();
+				m_ExplosionTimer = null;
+			}
+
+			base.OnAfterDelete();
+		}
+
+		private void StartExplosionTimer()
+		{
+			if ( m_ExplosionTimer != null )
+				m_ExplosionTimer.Stop();
+
+			m_ExplosionTimer = new ExplosionTimer( this );
+			m_ExplosionTimer.Start();
+		}
+
+		// Every few seconds, mark a random spot near Exodus and then drop a greater-explosion-pot
+		// blast there (players only - never Exodus himself).
+		private void DropExplosion()
+		{
+			Map map = this.Map;
+
+			if ( map == null || map == Map.Internal || !this.Alive )
+				return;
+
+			bool nearby = false;
+
+			IPooledEnumerable eable = this.GetMobilesInRange( 20 );
+
+			foreach ( Mobile m in eable )
+			{
+				if ( m is PlayerMobile && m.Alive )
+				{
+					nearby = true;
+					break;
+				}
+			}
+
+			eable.Free();
+
+			if ( !nearby )
+				return;
+
+			int offX, offY;
+
+			do
+			{
+				offX = Utility.RandomMinMax( -5, 5 );
+				offY = Utility.RandomMinMax( -5, 5 );
+			}
+			while ( ( offX * offX + offY * offY ) > 25 );
+
+			IPoint3D p = new Point3D( this.X + offX, this.Y + offY, this.Z );
+			Server.Spells.SpellHelper.GetSurfaceTop( ref p );
+			Point3D loc = new Point3D( p );
+
+			// Temporary landing indicator so players can step clear.
+			Effects.SendLocationEffect( loc, map, 0x3709, 30, 10, 0x489, 0 );
+			Effects.PlaySound( loc, map, 0x20C );
+
+			Timer.DelayCall( TimeSpan.FromSeconds( 1.5 ), () => ExplodeArea( loc, map ) );
+		}
+
+		private void ExplodeArea( Point3D loc, Map map )
+		{
+			if ( map == null || map == Map.Internal || this.Deleted )
+				return;
+
+			Effects.PlaySound( loc, map, 0x307 );
+			Effects.SendLocationEffect( loc, map, 0x36B0, 9, 10, 0, 0 );
+
+			List<Mobile> targets = new List<Mobile>();
+
+			IPooledEnumerable eable = map.GetMobilesInRange( loc, 2 );
+
+			foreach ( Mobile m in eable )
+			{
+				// Players only - Exodus (and other NPCs) are never harmed by his own blast.
+				if ( m is PlayerMobile && m != this && m.Alive && m.Blessed == false && this.CanBeHarmful( m, false ) )
+					targets.Add( m );
+			}
+
+			eable.Free();
+
+			int count = targets.Count;
+
+			for ( int i = 0; i < targets.Count; ++i )
+			{
+				Mobile m = targets[i];
+
+				this.DoHarmful( m );
+
+				int damage = Utility.RandomMinMax( 70, 80 ); // matches GreaterExplosionPotion
+
+				if ( count > 2 )
+					damage /= ( count - 1 );
+
+				AOS.Damage( m, this, damage, 0, 100, 0, 0, 0 );
+			}
+		}
+
+		private class ExplosionTimer : Timer
+		{
+			private readonly Exodus m_Owner;
+
+			public ExplosionTimer( Exodus owner ) : base( TimeSpan.FromSeconds( 3.0 ), TimeSpan.FromSeconds( 3.0 ) )
+			{
+				Priority = TimerPriority.OneSecond;
+				m_Owner = owner;
+			}
+
+			protected override void OnTick()
+			{
+				if ( m_Owner == null || m_Owner.Deleted || m_Owner.Map == null || m_Owner.Map == Map.Internal )
+				{
+					Stop();
+					return;
+				}
+
+				m_Owner.DropExplosion();
+			}
+		}
+
 		public Exodus( Serial serial ) : base( serial )
 		{
 		}
@@ -286,6 +389,8 @@ namespace Server.Mobiles
 			int version = reader.ReadInt();
 
 			m_FieldActive = CanUseField;
+
+			StartExplosionTimer();
 		}
 	}
 }
