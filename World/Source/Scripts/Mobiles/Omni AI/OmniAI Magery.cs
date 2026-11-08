@@ -257,6 +257,7 @@ namespace Server.Mobiles
 		}
 
 		DateTime m_LastExplosion;
+				DateTime m_LastFlameStrike;
 		public static int[] m_MageryMana = new int[] { 4, 6, 9, 11, 14, 20, 40, 50 };
 
 		public Spell GetRandomMageryDamageSpell()
@@ -268,8 +269,8 @@ namespace Server.Mobiles
 
 			whichone += Utility.RandomMinMax( -2, -0 );
 
-			if ( whichone > 6 )
-				whichone = 6;
+			if ( whichone > 7 )
+				whichone = 7;
 			else if (whichone < 1 )
 				whichone = 1;
 
@@ -280,20 +281,18 @@ namespace Server.Mobiles
 
 			switch( whichone )
 			{
-				case 6: return new FlameStrikeSpell( m_Mobile, null );
-				case 5:
-				{
-					if ( DateTime.Now > m_LastExplosion )
+				case 7: return new FlameStrikeSpell( m_Mobile, null );
+				case 6: return new EnergyBoltSpell( m_Mobile, null );
+				case 5: if ( DateTime.Now > m_LastExplosion )
 					{
-						m_LastExplosion = DateTime.Now + TimeSpan.FromSeconds( 3 );
+						m_LastExplosion = DateTime.Now + TimeSpan.FromSeconds( 4 );
 						return new ExplosionSpell( m_Mobile, null );
 					}
 					else
 						return new EnergyBoltSpell( m_Mobile, null );
-				}
 				case 4: return new MindBlastSpell( m_Mobile, null );
 				case 3: return new LightningSpell( m_Mobile, null );
-				case 2:
+				case 2: return new FireballSpell( m_Mobile, null );
 				case 1:
 					if ( whichone == 1 && m_Mobile.Combatant != null && m_Mobile.Combatant.InRange(m_Mobile, 2) )
 					{

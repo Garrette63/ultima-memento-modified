@@ -104,7 +104,7 @@ namespace Server.Items
 
 				if ( nSprung )
 				{
-					int nTrapType = Utility.RandomMinMax( 1, 25 );
+					int nTrapType = Utility.RandomMinMax( 1, 24 );
 
 					if ( HiddenTrapType > 0 ){ nTrapType = HiddenTrapType; }
 
@@ -140,7 +140,7 @@ namespace Server.Items
 
 						if ( m.Hidden != false ){ m.LocalOverheadMessage(MessageType.Emote, 0x916, true, textSay); sTrapType = textLog; }
 					}
-					else if ( nTrapType == 2 && SavingThrow( m, "Agility", true, this ) == false ) // TRIP WIRE
+					else if ( nTrapType == 25 && SavingThrow( m, "Agility", true, this ) == false ) // TRIP WIRE
 					{
 						int HowBad = Utility.RandomMinMax( 1, 5 );
 
@@ -200,7 +200,7 @@ namespace Server.Items
 							}
 						}
 					}
-					else if ( nTrapType == 3 && SavingThrow( m, "Magic", true, this ) == false ) // COINS TO LEAD TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Magic", true, this ) == false ) // COINS TO LEAD TRAP
 					{
 						textSay = "A trap triggered, making your coins heavier!";
 						textLog = "a transmutation trap";
@@ -247,7 +247,7 @@ namespace Server.Items
 						}
 						sTrapType = textLog;
 					}
-					else if ( nTrapType == 4 && SavingThrow( m, "Magic", true, this ) == false ) // LOSE ITEM TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Magic", true, this ) == false ) // LOSE ITEM TRAP
 					{
 						textSay = "A trap triggered, almost ruining one of your protected items!";
 						textLog = "a destructive trap";
@@ -430,7 +430,7 @@ namespace Server.Items
 
 						sTrapType = textLog;
 					}
-					else if ( nTrapType == 7 && SavingThrow( m, "Magic", true, this ) == false ) // DRAIN TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Magic", true, this ) == false ) // DRAIN TRAP
 					{
 						int nStat = Utility.RandomMinMax( 1, 3 );
 
@@ -486,7 +486,7 @@ namespace Server.Items
 							sTrapType = textLog;
 						}
 					}
-					else if ( nTrapType == 8 && SavingThrow( m, "Magic", true, this ) == false ) // GEM STONE TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Magic", true, this ) == false ) // GEM STONE TRAP
 					{
 						List<Item> items = new List<Item>();
 						int nAmount = 0;
@@ -532,7 +532,7 @@ namespace Server.Items
 							sTrapType = textLog;
 						}
 					}
-					else if ( nTrapType == 9 && SavingThrow( m, "Magic", true, this ) == false ) // REAGENT TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Magic", true, this ) == false ) // REAGENT TRAP
 					{
 						int nAmount = 0;
 
@@ -567,7 +567,7 @@ namespace Server.Items
 							sTrapType = textLog;
 						}
 					}
-					else if ( nTrapType == 10 && SavingThrow( m, "Magic", true, this ) == false ) // BOOK BOUND TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Magic", true, this ) == false ) // BOOK BOUND TRAP
 					{
 						Container cont = m.Backpack;
 						int nDull = 0;
@@ -628,7 +628,7 @@ namespace Server.Items
 							sTrapType = "a book bound trap";
 						}
 					}
-					else if ( nTrapType == 11 && SavingThrow( m, "Magic", true, this ) == false ) // TELEPORT TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Magic", true, this ) == false ) // TELEPORT TRAP
 					{
 						textSay = "A trap triggered, teleporting you away from here!";
 						textLog = "a teleportation trap";
@@ -651,7 +651,7 @@ namespace Server.Items
 							sTrapType = textLog;
 						}
 					}
-					else if ( nTrapType == 12  && SavingThrow( m, "Magic", true, this ) == false && m.Fame > 0 ) // FAME TRAP
+					else if ( nTrapType == 25  && SavingThrow( m, "Magic", true, this ) == false && m.Fame > 0 ) // FAME TRAP
 					{
 						int FameLoss = (int)(m.Fame - ( m.Fame * 0.20 ));
 						if ( FameLoss < 0 ){ FameLoss = 0; }
@@ -664,7 +664,7 @@ namespace Server.Items
 							sTrapType = "a forgotten fame trap";
 						}
 					}
-					else if ( nTrapType == 13 && SavingThrow( m, "Magic", true, this ) == false ) // CURSE ITEM TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Magic", true, this ) == false ) // CURSE ITEM TRAP
 					{
 						Container cont = m.Backpack;
 						Item iCursed = GetMyItem( m );
@@ -775,7 +775,7 @@ namespace Server.Items
 						m.Damage( itHurts, m );
 						sTrapType = textLog;
 					}
-					else if ( nTrapType == 20 && SavingThrow( m, "Agility", true, this ) == false ) // TRIP WIRE THAT BREAKS ARROWS
+					else if ( nTrapType == 25 && SavingThrow( m, "Agility", true, this ) == false ) // TRIP WIRE THAT BREAKS ARROWS
 					{
 						List<Item> items = new List<Item>();
 						int nBroken = 0;
@@ -832,7 +832,7 @@ namespace Server.Items
 							}
 						}
 					}
-					else if ( nTrapType == 21 && SavingThrow( m, "Poison", true, this ) == false ) // TAINTED TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Poison", true, this ) == false ) // TAINTED TRAP
 					{
 						List<Item> items = new List<Item>();
 						int nAmount = 0;
@@ -864,7 +864,7 @@ namespace Server.Items
 							sTrapType = "a noxious cloud trap";
 						}
 					}
-					else if ( nTrapType == 22 && SavingThrow( m, "Agility", true, this ) == false ) // TRIP WIRE THAT BREAKS POTIONS
+					else if ( nTrapType == 25 && SavingThrow( m, "Agility", true, this ) == false ) // TRIP WIRE THAT BREAKS POTIONS
 					{
 						List<Item> items = new List<Item>();
 						int nBroken = 0;
@@ -902,7 +902,7 @@ namespace Server.Items
 							sTrapType = textLog;
 						}
 					}
-					else if ( nTrapType == 23 && SavingThrow( m, "Magic", true, this ) == false ) // JEWELERY TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Magic", true, this ) == false ) // JEWELERY TRAP
 					{
 						// Tangle equipped jewelry
 						bool tangled = false;
@@ -951,7 +951,7 @@ namespace Server.Items
 							box.Delete();
 						}
 					}
-					else if ( nTrapType == 24 && SavingThrow( m, "Agility", true, this ) == false ) // PIT TRAP
+					else if ( nTrapType == 25 && SavingThrow( m, "Agility", true, this ) == false ) // PIT TRAP
 					{
 						textSay = "A fall into a deep pit!";
 						textLog = "a deep pit";
