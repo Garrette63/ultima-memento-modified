@@ -33,13 +33,14 @@ export PATH
 
 # --- Re-open in Konsole when launched without a terminal --------------------
 # A file-manager "execute" launch has no TTY, so build output would be invisible
-# and no window would exist. In that case re-run ourselves inside Konsole and
-# keep the window open afterwards. Console runs already have a TTY and skip this.
+# and no window would exist. In that case re-run ourselves inside Konsole so the
+# output is visible; the window closes automatically when the build finishes.
+# Console runs already have a TTY and skip this.
 if [ ! -t 1 ] && [ -z "${MEMENTO_IN_TERMINAL:-}" ] \
    && { [ -n "${WAYLAND_DISPLAY:-}" ] || [ -n "${DISPLAY:-}" ]; } \
    && command -v konsole >/dev/null 2>&1; then
     _self="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)/$(basename -- "${BASH_SOURCE[0]}")"
-    MEMENTO_IN_TERMINAL=1 exec konsole --hold -e bash "$_self" "$@"
+    MEMENTO_IN_TERMINAL=1 exec konsole -e bash "$_self" "$@"
 fi
 
 # Folder that contains this shortcut == the World folder.
