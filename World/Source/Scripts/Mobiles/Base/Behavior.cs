@@ -9408,7 +9408,7 @@ namespace Server.Mobiles
 				}
 			}
 
-			if( !m_Mobile.Controlled && !m_Mobile.Summoned && !m_Mobile.IsParagon && !(m_Mobile is HenchmanArcher) && !(m_Mobile is HenchmanMonster) && !(m_Mobile is HenchmanWizard) && !(m_Mobile is HenchmanFighter) )
+			if( !m_Mobile.Controlled && !m_Mobile.Summoned && !m_Mobile.IsParagon && !(m_Mobile is HenchmanArcher) && !(m_Mobile is HenchmanMonster) && !(m_Mobile is HenchmanWizard) && !(m_Mobile is HenchmanFighter) && !(m_Mobile is Exodus) )
 			{
 				if( m_Mobile.Hits < m_Mobile.HitsMax * 20 / 100 )
 				{
