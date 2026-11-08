@@ -11,6 +11,7 @@ namespace Server.Gumps
 		public LawnRemoveTarget(BaseHouse house) : base(-1, true, TargetFlags.None)
 		{
 			m_House = house;
+			CheckLOS = false;
 		}
 
 		protected override void OnTarget(Mobile from, object targeted)
