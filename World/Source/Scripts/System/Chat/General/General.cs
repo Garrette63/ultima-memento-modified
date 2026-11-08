@@ -41,10 +41,19 @@ namespace Knives.Chat3
 
         // The client's chat button sends packet 0xB5 (ChatRequest), which the core
         // re-raises as EventSink.ChatRequest.  Knives Chat3 shipped without a
-        // subscriber here, so the chat button did nothing.  Open the chat list.
+        // subscriber here, so the chat button did nothing.  Behave exactly like
+        // the [c command: route through the Public channel so it joins (if needed),
+        // sets the current channel and opens the real channel chat view (instead of
+        // the empty "View All" player list).
         private static void OnChatRequest(ChatRequestEventArgs args)
         {
-            if (args != null && args.Mobile != null)
+            if (args == null || args.Mobile == null)
+                return;
+
+            Channel c = Channel.GetByType(typeof(Public));
+            if (c != null)
+                c.OnChat(args.Mobile, "");
+            else
                 List(args.Mobile, 0);
         }
 
