@@ -190,13 +190,14 @@ namespace Server.Spells.Magical
 
 						if ( hitThrough )
 						{
-							int drain = ((int)(Caster.Fame/500));
+							int drain = ((int)(Caster.Fame/500)) - (int)(((int)(Caster.Fame/500)) * (m.Skills[SkillName.MagicResist].Value / 200.0));
+								if ( drain < 0 ){ drain = 0; }
 
 							m.Mana = m.Mana - drain;
 								if ( m.Mana < 0 ){ m.Mana = 0; }
 
 							m.Stam = m.Stam - drain;
-								if ( m.Stam < 0 ){ m.Stam = 0; }
+								if ( m.Stam < 5 ){ m.Stam = 5; }
 
 							m.SendMessage( "You feel your soul draining!" );
 						}
@@ -738,13 +739,14 @@ namespace Server.Spells.Magical
 
 						if ( hitThrough )
 						{
-							int drain = ((int)(Caster.Fame/500));
+							int drain = ((int)(Caster.Fame/500)) - (int)(((int)(Caster.Fame/500)) * (m.Skills[SkillName.MagicResist].Value / 200.0));
+								if ( drain < 0 ){ drain = 0; }
 
 							m.Mana = m.Mana - drain;
 								if ( m.Mana < 0 ){ m.Mana = 0; }
 
 							m.Stam = m.Stam - drain;
-								if ( m.Stam < 0 ){ m.Stam = 0; }
+								if ( m.Stam < 5 ){ m.Stam = 5; }
 
 							m.SendMessage( "You feel your soul draining!" );
 						}
