@@ -38,13 +38,13 @@ namespace Server.Mobiles
 			BaseSoundID = 0x300;
 			Body = 451;
 
-			SetStr( 500, 700 );
-			SetDex( 177, 255 );
-			SetInt( 151, 250 );
+			SetStr( 1500, 2100 );
+			SetDex( 531, 765 );
+			SetInt( 453, 750 );
 
-			SetHits( 400, 500 );
+			SetHits( 2400, 3000 );
 
-			SetDamage( 18, 23 );
+			SetDamage( 54, 69 );
 
 			SetDamageType( ResistanceType.Physical, 50 );
 			SetDamageType( ResistanceType.Energy, 50 );
@@ -55,11 +55,11 @@ namespace Server.Mobiles
 			SetResistance( ResistanceType.Poison, 100 );
 			SetResistance( ResistanceType.Energy, 20, 40 );
 
-			SetSkill( SkillName.Anatomy, 110.0 );
-			SetSkill( SkillName.Psychology, 110.0 );
-			SetSkill( SkillName.MagicResist, 110.0 );
-			SetSkill( SkillName.Tactics, 110.0 );
-			SetSkill( SkillName.FistFighting, 110.0 );
+			SetSkill( SkillName.Anatomy, 125.0 );
+			SetSkill( SkillName.Psychology, 125.0 );
+			SetSkill( SkillName.MagicResist, 125.0 );
+			SetSkill( SkillName.Tactics, 125.0 );
+			SetSkill( SkillName.FistFighting, 125.0 );
 
 			Fame = 28000;
 			Karma = -28000;
