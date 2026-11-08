@@ -231,19 +231,52 @@ namespace Server.Mobiles
 			if ( target == null || target.Deleted || this.Map == null || target.Map != this.Map )
 				return;
 
-			Point3D p = target.Location;
+			Map map = this.Map;
 
-			Effects.PlaySound( p, this.Map, 0x160 );
+			// Aim at the ground beneath the attacker, not the mobile itself.
+			IPoint3D gp = new Point3D( target.X, target.Y, target.Z );
+			Server.Spells.SpellHelper.GetSurfaceTop( ref gp );
+			Point3D loc = new Point3D( gp );
 
-			int damage = Utility.RandomMinMax( 125, 200 ); // 5x the old 25-40
+			// Warning marker on the ground (same style as the explosion indicator, but a different hue).
+			Effects.SendLocationEffect( loc, map, 0x3709, 30, 10, 0x480, 0 );
+			Effects.PlaySound( loc, map, 0x20C );
 
-			this.DoHarmful( target );
-			AOS.Damage( target, this, damage, 0, 100, 0, 0, 0 );
+			// The meteor falls onto that ground spot a moment later.
+			Timer.DelayCall( TimeSpan.FromSeconds( 1.5 ), () => MeteorImpact( loc, map, target ) );
+		}
+
+		private void MeteorImpact( Point3D loc, Map map, Mobile originalTarget )
+		{
+			if ( map == null || map == Map.Internal || this.Deleted )
+				return;
+
+			Effects.PlaySound( loc, map, 0x160 );
+
+			// Hit the attacker where it lands - they can dodge by stepping away during the warning.
+			if ( originalTarget != null && !originalTarget.Deleted && originalTarget.Alive && originalTarget.Map == map )
+			{
+				int dx = originalTarget.X - loc.X;
+				int dy = originalTarget.Y - loc.Y;
+
+				if ( ( dx * dx + dy * dy ) <= 9 )
+				{
+					int damage = Utility.RandomMinMax( 125, 200 ); // 5x the old 25-40
+
+					this.DoHarmful( originalTarget );
+					AOS.Damage( originalTarget, this, damage, 0, 100, 0, 0, 0 );
+				}
+			}
 
 			int hue = PlayerSettings.GetMySpellHue( true, this, 0 );
 
-			Effects.SendLocationEffect( p, this.Map, Utility.RandomList( 0x33E5, 0x33F5 ), 85, 10, hue, 0 );
-			Effects.PlaySound( p, this.Map, 0x15F );
+			Effects.SendLocationEffect( loc, map, Utility.RandomList( 0x33E5, 0x33F5 ), 85, 10, hue, 0 );
+			Effects.PlaySound( loc, map, 0x15F );
+
+			// Meteor impact ignites a 5x5 conflagration field where it lands.
+			ConflagrationPotion conflag = new ConflagrationPotion();
+			conflag.Explode( this, loc, map, false );
+			conflag.Delete();
 		}
 
 		public override void OnAfterDelete()
@@ -272,25 +305,8 @@ namespace Server.Mobiles
 		{
 			Map map = this.Map;
 
-			if ( map == null || map == Map.Internal || !this.Alive )
-				return;
-
-			bool nearby = false;
-
-			IPooledEnumerable eable = this.GetMobilesInRange( 20 );
-
-			foreach ( Mobile m in eable )
-			{
-				if ( m is PlayerMobile && m.Alive )
-				{
-					nearby = true;
-					break;
-				}
-			}
-
-			eable.Free();
-
-			if ( !nearby )
+			// Only fire while Exodus is actually fighting someone.
+			if ( map == null || map == Map.Internal || !this.Alive || this.Combatant == null )
 				return;
 
 			// Five 3x3 blocks, all released at the same moment, each block within 10 tiles of Exodus.
@@ -363,7 +379,7 @@ namespace Server.Mobiles
 
 				this.DoHarmful( m );
 
-				int damage = Utility.RandomMinMax( 70, 80 ); // matches GreaterExplosionPotion
+				int damage = Utility.RandomMinMax( 35, 40 ); // half of greater-explosion potion damage
 
 				if ( count > 2 )
 					damage /= ( count - 1 );
