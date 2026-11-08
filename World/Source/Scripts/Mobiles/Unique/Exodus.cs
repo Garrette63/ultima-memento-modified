@@ -35,7 +35,7 @@ namespace Server.Mobiles
 		public override void BreathDealDamage( Mobile target, int form ){ base.BreathDealDamage( target, 14 ); }
 
 		[Constructable]
-		public Exodus () : base( AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4 )
+		public Exodus () : base( AIType.AI_Mage, FightMode.Closest, 10, 1, 0.2, 0.4 )
 		{
 			Name = "Exodus";
 			BaseSoundID = 0x300;
@@ -61,6 +61,7 @@ namespace Server.Mobiles
 			SetSkill( SkillName.Anatomy, 125.0 );
 			SetSkill( SkillName.Psychology, 125.0 );
 			SetSkill( SkillName.MagicResist, 125.0 );
+			SetSkill( SkillName.Magery, 125.0 );
 			SetSkill( SkillName.Tactics, 125.0 );
 			SetSkill( SkillName.FistFighting, 125.0 );
 
@@ -440,7 +441,7 @@ namespace Server.Mobiles
 						if ( Math.Max( Math.Abs( dx ), Math.Abs( dy ) ) != r ) // only the ring at radius r
 							continue;
 
-						if ( ( ( dx + dy ) & 1 ) != 0 ) // skip every other tile
+						if ( ( dx & 1 ) != 0 || ( dy & 1 ) != 0 ) // leave exactly one empty tile between fires
 							continue;
 
 						IPoint3D p = new Point3D( m_Center.X + dx, m_Center.Y + dy, m_Center.Z );
@@ -465,7 +466,7 @@ namespace Server.Mobiles
 				return;
 
 			// A real conflagration-potion fire tile, but only burning for 3 seconds.
-			BaseConflagrationPotion.InternalItem fire = new BaseConflagrationPotion.InternalItem( owner, loc, map, 10, 20 );
+			BaseConflagrationPotion.InternalItem fire = new BaseConflagrationPotion.InternalItem( owner, loc, map, 20, 30 ); // Greater Conflagration damage
 			Timer.DelayCall( TimeSpan.FromSeconds( 3.0 ), () => { if ( fire != null && !fire.Deleted ) fire.Delete(); } );
 		}
 
