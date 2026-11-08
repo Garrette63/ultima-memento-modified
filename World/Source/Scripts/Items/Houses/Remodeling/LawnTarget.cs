@@ -64,70 +64,17 @@ namespace Server.Misc
 			if (map == null)
 				return false;
 
-			bool regionCheck = false;
-
-			Region reg = Region.Find( loc, map );
 			m_House = BaseHouse.FindHouseAt(m_From.Location, map, 20);
 
-			if ( reg.IsDefault || reg.Name == null || reg.Name == "" )
-				regionCheck = true;
-			else if ( m_House != null && m_House.IsCoOwner( m_From ) )
-				regionCheck = true;
-			else if ( reg.Name != null && reg.Name != "" && reg.AllowHousing( m_From, loc ) )
-				regionCheck = true;
-
-			if ( m_House == null || !m_House.IsCoOwner(m_From) )
+			// Region is intentionally ignored. The only requirement is that the player
+			// is standing inside a house they own or co-own.
+			if ( m_House == null || !m_House.IsCoOwner( m_From ) )
 			{
 				m_From.SendMessage("You must be standing in your house to place this!");
 				return false;
 			}
-			else if ( !IsWithinHouseLand( m_House, loc ) )
-			{
-				m_From.SendMessage("You will have to get closer and place within your land!");
-				return false;
-			}
-			else if ( !regionCheck )
-			{
-				m_From.SendMessage("You will have to get closer and place within your land!");
-				return false;
-			}
 
 			return true;
-		}
-
-		// Allow placing anywhere within the house's footprint plus the yard margin,
-		// independent of exactly where the player is standing (they only need to be
-		// inside the house, which is validated above). This keeps the "space around
-		// the house" restriction but is no longer tied to the player's position.
-		private static bool IsWithinHouseLand( BaseHouse house, Point3D loc )
-		{
-			if ( house == null )
-				return false;
-
-			int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
-
-			foreach ( Rectangle2D rect in house.Area )
-			{
-				int x0 = house.X + rect.Start.X;
-				int y0 = house.Y + rect.Start.Y;
-				int x1 = x0 + rect.Width;
-				int y1 = y0 + rect.Height;
-
-				if ( x0 < minX ) minX = x0;
-				if ( y0 < minY ) minY = y0;
-				if ( x1 > maxX ) maxX = x1;
-				if ( y1 > maxY ) maxY = y1;
-			}
-
-			if ( minX > maxX || minY > maxY )
-				return false;
-
-			minX -= Remodeling.Left;
-			minY -= Remodeling.Back;
-			maxX += Remodeling.Right;
-			maxY += Remodeling.Front;
-
-			return ( loc.X >= minX && loc.X <= maxX && loc.Y >= minY && loc.Y <= maxY );
 		}
 
 		public void EndPlace(Point3D loc)
