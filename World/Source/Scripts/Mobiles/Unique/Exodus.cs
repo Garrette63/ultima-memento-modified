@@ -39,13 +39,13 @@ namespace Server.Mobiles
 			BaseSoundID = 0x300;
 			Body = 451;
 
-			SetStr( 1500, 2100 );
+			SetStr( 900, 1260 );
 			SetDex( 531, 765 );
 			SetInt( 453, 750 );
 
 			SetHits( 2400, 3000 );
 
-			SetDamage( 32, 41 );
+			SetDamage( 20, 25 );
 
 			SetDamageType( ResistanceType.Physical, 50 );
 			SetDamageType( ResistanceType.Energy, 50 );
@@ -291,6 +291,16 @@ namespace Server.Mobiles
 
 			if ( !m_FieldActive && !IsHurt() )
 				m_FieldActive = true;
+		}
+
+		// Exodus is immune to fear / flee effects (Dispel Evil, Cause Fear, etc.).
+		public override void BeginFlee( TimeSpan maxDuration )
+		{
+		}
+
+		public override bool CheckFlee()
+		{
+			return false;
 		}
 
 		public override bool Move( Direction d )
