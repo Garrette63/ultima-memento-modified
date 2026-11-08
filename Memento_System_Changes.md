@@ -117,6 +117,8 @@ No other files were modified.
 67. **Reverted ALL barrier changes** — restored the original barrier: `CanUseField` **90%** (was 50%), `OnThink` re-raise only at full HP (`!IsHurt`), `CheckReflect` **25% unconditional** (was 40% barrier-gated), and the **EBolt-on-spell** + **pet-kill** (`SendEBoltOnPet`) retaliations and their methods. Non-barrier changes (stats, explosions, spawn, regen, base damage) untouched. Backed up as `Backups/Exodus.cs.2026-11-08-152750.bak`.
 68. **Reverted the near-instant regen** — removed the `if ( from is Exodus ) points += 200;` special-case from `RegenRates.Mobile_HitsRegenRate`, restoring normal creature regeneration. Backed up as `Backups/RegenRates.cs.2026-11-08-152927.bak`.
 69. **Exodus base damage −⅓ (again)** — `SetDamage` 18–23 → **12–15**. Backed up as `Backups/Exodus.cs.2026-11-08-153230.bak`.
+70. **Conflagration ring on every 25% HP lost** — added `m_RingBands` tracking in `OnThink`: each time Exodus crosses **75% / 50% / 25%** HP, `StartConflagrationRing` runs a `RingTimer` that expands one Chebyshev ring per second from his location out to **15 tiles**, **skipping every other tile** (checkerboard). Each tile shows the explosion-style warning (`0x3709`, hue `0x489`), then 1 s later a real `BaseConflagrationPotion.InternalItem` fire ignites there and is deleted after **3 s**. Backed up as `Backups/Exodus.cs.2026-11-08-155755.bak`.
+71. **Conflagration ring — 10 s cooldown** — added `m_NextRingAllowed`; the ring now triggers at most once every **10 seconds** (`reached > m_RingBands && DateTime.Now >= m_NextRingAllowed`, cooldown set on fire). Backed up as `Backups/Exodus.cs.2026-11-08-160007.bak`.
 
 ---
 
@@ -209,6 +211,7 @@ No other files were modified.
 - Hitting the barrier with melee reduces that hit to 75%, and pets that melee the barrier are one-shot by `SendEBoltOnPet`.
 - **Spell reflect / retaliation:** 25% of incoming spells are reflected back at the caster (`CheckReflect`), and 40% of the time a spell hits he fires an EBolt retaliation (`SendEBolt`).
 - **Periodic explosion:** every **10 s** (while he is **in combat**) he targets a **random player within 20 tiles** and drops a single **3×3** block (9 tiles) centered on them, each tile telegraphed **2 s** earlier — each blast (radius 2) hits its area for 35–40 fire — **players only** (Exodus is never damaged).
+- **Conflagration ring:** each time he loses another 25% HP (at 75%/50%/25%), **at most once every 10 s**, a ring of conflagration fire expands from his position — one ring per second out to 15 tiles, skipping every other tile, each tile telegraphed 1 s (`0x3709`) then igniting and burning for 3 s.
 - **Spawning (TEMPORARY — testing):** Exodus no longer relocates to a random dungeon on spawn (`Worlds.MoveToRandomDungeon` is commented out in `OnAfterSpawn`); it stays where spawned. Uncomment to restore.
 - **Stats (TEMPORARY — testing):** core stat block tripled — STR 1500-2100, DEX 531-765, INT 453-750, Hits 2400-3000 (~6× original), Damage 12-15.
 - **Skills (TEMPORARY — testing):** Anatomy/Psychology/MagicResist/Tactics/FistFighting = **125**.

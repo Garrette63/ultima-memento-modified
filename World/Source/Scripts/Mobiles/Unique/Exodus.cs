@@ -13,6 +13,8 @@ namespace Server.Mobiles
 	{
 		private bool m_FieldActive;
 		private ExplosionTimer m_ExplosionTimer;
+		private int m_RingBands;
+		private DateTime m_NextRingAllowed;
 		public bool FieldActive{ get{ return m_FieldActive; } }
 		public bool CanUseField{ get{ return Hits >= HitsMax * 9 / 10; } } // TODO: an OSI bug prevents to verify this
 		public override bool IsScaredOfScaryThings{ get{ return false; } }
@@ -207,6 +209,20 @@ namespace Server.Mobiles
 
 			if ( !m_FieldActive && !IsHurt() )
 				m_FieldActive = true;
+
+			// Each time another 25% of health is lost, unleash an expanding conflagration ring.
+			if ( HitsMax > 0 && Alive && Map != null && Map != Map.Internal )
+			{
+				double frac = (double)Hits / HitsMax;
+				int reached = frac <= 0.25 ? 3 : frac <= 0.50 ? 2 : frac <= 0.75 ? 1 : 0;
+
+				if ( reached > m_RingBands && DateTime.Now >= m_NextRingAllowed )
+				{
+					m_RingBands = reached;
+					m_NextRingAllowed = DateTime.Now + TimeSpan.FromSeconds( 10.0 );
+					StartConflagrationRing();
+				}
+			}
 		}
 
 		public override bool Move( Direction d )
@@ -366,6 +382,91 @@ namespace Server.Mobiles
 
 				m_Owner.DropExplosion();
 			}
+		}
+
+		private void StartConflagrationRing()
+		{
+			Map map = this.Map;
+
+			if ( map == null || map == Map.Internal || !this.Alive )
+				return;
+
+			IPoint3D cp = new Point3D( this.X, this.Y, this.Z );
+			Server.Spells.SpellHelper.GetSurfaceTop( ref cp );
+			Point3D center = new Point3D( cp );
+
+			new RingTimer( this, center, map ).Start();
+		}
+
+		// Builds a conflagration ring outward from the center: one Chebyshev ring per second,
+		// out to 15 tiles, skipping every other tile (checkerboard). Each tile shows an
+		// explosion-style warning, then a conflagration fire ignites there for 3 seconds.
+		private class RingTimer : Timer
+		{
+			private readonly Exodus m_Owner;
+			private readonly Point3D m_Center;
+			private readonly Map m_Map;
+			private int m_Radius;
+
+			public RingTimer( Exodus owner, Point3D center, Map map ) : base( TimeSpan.Zero, TimeSpan.FromSeconds( 1.0 ) )
+			{
+				Priority = TimerPriority.OneSecond;
+				m_Owner = owner;
+				m_Center = center;
+				m_Map = map;
+				m_Radius = 0;
+			}
+
+			protected override void OnTick()
+			{
+				if ( m_Owner == null || m_Owner.Deleted || m_Map == null || m_Map == Map.Internal )
+				{
+					Stop();
+					return;
+				}
+
+				if ( m_Radius > 15 )
+				{
+					Stop();
+					return;
+				}
+
+				int r = m_Radius;
+
+				for ( int dx = -r; dx <= r; ++dx )
+				{
+					for ( int dy = -r; dy <= r; ++dy )
+					{
+						if ( Math.Max( Math.Abs( dx ), Math.Abs( dy ) ) != r ) // only the ring at radius r
+							continue;
+
+						if ( ( ( dx + dy ) & 1 ) != 0 ) // skip every other tile
+							continue;
+
+						IPoint3D p = new Point3D( m_Center.X + dx, m_Center.Y + dy, m_Center.Z );
+						Server.Spells.SpellHelper.GetSurfaceTop( ref p );
+						Point3D loc = new Point3D( p );
+
+						// Warning indicator (like the explosion effect).
+						Effects.SendLocationEffect( loc, m_Map, 0x3709, 30, 10, 0x489, 0 );
+
+						// Ignite the conflagration fire on that tile a moment later.
+						Timer.DelayCall( TimeSpan.FromSeconds( 1.0 ), () => IgniteRingFire( m_Owner, loc, m_Map ) );
+					}
+				}
+
+				m_Radius++;
+			}
+		}
+
+		private static void IgniteRingFire( Exodus owner, Point3D loc, Map map )
+		{
+			if ( owner == null || owner.Deleted || map == null || map == Map.Internal )
+				return;
+
+			// A real conflagration-potion fire tile, but only burning for 3 seconds.
+			BaseConflagrationPotion.InternalItem fire = new BaseConflagrationPotion.InternalItem( owner, loc, map, 10, 20 );
+			Timer.DelayCall( TimeSpan.FromSeconds( 3.0 ), () => { if ( fire != null && !fire.Deleted ) fire.Delete(); } );
 		}
 
 		public Exodus( Serial serial ) : base( serial )
