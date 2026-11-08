@@ -33,9 +33,19 @@ namespace Knives.Chat3
 
         public static void Initialize()
         {
+            EventSink.ChatRequest += new ChatRequestEventHandler(OnChatRequest);
             EventSink.Speech += new SpeechEventHandler(OnSpeech);
             EventSink.Login += new LoginEventHandler(OnLogin);
             EventSink.CharacterCreated += new CharacterCreatedEventHandler(OnCreate);
+        }
+
+        // The client's chat button sends packet 0xB5 (ChatRequest), which the core
+        // re-raises as EventSink.ChatRequest.  Knives Chat3 shipped without a
+        // subscriber here, so the chat button did nothing.  Open the chat list.
+        private static void OnChatRequest(ChatRequestEventArgs args)
+        {
+            if (args != null && args.Mobile != null)
+                List(args.Mobile, 0);
         }
 
         private static void OnLoad()

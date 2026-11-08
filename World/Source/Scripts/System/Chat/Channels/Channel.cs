@@ -159,6 +159,11 @@ namespace Knives.Chat3
             catch(Exception e)
             {
                 Errors.Report(General.Local(186));
+
+                // Fall back to the predefined channels so a missing or stale
+                // Channels.bin can never leave chat with zero channels (which
+                // would also mean the [c / [chat commands never get registered).
+                PredefinedChannels();
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.Source);
                 Console.WriteLine(e.StackTrace);
