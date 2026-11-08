@@ -84,7 +84,7 @@ namespace Server.Items
 							from.SendMessage("You have too many followers to capture");
 							from.SendMessage("that creature as it requires " + slots + " slots!");
 						}
-						else if ( i_Net.MinTameSkill > Utility.RandomMinMax( 50, 200 ) )
+						else if ( i_Net.MinTameSkill < Utility.RandomMinMax( 50, 200 ) )
 						{
 							if ( Utility.RandomBool() )
 							{

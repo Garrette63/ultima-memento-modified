@@ -106,6 +106,8 @@ namespace Server
 		private ushort m_Cap;
 		private SkillLock m_Lock;
 
+		public bool CanGain { get; set; }
+
 		public override string ToString()
 		{
 			return String.Format( "[{0}: {1}]", Name, Base );
@@ -249,27 +251,22 @@ namespace Server
 				case SkillName.Forensics:
 				case SkillName.Lumberjacking:
 				case SkillName.Mining:
-				case SkillName.Seafaring:
-					return true;
-
-
-				// Misc Secondary skills
-				case SkillName.ArmsLore:
-				case SkillName.Camping:
-				case SkillName.Mercantile:
-				case SkillName.Searching:
-				case SkillName.Tasting:
 					return true;
 
 				case SkillName.Anatomy:
 				case SkillName.Druidism:
+				case SkillName.Mercantile:
+				case SkillName.ArmsLore:
 				case SkillName.Parry:
 				case SkillName.Begging:
 				case SkillName.Peacemaking:
+				case SkillName.Camping:
 				case SkillName.Cartography:
+				case SkillName.Searching:
 				case SkillName.Discordance:
 				case SkillName.Psychology:
 				case SkillName.Healing:
+				case SkillName.Seafaring:
 				case SkillName.Herding:
 				case SkillName.Hiding:
 				case SkillName.Provocation:
@@ -284,6 +281,7 @@ namespace Server
 				case SkillName.Spiritualism:
 				case SkillName.Stealing:
 				case SkillName.Taming:
+				case SkillName.Tasting:
 				case SkillName.Tracking:
 				case SkillName.Veterinary:
 				case SkillName.Swords:
@@ -311,6 +309,7 @@ namespace Server
 		{
 			m_Owner = owner;
 			m_Info = info;
+			CanGain = true;
 
 			int version = reader.ReadByte();
 
@@ -346,6 +345,9 @@ namespace Server
 
 						if ( (version & 0x4) != 0 )
 							m_Lock = (SkillLock)reader.ReadByte();
+
+						if ( (version & 0x8) != 0 )
+							CanGain = false;
 					}
 
 					break;
@@ -366,6 +368,7 @@ namespace Server
 			m_Base = (ushort)baseValue;
 			m_Cap = (ushort)cap;
 			m_Lock = skillLock;
+			CanGain = true;
 		}
 
 		public void SetLockNoRelay( SkillLock skillLock )
@@ -378,7 +381,7 @@ namespace Server
 
 		public void Serialize( GenericWriter writer )
 		{
-			if ( m_Base == 0 && m_Cap == 1000 && m_Lock == SkillLock.Up )
+			if ( m_Base == 0 && m_Cap == 1000 && m_Lock == SkillLock.Up && CanGain )
 			{
 				writer.Write( (byte) 0xFF ); // default
 			}
@@ -394,6 +397,9 @@ namespace Server
 
 				if ( m_Lock != SkillLock.Up )
 					flags |= 0x4;
+
+				if ( !CanGain )
+					flags |= 0x8;
 
 				writer.Write( (byte) flags ); // version
 
@@ -454,6 +460,8 @@ namespace Server
 		{
 			get
 			{
+				if ( !CanGain && m_Lock == SkillLock.Up ) return SkillLock.Locked;
+
 				return m_Lock;
 			}
 		}
@@ -813,7 +821,7 @@ namespace Server
 				new SkillInfo(  3, "Mercantile",		0.0,	0.0,	0.0,	"Merchant",	null,	0.0,	0.0,	1.0,	1.0 ),
 				new SkillInfo(  4, "Arms Lore",			0.0,	0.0,	0.0,	"Man-at-arms",	null,	0.75,	0.15,	0.1,	1.0 ),
 				new SkillInfo(  5, "Parrying",			7.5,	2.5,	0.0,	"Duelist",	null,	0.75,	0.25,	0.0,	1.0 ),
-				new SkillInfo(  6, "Begging",			0.0,	0.0,	0.0,	"Beggar",	null,	0.0,	0.0,	0.0,	1.0 ),
+				new SkillInfo(  6, "Begging",			0.0,	0.0,	0.0,	"Beggar",	null,	0.0,	0.0,	0.0,	0.5 ),
 				new SkillInfo(  7, "Blacksmithy",		10.0,	0.0,	0.0,	"Blacksmith",	null,	1.0,	0.0,	0.0,	1.0 ),
 				new SkillInfo(  8, "Bowcrafting",		6.0,	16.0,	0.0,	"Bowyer",	null,	0.6,	1.6,	0.0,	1.0 ),
 				new SkillInfo(  9, "Peacemaking",		0.0,	0.0,	0.0,	"Pacifier",		null,	0.0,	0.0,	0.0,	1.0 ),
@@ -1278,7 +1286,7 @@ namespace Server
 						{
 							Skill sk = new Skill( this, info[i], reader );
 
-							if ( sk.BaseFixedPoint != 0 || sk.CapFixedPoint != 1000 || sk.Lock != SkillLock.Up )
+							if ( sk.BaseFixedPoint != 0 || sk.CapFixedPoint != 1000 || sk.Lock != SkillLock.Up || !sk.CanGain )
 							{
 								m_Skills[i] = sk;
 								if (!sk.IsSecondarySkill()) // Secondary skills don't affect Total

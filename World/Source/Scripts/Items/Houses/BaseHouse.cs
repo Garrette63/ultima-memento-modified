@@ -380,7 +380,7 @@ namespace Server.Multis
 			return ( (PlayerVendors.Count + VendorRentalContracts.Count) < GetNewVendorSystemMaxVendors() );
 		}
 
-		public const int MaximumBarkeepCount = 10;
+		public const int MaximumBarkeepCount = 2;
 
 		public virtual bool CanPlaceNewBarkeep()
 		{
