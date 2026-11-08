@@ -71,10 +71,12 @@ namespace Server.Misc
 
 			if ( reg.IsDefault || reg.Name == null || reg.Name == "" )
 				regionCheck = true;
+			else if ( m_House != null && m_House.IsCoOwner( m_From ) )
+				regionCheck = true;
 			else if ( reg.Name != null && reg.Name != "" && reg.AllowHousing( m_From, loc ) )
 				regionCheck = true;
 
-			if ( m_House == null || !m_House.IsOwner(m_From) )
+			if ( m_House == null || !m_House.IsCoOwner(m_From) )
 			{
 				m_From.SendMessage("You must be standing in your house to place this!");
 				return false;
