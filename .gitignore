@@ -52,3 +52,6 @@ World/Scripts/Obsolete
 World.exe
 World.exe.config
 src/World.exe - Shortcut
+World/WorldLinux.exe
+World/Data/Data.ref
+/World/Saves
