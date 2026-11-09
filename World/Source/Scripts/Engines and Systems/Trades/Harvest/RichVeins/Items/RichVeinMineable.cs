@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Server.Items.Abstractions;
+using Server.Network;
 
 namespace Server.Engines.Harvest
 {
@@ -24,9 +25,34 @@ namespace Server.Engines.Harvest
         {
         }
 
+        // Players may only see a glistening ore vein once their trained Mining skill reaches this value
+        // (matches RichVeinMining.CheckHarvest, which requires Mining Base >= 65 to mine a vein).
+        private const double VisibleMiningRequirement = 65.0;
+
         public override bool HandlesOnMovement { get { return true; } }
 
         public bool HasSpawner { get { return _parent != null; } }
+
+        public static bool CanBeSeenBy(Mobile m)
+        {
+            if (m == null)
+                return false;
+
+            // Staff need to see veins for placement and debugging.
+            if (m.AccessLevel > AccessLevel.Player)
+                return true;
+
+            return m.Skills[SkillName.Mining].Base >= VisibleMiningRequirement;
+        }
+
+        public override void SendInfoTo(NetState state, bool sendOplPacket)
+        {
+            // Don't send the vein to clients that cannot yet see it, keeping it invisible to them.
+            if (!CanBeSeenBy(state != null ? state.Mobile : null))
+                return;
+
+            base.SendInfoTo(state, sendOplPacket);
+        }
 
         public override void Deserialize(GenericReader reader)
         {
@@ -110,12 +136,41 @@ namespace Server.Engines.Harvest
                 var now = DateTime.UtcNow;
                 if (now < m_nextSound) return;
 
-                Effects.SendTargetEffect(this, 0x3039, 10, 32);
-                m_nextSound = now.AddSeconds(25);
-                if (m.Skills[SkillName.Mining].Value < 100) return; // GM+ Required for sounds
+                // The tell-tale glistening only exists for miners who can actually see the vein.
+                if (CanBeSeenBy(m))
+                {
+                    m_nextSound = now.AddSeconds(25);
+                    SendSparkleToMiners();
 
-                m.PlaySound(0x511); // Mirror image
+                    if (m.Skills[SkillName.Mining].Value >= 100) // GM+ Required for sounds
+                        m.PlaySound(0x511); // Mirror image
+                }
             }
+        }
+
+        // Send the sparkle effect only to clients that are allowed to see the vein.
+        private void SendSparkleToMiners()
+        {
+            Map map = Map;
+            if (map == null || map == Map.Internal)
+                return;
+
+            Packet sparkle = null;
+
+            IPooledEnumerable eable = map.GetClientsInRange(Location);
+            foreach (NetState state in eable)
+            {
+                if (!CanBeSeenBy(state.Mobile))
+                    continue;
+
+                if (sparkle == null)
+                    sparkle = Packet.Acquire(new TargetEffect(this, 0x3039, 10, 32, 0, 0));
+
+                state.Send(sparkle);
+            }
+            eable.Free();
+
+            Packet.Release(sparkle);
         }
 
         public override void Serialize(GenericWriter writer)
