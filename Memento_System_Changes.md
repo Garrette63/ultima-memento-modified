@@ -137,6 +137,7 @@ No other files were modified.
 87. **Str & base damage −25%** — `SetStr` 1200–1680 → **900–1260**; `SetDamage` 26–33 → **20–25**. Effective melee (pre-resist) ≈ **105–159**; vs 70-all-resist ≈ **32–48**/hit. Backed up as `Backups/Exodus.cs.2026-11-08-175153.bak`.
 88. **Exodus flee — the REAL fix (OmniAI)** — root cause: `BaseCreature.ChangeAIType` routes `AI_Mage` (and `AI_Melee`/`AI_Archer`/`AI_Berserk`/`AI_Predator`) to **`OmniAI`**, *not* `MageAI`/`MeleeAI`, so the earlier guard patches (#75/#84) never applied. Added `!(m_Mobile is Exodus)` to OmniAI's low-health flee guard (`OmniAI Core.cs` line 229). Combined with the `BeginFlee`/`CheckFlee` fear-immunity overrides (#86), Exodus now never flees. Backed up as `Backups/OmniAI Core.cs.2026-11-08-175428.bak`.
 84. **Exodus flee fix (MageAI)** — he now uses `AI_Mage`, and the earlier no-flee patch only covered `MeleeAI`. Added `!(m_Mobile is Exodus)` to `MageAI.DoActionCombat`'s low-health flee condition (line 9411) too, so he no longer flees under the mage AI. Backed up as `Backups/Behavior.cs.2026-11-08-164556.bak`.
+89. **Exodus spawn relocation restored** — re-enabled `Worlds.MoveToRandomDungeon( this )` in `OnAfterSpawn` (reverts TEMPORARY #47). Exodus relocates to a random dungeon on spawn again; the burn-away spawn visual is kept. Backed up as `Backups/Exodus.cs.2026-11-08-192433.bak`.
 
 ---
 
@@ -232,7 +233,7 @@ No other files were modified.
 - **Never flees:** he runs `OmniAI` (`ChangeAIType` routes `AI_Mage`/`AI_Melee`/etc. to `OmniAI`), and OmniAI's flee check excludes `Exodus`; he's also immune to fear/flee effects (`BeginFlee`/`CheckFlee` overridden), so neither low HP nor Dispel Evil/Cause Fear makes him run.
 - **Gold on death (champion-style):** when he dies he scatters gold across a 12-tile radius — one `Gold(300–800 × goldCutRate)` pile per tile, each after a random 0–10 s delay, with a small burst effect.
 - **Horde minions:** his corpse also drops **two `HoardMinionFamiliarItem`** (champion-style).
-- **Spawning (TEMPORARY — testing):** Exodus no longer relocates to a random dungeon on spawn (`Worlds.MoveToRandomDungeon` is commented out in `OnAfterSpawn`); it stays where spawned. Uncomment to restore.
+- **Spawning:** on spawn Exodus relocates to a random dungeon (`Worlds.MoveToRandomDungeon` in `OnAfterSpawn`), with the burn-away spawn visual kept.
 - **Stats (TEMPORARY — testing):** core stat block tripled — STR 900-1260, DEX 531-765, INT 453-750, Hits 2400-3000 (~6× original), Damage 20-25 (base; strength-scaled ≈105-159 pre-resist, ≈32-48 vs 70 resist).
 - **Skills (TEMPORARY — testing):** Anatomy/Psychology/MagicResist/**Magery**/Tactics/FistFighting = **125**.
 

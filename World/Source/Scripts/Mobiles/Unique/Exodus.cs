@@ -132,8 +132,7 @@ namespace Server.Mobiles
         public override void OnAfterSpawn()
         {
 			base.OnAfterSpawn();
-			// TEMP (testing): leave Exodus where it is spawned instead of relocating to a random dungeon
-			// Worlds.MoveToRandomDungeon( this );
+			Worlds.MoveToRandomDungeon( this );
 			Server.Misc.IntelligentAction.BurnAway( this );
 		}
 
