@@ -258,6 +258,9 @@ namespace Server.Mobiles
 			c.DropItem( new HoardMinionFamiliarItem() );
 			c.DropItem( new HoardMinionFamiliarItem() );
 
+			// The boss always leaves behind the Zork! terminal.
+			c.DropItem( new ZorkPad() );
+
 			PlayerMobile killer = MobileUtilities.TryGetKillingPlayer( this );
 			if ( killer != null )
 			{
