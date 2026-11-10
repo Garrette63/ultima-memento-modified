@@ -55,3 +55,6 @@ src/World.exe - Shortcut
 World/WorldLinux.exe
 World/Data/Data.ref
 /World/Saves
+/World/Saves/Accounts
+/World/Saves/Items
+/World/Saves/Mobiles
