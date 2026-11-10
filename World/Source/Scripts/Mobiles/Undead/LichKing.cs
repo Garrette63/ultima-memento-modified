@@ -61,7 +61,7 @@ namespace Server.Mobiles
 			{
 				int killerLuck = MobileUtilities.GetLuckFromKiller( this );
 
-				if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 && !Server.Misc.PlayerSettings.GetSpecialsKilled( killer, "LichKing" ) )
+				if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 )
 				{
 					Server.Misc.PlayerSettings.SetSpecialsKilled( killer, "LichKing", true );
 					ManualOfItems book = new ManualOfItems();
@@ -84,7 +84,7 @@ namespace Server.Mobiles
 						book.m_Extra = "of the Lich King";
 						book.m_FromWho = "Taken from the King of the Dead";
 						book.m_HowGiven = "Acquired by";
-						book.m_Points = 150;
+						book.m_Points = 300;
 						book.m_Hue = 0x845;
 						c.DropItem( book );
 				}

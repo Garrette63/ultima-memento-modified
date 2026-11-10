@@ -66,7 +66,7 @@ namespace Server.Mobiles
 					c.DropItem( new DragonRidingScroll() );
 				}
 
-				if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 && !Server.Misc.PlayerSettings.GetSpecialsKilled( killer, "DragonKing" ) )
+				if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 )
 				{
 					Server.Misc.PlayerSettings.SetSpecialsKilled( killer, "DragonKing", true );
 					ManualOfItems book = new ManualOfItems();
@@ -89,7 +89,7 @@ namespace Server.Mobiles
 						book.m_Extra = "of the Dragon King";
 						book.m_FromWho = "Taken from the King of Dragons";
 						book.m_HowGiven = "Acquired by";
-						book.m_Points = 150;
+						book.m_Points = 300;
 						book.m_Hue = 0x6DF;
 						c.DropItem( book );
 				}

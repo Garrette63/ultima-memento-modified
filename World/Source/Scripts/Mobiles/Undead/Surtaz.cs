@@ -194,7 +194,7 @@ namespace Server.Items
 
 				if ( from is PlayerMobile )
 				{
-					if ( GetPlayerInfo.LuckyKiller( from.Luck ) && !Server.Misc.PlayerSettings.GetSpecialsKilled( from, "Surtaz" ) )
+					if ( GetPlayerInfo.LuckyKiller( from.Luck ) )
 					{
 						if ( GetPlayerInfo.LuckyKiller( from.Luck ) )
 						{
@@ -222,7 +222,7 @@ namespace Server.Items
 							lexicon.m_Extra = "of Surtaz the Fallen";
 							lexicon.m_FromWho = "Taken from Surtaz";
 							lexicon.m_HowGiven = "Acquired by";
-							lexicon.m_Points = 200;
+							lexicon.m_Points = 300;
 							lexicon.m_Hue = 0xB85;
 							MyChest.DropItem( lexicon );
 					}

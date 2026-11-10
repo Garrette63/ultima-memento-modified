@@ -196,7 +196,7 @@ namespace Server.Mobiles
 			{
 				int killerLuck = MobileUtilities.GetLuckFromKiller( this );
 
-				if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 && !Server.Misc.PlayerSettings.GetSpecialsKilled( killer, "Dracula" ) )
+				if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 )
 				{
 					Server.Misc.PlayerSettings.SetSpecialsKilled( killer, "Dracula", true );
 					ManualOfItems book = new ManualOfItems();
@@ -219,7 +219,7 @@ namespace Server.Mobiles
 						book.m_Extra = "of the Vampire";
 						book.m_FromWho = "from Dracula";
 						book.m_HowGiven = "Acquired by";
-						book.m_Points = 250;
+						book.m_Points = 300;
 						book.m_Hue = 0x497;
 						killer.AddToBackpack( book );
 						killer.PrivateOverheadMessage(MessageType.Regular, 1153, false, "You found a book and put it in your pack.", killer.NetState);

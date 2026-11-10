@@ -139,7 +139,7 @@ namespace Server.Mobiles
 						{
 							foreach ( PartyMemberInfo pmi in p.Members )
 							{
-								if ( pmi.Mobile is PlayerMobile && pmi.Mobile.InRange(this.Location, 20) && pmi.Mobile.Map == this.Map && !pmi.Mobile.Blessed && !Server.Misc.PlayerSettings.GetSpecialsKilled( pmi.Mobile, "TitanLithos" ) )
+								if ( pmi.Mobile is PlayerMobile && pmi.Mobile.InRange(this.Location, 20) && pmi.Mobile.Map == this.Map && !pmi.Mobile.Blessed )
 								{
 									Server.Misc.PlayerSettings.SetSpecialsKilled( pmi.Mobile, "TitanLithos", true );
 									ManualOfItems book = new ManualOfItems();
@@ -171,7 +171,7 @@ namespace Server.Mobiles
 								}
 							}
 						}
-						else if ( !Server.Misc.PlayerSettings.GetSpecialsKilled( winner, "TitanLithos" ) )
+						else
 						{
 							Server.Misc.PlayerSettings.SetSpecialsKilled( winner, "TitanLithos", true );
 							ManualOfItems book = new ManualOfItems();

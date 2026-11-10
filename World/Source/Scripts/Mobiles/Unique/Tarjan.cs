@@ -202,34 +202,31 @@ namespace Server.Items
 				from.CloseGump( typeof(Server.Gumps.ClueGump) );
 				from.SendGump(new Server.Gumps.ClueGump( from, "You found a key with a symbol of a unicorn on it, along with a magical book of items.", "Tarjan's Death" ) );
 
-				if ( !Server.Misc.PlayerSettings.GetSpecialsKilled( from, "Tarjan" ) )
-				{
-					Server.Misc.PlayerSettings.SetSpecialsKilled( from, "Tarjan", true );
-					ManualOfItems book = new ManualOfItems();
-						book.Hue = 0x5B7;
-						book.Name = "Chest of Tarjan Relics";
-						book.m_Charges = 1;
-						book.m_Skill_1 = 99;
-						book.m_Skill_2 = 32;
-						book.m_Skill_3 = 0;
-						book.m_Skill_4 = 0;
-						book.m_Skill_5 = 0;
-						book.m_Value_1 = 10.0;
-						book.m_Value_2 = 10.0;
-						book.m_Value_3 = 0.0;
-						book.m_Value_4 = 0.0;
-						book.m_Value_5 = 0.0;
-						book.m_Slayer_1 = 11;
-						book.m_Slayer_2 = 0;
-						book.m_Owner = from;
-						book.m_Extra = "of the Mad God";
-						book.m_FromWho = "Taken from Tarjan";
-						book.m_HowGiven = "Acquired by";
-						book.m_Points = 100;
-						book.m_Hue = 0x5B7;
-						from.AddToBackpack( book );
-						from.SendMessage( "A small chest has been added to your pack!" );
-				}
+				Server.Misc.PlayerSettings.SetSpecialsKilled( from, "Tarjan", true );
+				ManualOfItems book = new ManualOfItems();
+					book.Hue = 0x5B7;
+					book.Name = "Chest of Tarjan Relics";
+					book.m_Charges = 1;
+					book.m_Skill_1 = 99;
+					book.m_Skill_2 = 32;
+					book.m_Skill_3 = 0;
+					book.m_Skill_4 = 0;
+					book.m_Skill_5 = 0;
+					book.m_Value_1 = 10.0;
+					book.m_Value_2 = 10.0;
+					book.m_Value_3 = 0.0;
+					book.m_Value_4 = 0.0;
+					book.m_Value_5 = 0.0;
+					book.m_Slayer_1 = 11;
+					book.m_Slayer_2 = 0;
+					book.m_Owner = from;
+					book.m_Extra = "of the Mad God";
+					book.m_FromWho = "Taken from Tarjan";
+					book.m_HowGiven = "Acquired by";
+					book.m_Points = 300;
+					book.m_Hue = 0x5B7;
+					from.AddToBackpack( book );
+					from.SendMessage( "A small chest has been added to your pack!" );
 			}
 		}
 

@@ -130,7 +130,7 @@ namespace Server.Mobiles
 					}
 				}
 
-				if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 && !Server.Misc.PlayerSettings.GetSpecialsKilled( killer, "Jormungandr" ) )
+				if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 )
 				{
 					Server.Misc.PlayerSettings.SetSpecialsKilled( killer, "Jormungandr", true );
 					ManualOfItems book = new ManualOfItems();
@@ -153,7 +153,7 @@ namespace Server.Mobiles
 						book.m_Extra = "of Midgard";
 						book.m_FromWho = "Taken from Jormungandr the Serpent of Midgard";
 						book.m_HowGiven = "Acquired by";
-						book.m_Points = 200;
+						book.m_Points = 300;
 						book.m_Hue = 0xB3D;
 						c.DropItem( book );
 				}

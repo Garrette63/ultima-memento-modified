@@ -147,7 +147,7 @@ namespace Server.Items
 
 				if ( from is PlayerMobile )
 				{
-					if ( GetPlayerInfo.LuckyKiller( from.Luck ) && !Server.Misc.PlayerSettings.GetSpecialsKilled( from, "Vulcrum" ) )
+					if ( GetPlayerInfo.LuckyKiller( from.Luck ) )
 					{
 						if ( GetPlayerInfo.LuckyKiller( from.Luck ) )
 						{
@@ -175,7 +175,7 @@ namespace Server.Items
 							lexicon.m_Extra = "of Vulcrum of the Flame";
 							lexicon.m_FromWho = "Taken from Vulcrum";
 							lexicon.m_HowGiven = "Acquired by";
-							lexicon.m_Points = 200;
+							lexicon.m_Points = 300;
 							lexicon.m_Hue = 0x4EA;
 							MyChest.DropItem( lexicon );
 					}

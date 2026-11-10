@@ -35,7 +35,7 @@ namespace Server.Items
 				m_Extra = null;
 				m_FromWho = "";
 				m_HowGiven = "";
-				m_Points = 100;
+				m_Points = 300;
 				m_Hue = 0;
 			}
 		}
