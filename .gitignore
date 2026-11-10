@@ -59,3 +59,10 @@ World/Data/Data.ref
 /World/Saves/Items
 /World/Saves/Mobiles
 /World/Saves/Accounts
+World/Saves/Accounts/accounts.xml
+World/Saves/Items/Items.bin
+World/Saves/Items/Items.idx
+World/Saves/Items/Items.tdb
+World/Saves/Mobiles/Mobiles.bin
+World/Saves/Mobiles/Mobiles.idx
+World/Saves/Mobiles/Mobiles.tdb
