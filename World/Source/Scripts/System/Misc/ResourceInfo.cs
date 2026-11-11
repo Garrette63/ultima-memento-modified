@@ -409,10 +409,10 @@ namespace Server.Items
 			new CraftResourceInfo( 0x424, 	0x979,	2	,	5	,	2.40	,	45.0	,	90	,	20	,	32	,	10	,	1	,	1054156	,	1054028	,	1063826,	 "Violet",	CraftAttributeInfo.VioletScales,	CraftResource.VioletScales,	typeof( VioletScales ) ),		
 			new CraftResourceInfo( 0x449, 	0x42A,	2	,	5	,	2.40	,	45.0	,	90	,	20	,	32	,	10	,	1	,	1054157	,	1054029	,	1063828,	 "Platinum",	CraftAttributeInfo.PlatinumScales,	CraftResource.PlatinumScales,	typeof( PlatinumScales ) ),		
 			new CraftResourceInfo( 0x99D,	0x99D,	4	,	9	,	3.40	,	115.0	,	90	,	26	,	32	,	10	,	1	,	1054158	,	1060096	,	1063830,	 "Cadalyte",	CraftAttributeInfo.CadalyteScales,	CraftResource.CadalyteScales,	typeof( CadalyteScales ) ),		
-			new CraftResourceInfo( 0x5D6,	0x5D6,	3	,	7	,	3.00	,	110.0	,	90	,	22	,	32	,	10	,	1	,	1064170	,	1064171	,	1064172,	 "Gorn",	CraftAttributeInfo.GornScales,	CraftResource.CadalyteScales,	typeof( GornScales ) ),		
-			new CraftResourceInfo( 0x5D8,	0x5D8,	3	,	7	,	3.00	,	110.0	,	90	,	22	,	32	,	10	,	1	,	1064174	,	1064175	,	1064176,	 "Trandoshan",	CraftAttributeInfo.TrandoshanScales,	CraftResource.CadalyteScales,	typeof( TrandoshanScales ) ),		
-			new CraftResourceInfo( 0x5D5,	0x5D5,	3	,	7	,	3.00	,	110.0	,	90	,	22	,	32	,	10	,	1	,	1064178	,	1064179	,	1064180,	 "Silurian",	CraftAttributeInfo.SilurianScales,	CraftResource.CadalyteScales,	typeof( SilurianScales ) ),		
-			new CraftResourceInfo( 0x692,	0x692,	3	,	7	,	3.00	,	110.0	,	90	,	22	,	32	,	10	,	1	,	1064182	,	1064183	,	1064184,	 "Krayt",	CraftAttributeInfo.KraytScales,	CraftResource.CadalyteScales,	typeof( KraytScales ) )		
+			new CraftResourceInfo( 0x5D6,	0x5D6,	3	,	7	,	3.00	,	110.0	,	90	,	22	,	32	,	10	,	1	,	1064170	,	1064171	,	1064172,	 "Gorn",	CraftAttributeInfo.GornScales,	CraftResource.GornScales,	typeof( GornScales ) ),		
+			new CraftResourceInfo( 0x5D8,	0x5D8,	3	,	7	,	3.00	,	110.0	,	90	,	22	,	32	,	10	,	1	,	1064174	,	1064175	,	1064176,	 "Trandoshan",	CraftAttributeInfo.TrandoshanScales,	CraftResource.TrandoshanScales,	typeof( TrandoshanScales ) ),		
+			new CraftResourceInfo( 0x5D5,	0x5D5,	3	,	7	,	3.00	,	110.0	,	90	,	22	,	32	,	10	,	1	,	1064178	,	1064179	,	1064180,	 "Silurian",	CraftAttributeInfo.SilurianScales,	CraftResource.SilurianScales,	typeof( SilurianScales ) ),		
+			new CraftResourceInfo( 0x692,	0x692,	3	,	7	,	3.00	,	110.0	,	90	,	22	,	32	,	10	,	1	,	1064182	,	1064183	,	1064184,	 "Krayt",	CraftAttributeInfo.KraytScales,	CraftResource.KraytScales,	typeof( KraytScales ) )		
 			};																														
 			private static CraftResourceInfo[] m_SpecialInfo = new CraftResourceInfo[]																														
 			{																														
@@ -1033,14 +1033,14 @@ namespace Server.Items
 				case CraftResource.Xormite:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
-						// AosAttribute_RegenMana = 3,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_EnhancePotions = 2,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_SelfRepair = 1,
-						// AosWeaponAttribute_HitEnergyArea = 15,
-						// AosArmorAttribute_SelfRepair = 1
+						AosAttribute_RegenMana = 3,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_EnhancePotions = 2,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_SelfRepair = 1,
+						AosWeaponAttribute_HitEnergyArea = 15,
+						AosArmorAttribute_SelfRepair = 1
 					}); break;
 				case CraftResource.Dwarven:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1049,9 +1049,9 @@ namespace Server.Items
 						Slayer = SlayerName.OgreTrashing,
 						Skill5 = 99,
 						Skill5Val = 2,
-						// AosAttribute_DefendChance = 3,
-						// AosWeaponAttribute_SelfRepair = 1,
-						// AosArmorAttribute_SelfRepair = 1
+						AosAttribute_DefendChance = 3,
+						AosWeaponAttribute_SelfRepair = 1,
+						AosArmorAttribute_SelfRepair = 1
 					}); break;
 				case CraftResource.Agrinium:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1059,12 +1059,12 @@ namespace Server.Items
 						Slayer2 = SlayerName.EarthShatter,
 						Skill5 = 99,
 						Skill5Val = 2,
-						// AosAttribute_DefendChance = 3,
-						// AosAttribute_AttackChance = 3,
-						// AosAttribute_WeaponDamage = 3,
-						// AosWeaponAttribute_SelfRepair = 1,
-						// AosWeaponAttribute_HitPhysicalArea = 10,
-						// AosArmorAttribute_SelfRepair = 1
+						AosAttribute_DefendChance = 3,
+						AosAttribute_AttackChance = 3,
+						AosAttribute_WeaponDamage = 3,
+						AosWeaponAttribute_SelfRepair = 1,
+						AosWeaponAttribute_HitPhysicalArea = 10,
+						AosArmorAttribute_SelfRepair = 1
 					}); break;
 				case CraftResource.Beskar:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1074,12 +1074,12 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 43,
 						Skill4Val = 1,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosWeaponAttribute_HitLowerAttack = 10,
-						// AosWeaponAttribute_HitLowerDefend = 10,
-						// AosWeaponAttribute_HitHarm = 5,
-						// AosWeaponAttribute_HitPhysicalArea = 10
+						AosAttribute_BonusDex = 1,
+						AosAttribute_ReflectPhysical = 2,
+						AosWeaponAttribute_HitLowerAttack = 10,
+						AosWeaponAttribute_HitLowerDefend = 10,
+						AosWeaponAttribute_HitHarm = 5,
+						AosWeaponAttribute_HitPhysicalArea = 10
 					}); break;
 				case CraftResource.Carbonite:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1089,12 +1089,12 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 23,
 						Skill4Val = 1,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_DefendChance = 3,
-						// AosWeaponAttribute_HitLeechHits = 15,
-						// AosWeaponAttribute_HitLeechStam = 15,
-						// AosWeaponAttribute_HitDispel = 20,
-						// AosWeaponAttribute_HitPhysicalArea = 10
+						AosAttribute_RegenHits = 1,
+						AosAttribute_DefendChance = 3,
+						AosWeaponAttribute_HitLeechHits = 15,
+						AosWeaponAttribute_HitLeechStam = 15,
+						AosWeaponAttribute_HitDispel = 20,
+						AosWeaponAttribute_HitPhysicalArea = 10
 					}); break;
 				case CraftResource.Cortosis:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1102,11 +1102,11 @@ namespace Server.Items
 						Slayer2 = SlayerName.WizardSlayer,
 						Skill5 = 1,
 						Skill5Val = 2,
-						// AosAttribute_DefendChance = 3,
-						// AosAttribute_AttackChance = 3,
-						// AosAttribute_WeaponSpeed = 3,
-						// AosAttribute_EnhancePotions = 2,
-						// AosWeaponAttribute_HitEnergyArea = 10
+						AosAttribute_DefendChance = 3,
+						AosAttribute_AttackChance = 3,
+						AosAttribute_WeaponSpeed = 3,
+						AosAttribute_EnhancePotions = 2,
+						AosWeaponAttribute_HitEnergyArea = 10
 					}); break;
 				case CraftResource.Durasteel:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1116,15 +1116,15 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 48,
 						Skill4Val = 1,
-						// AosAttribute_DefendChance = 3,
-						// AosAttribute_AttackChance = 3,
-						// AosAttribute_WeaponDamage = 3,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosWeaponAttribute_SelfRepair = 1,
-						// AosWeaponAttribute_HitLowerAttack = 15,
-						// AosWeaponAttribute_HitLowerDefend = 15,
-						// AosWeaponAttribute_HitPhysicalArea = 10,
-						// AosArmorAttribute_SelfRepair = 1
+						AosAttribute_DefendChance = 3,
+						AosAttribute_AttackChance = 3,
+						AosAttribute_WeaponDamage = 3,
+						AosAttribute_ReflectPhysical = 3,
+						AosWeaponAttribute_SelfRepair = 1,
+						AosWeaponAttribute_HitLowerAttack = 15,
+						AosWeaponAttribute_HitLowerDefend = 15,
+						AosWeaponAttribute_HitPhysicalArea = 10,
+						AosArmorAttribute_SelfRepair = 1
 					}); break;
 				case CraftResource.Durite:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1134,11 +1134,11 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 8,
 						Skill4Val = 1,
-						// AosWeaponAttribute_SelfRepair = 1,
-						// AosWeaponAttribute_HitLeechHits = 10,
-						// AosWeaponAttribute_HitLeechStam = 10,
-						// AosWeaponAttribute_HitPhysicalArea = 10,
-						// AosArmorAttribute_SelfRepair = 1
+						AosWeaponAttribute_SelfRepair = 1,
+						AosWeaponAttribute_HitLeechHits = 10,
+						AosWeaponAttribute_HitLeechStam = 10,
+						AosWeaponAttribute_HitPhysicalArea = 10,
+						AosArmorAttribute_SelfRepair = 1
 					}); break;
 				case CraftResource.Farium:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1148,11 +1148,11 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 42,
 						Skill4Val = 1,
-						// AosAttribute_BonusDex = 2,
-						// AosWeaponAttribute_SelfRepair = 1,
-						// AosWeaponAttribute_HitLowerAttack = 10,
-						// AosWeaponAttribute_HitLowerDefend = 10,
-						// AosWeaponAttribute_HitFireArea = 10
+						AosAttribute_BonusDex = 2,
+						AosWeaponAttribute_SelfRepair = 1,
+						AosWeaponAttribute_HitLowerAttack = 10,
+						AosWeaponAttribute_HitLowerDefend = 10,
+						AosWeaponAttribute_HitFireArea = 10
 					}); break;
 				case CraftResource.Laminasteel:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1162,9 +1162,9 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 4,
 						Skill4Val = 1,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_RegenMana = 1,
+						AosAttribute_RegenHits = 1,
+						AosAttribute_RegenStam = 1,
+						AosAttribute_RegenMana = 1,
 						AosWeaponAttribute_HitPoisonArea = 10
 					}); break;
 				case CraftResource.Neuranium:
@@ -1175,12 +1175,12 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 33,
 						Skill4Val = 1,
-						// AosAttribute_SpellDamage = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_LowerManaCost = 2,
-						// AosAttribute_LowerRegCost = 3,
-						// AosWeaponAttribute_HitFireArea = 10,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_SpellDamage = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_LowerManaCost = 2,
+						AosAttribute_LowerRegCost = 3,
+						AosWeaponAttribute_HitFireArea = 10,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Phrik:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1190,16 +1190,16 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 21,
 						Skill4Val = 1,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusHits = 2,
-						// AosAttribute_BonusStam = 2,
-						// AosAttribute_WeaponSpeed = 3,
-						// AosAttribute_SpellDamage = 1,
-						// AosAttribute_CastRecovery = 1,
-						// AosAttribute_LowerManaCost = 2,
-						// AosAttribute_LowerRegCost = 3,
-						// AosWeaponAttribute_HitEnergyArea = 10,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusHits = 2,
+						AosAttribute_BonusStam = 2,
+						AosAttribute_WeaponSpeed = 3,
+						AosAttribute_SpellDamage = 1,
+						AosAttribute_CastRecovery = 1,
+						AosAttribute_LowerManaCost = 2,
+						AosAttribute_LowerRegCost = 3,
+						AosWeaponAttribute_HitEnergyArea = 10,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Promethium:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1207,10 +1207,10 @@ namespace Server.Items
 						Slayer2 = SlayerName.LizardmanSlaughter,
 						Skill5 = 40,
 						Skill5Val = 2,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_BonusHits = 3,
-						// AosAttribute_WeaponDamage = 2,
-						// AosWeaponAttribute_HitPoisonArea = 10
+						AosAttribute_RegenHits = 1,
+						AosAttribute_BonusHits = 3,
+						AosAttribute_WeaponDamage = 2,
+						AosWeaponAttribute_HitPoisonArea = 10
 					}); break;
 				case CraftResource.Quadranium:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1220,10 +1220,10 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 27,
 						Skill4Val = 1,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusStam = 3,
-						// AosWeaponAttribute_SelfRepair = 1,
-						// AosWeaponAttribute_HitEnergyArea = 10
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusStam = 3,
+						AosWeaponAttribute_SelfRepair = 1,
+						AosWeaponAttribute_HitEnergyArea = 10
 					}); break;
 				case CraftResource.Songsteel:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1235,10 +1235,10 @@ namespace Server.Items
 						Skill4Val = 1,
 						Skill3 = 16,
 						Skill3Val = 1,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusStam = 3,
-						// AosAttribute_WeaponSpeed = 3,
-						// AosWeaponAttribute_HitEnergyArea = 10
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusStam = 3,
+						AosAttribute_WeaponSpeed = 3,
+						AosWeaponAttribute_HitEnergyArea = 10
 					}); break;
 				case CraftResource.Titanium:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1248,12 +1248,12 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 48,
 						Skill4Val = 1,
-						// AosAttribute_DefendChance = 3,
-						// AosAttribute_AttackChance = 3,
-						// AosAttribute_WeaponDamage = 3,
-						// AosWeaponAttribute_SelfRepair = 1,
-						// AosWeaponAttribute_HitPhysicalArea = 10,
-						// AosArmorAttribute_SelfRepair = 1
+						AosAttribute_DefendChance = 3,
+						AosAttribute_AttackChance = 3,
+						AosAttribute_WeaponDamage = 3,
+						AosWeaponAttribute_SelfRepair = 1,
+						AosWeaponAttribute_HitPhysicalArea = 10,
+						AosArmorAttribute_SelfRepair = 1
 					}); break;
 				case CraftResource.Trimantium:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1261,9 +1261,9 @@ namespace Server.Items
 						Slayer2 = SlayerName.NeptunesBane,
 						Skill5 = 19,
 						Skill5Val = 2,
-						// AosAttribute_BonusHits = 3,
-						// AosAttribute_BonusStam = 3,
-						// AosWeaponAttribute_HitColdArea = 10
+						AosAttribute_BonusHits = 3,
+						AosAttribute_BonusStam = 3,
+						AosWeaponAttribute_HitColdArea = 10
 					}); break;
 				case CraftResource.Xonolite:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1273,12 +1273,12 @@ namespace Server.Items
 						Skill5Val = 1,
 						Skill4 = 44,
 						Skill4Val = 1,
-						// AosAttribute_SpellDamage = 1,
-						// AosAttribute_CastRecovery = 1,
-						// AosAttribute_LowerManaCost = 2,
-						// AosAttribute_LowerRegCost = 3,
-						// AosWeaponAttribute_HitFireArea = 10,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_SpellDamage = 1,
+						AosAttribute_CastRecovery = 1,
+						AosAttribute_LowerManaCost = 2,
+						AosAttribute_LowerRegCost = 3,
+						AosWeaponAttribute_HitFireArea = 10,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 
 				case CraftResource.RedScales:
@@ -1404,15 +1404,15 @@ namespace Server.Items
 						Skill4Val = 5,
 						Skill3 = 19,
 						Skill3Val = 5,
-						// AosAttribute_DefendChance = 3,
-						// AosAttribute_AttackChance = 3,
-						// AosAttribute_BonusStam = 2,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosAttribute_EnhancePotions = 2,
-						// AosWeaponAttribute_SelfRepair = 5,
-						// AosWeaponAttribute_HitLeechHits = 10,
-						// AosWeaponAttribute_HitColdArea = 20,
-						// AosArmorAttribute_SelfRepair = 5
+						AosAttribute_DefendChance = 3,
+						AosAttribute_AttackChance = 3,
+						AosAttribute_BonusStam = 2,
+						AosAttribute_ReflectPhysical = 3,
+						AosAttribute_EnhancePotions = 2,
+						AosWeaponAttribute_SelfRepair = 5,
+						AosWeaponAttribute_HitLeechHits = 10,
+						AosWeaponAttribute_HitColdArea = 20,
+						AosArmorAttribute_SelfRepair = 5
 					}); break;
 				case CraftResource.DreadSpec:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1421,13 +1421,13 @@ namespace Server.Items
 						Skill5Val = 5,
 						Skill4 = 48,
 						Skill4Val = 5,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_AttackChance = 5,
-						// AosAttribute_WeaponDamage = 7,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_NightSight = 1
+						AosAttribute_RegenHits = 1,
+						AosAttribute_RegenStam = 1,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_AttackChance = 5,
+						AosAttribute_WeaponDamage = 7,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_NightSight = 1
 					}); break;
 				case CraftResource.GhoulishSpec:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1435,14 +1435,14 @@ namespace Server.Items
 						Slayer2 = SlayerName.Repond,
 						Skill5 = 99,
 						Skill5Val = 15,
-						// AosAttribute_RegenHits = 2,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_DefendChance = 2,
-						// AosAttribute_WeaponDamage = 7,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitLeechHits = 10,
-						// AosWeaponAttribute_HitLeechStam = 10
+						AosAttribute_RegenHits = 2,
+						AosAttribute_RegenStam = 2,
+						AosAttribute_DefendChance = 2,
+						AosAttribute_WeaponDamage = 7,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitLeechHits = 10,
+						AosWeaponAttribute_HitLeechStam = 10
 					}); break;
 				case CraftResource.WyrmSpec:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1450,12 +1450,12 @@ namespace Server.Items
 						Slayer2 = SlayerName.DragonSlaying,
 						Skill5 = 99,
 						Skill5Val = 15,
-						// AosAttribute_DefendChance = 3,
-						// AosAttribute_AttackChance = 7,
-						// AosAttribute_WeaponDamage = 8,
-						// AosAttribute_WeaponSpeed = 5,
-						// AosWeaponAttribute_HitLowerAttack = 50,
-						// AosWeaponAttribute_HitLowerDefend = 50
+						AosAttribute_DefendChance = 3,
+						AosAttribute_AttackChance = 7,
+						AosAttribute_WeaponDamage = 8,
+						AosAttribute_WeaponSpeed = 5,
+						AosWeaponAttribute_HitLowerAttack = 50,
+						AosWeaponAttribute_HitLowerDefend = 50
 					}); break;
 				case CraftResource.HolySpec:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1464,13 +1464,13 @@ namespace Server.Items
 						Slayer = SlayerName.Exorcism,
 						Skill5 = 99,
 						Skill5Val = 20,
-						// AosAttribute_RegenHits = 2,
-						// AosAttribute_AttackChance = 9,
-						// AosAttribute_WeaponDamage = 9,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_SelfRepair = 2,
-						// AosWeaponAttribute_HitLeechHits = 5,
-						// AosArmorAttribute_SelfRepair = 2
+						AosAttribute_RegenHits = 2,
+						AosAttribute_AttackChance = 9,
+						AosAttribute_WeaponDamage = 9,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_SelfRepair = 2,
+						AosWeaponAttribute_HitLeechHits = 5,
+						AosArmorAttribute_SelfRepair = 2
 					}); break;
 				case CraftResource.BloodlessSpec:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1482,14 +1482,14 @@ namespace Server.Items
 						Skill4Val = 5,
 						Skill3 = 44,
 						Skill3Val = 5,
-						// AosAttribute_BonusMana = 3,
-						// AosAttribute_WeaponDamage = 8,
-						// AosAttribute_LowerManaCost = 5,
-						// AosAttribute_LowerRegCost = 5,
-						// AosAttribute_SpellChanneling = 1,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitPoisonArea = 50,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_BonusMana = 3,
+						AosAttribute_WeaponDamage = 8,
+						AosAttribute_LowerManaCost = 5,
+						AosAttribute_LowerRegCost = 5,
+						AosAttribute_SpellChanneling = 1,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitPoisonArea = 50,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.GildedSpec:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1505,13 +1505,13 @@ namespace Server.Items
 						Slayer2 = SlayerName.Repond,
 						Skill5 = 99,
 						Skill5Val = 10,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_AttackChance = 9,
-						// AosAttribute_SpellDamage = 2,
-						// AosWeaponAttribute_HitLeechHits = 5,
-						// AosWeaponAttribute_HitLowerDefend = 50,
-						// AosWeaponAttribute_HitDispel = 20,
-						// AosWeaponAttribute_HitPhysicalArea = 25
+						AosAttribute_RegenHits = 1,
+						AosAttribute_AttackChance = 9,
+						AosAttribute_SpellDamage = 2,
+						AosWeaponAttribute_HitLeechHits = 5,
+						AosWeaponAttribute_HitLowerDefend = 50,
+						AosWeaponAttribute_HitDispel = 20,
+						AosWeaponAttribute_HitPhysicalArea = 25
 					}); break;
 				case CraftResource.WintrySpec:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1519,9 +1519,9 @@ namespace Server.Items
 						Slayer2 = SlayerName.FlameDousing,
 						Skill5 = 99,
 						Skill5Val = 5,
-						// AosAttribute_WeaponDamage = 8,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosAttribute_NightSight = 1
+						AosAttribute_WeaponDamage = 8,
+						AosAttribute_ReflectPhysical = 3,
+						AosAttribute_NightSight = 1
 					}); break;
 				case CraftResource.FireSpec: ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
@@ -1549,35 +1549,35 @@ namespace Server.Items
 						Skill5Val = 15,
 						Skill4 = 32,
 						Skill4Val = 10,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_AttackChance = 5,
-						// AosAttribute_BonusStr = 2,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_BonusHits = 4,
-						// AosAttribute_BonusStam = 3,
-						// AosAttribute_WeaponDamage = 9,
-						// AosAttribute_WeaponSpeed = 5,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_SelfRepair = 3,
-						// AosWeaponAttribute_HitLightning = 20,
-						// AosWeaponAttribute_HitDispel = 20,
-						// AosWeaponAttribute_HitEnergyArea = 25,
-						// AosArmorAttribute_SelfRepair = 3,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenHits = 1,
+						AosAttribute_RegenStam = 1,
+						AosAttribute_RegenMana = 1,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_AttackChance = 5,
+						AosAttribute_BonusStr = 2,
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_BonusHits = 4,
+						AosAttribute_BonusStam = 3,
+						AosAttribute_WeaponDamage = 9,
+						AosAttribute_WeaponSpeed = 5,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_SelfRepair = 3,
+						AosWeaponAttribute_HitLightning = 20,
+						AosWeaponAttribute_HitDispel = 20,
+						AosWeaponAttribute_HitEnergyArea = 25,
+						AosArmorAttribute_SelfRepair = 3,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.TurtleSpec:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Slayer2 = SlayerName.NeptunesBane,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosWeaponAttribute_HitFireball = 20,
-						// AosWeaponAttribute_HitFireArea = 50,
-						// AosArmorAttribute_SelfRepair = 5
+						AosAttribute_DefendChance = 5,
+						AosAttribute_ReflectPhysical = 3,
+						AosWeaponAttribute_HitFireball = 20,
+						AosWeaponAttribute_HitFireArea = 50,
+						AosArmorAttribute_SelfRepair = 5
 					}); break;
 
 				case CraftResource.RegularLeather:
@@ -1601,12 +1601,12 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 17,
 						Skill4Val = 2,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitEnergyArea = 5,
-						// AosWeaponAttribute_HitPhysicalArea = 5,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 1,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitEnergyArea = 5,
+						AosWeaponAttribute_HitPhysicalArea = 5,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Biomesh:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1616,12 +1616,12 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 21,
 						Skill4Val = 2,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosAttribute_EnhancePotions = 7,
-						// AosAttribute_SpellChanneling = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenHits = 1,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_ReflectPhysical = 3,
+						AosAttribute_EnhancePotions = 7,
+						AosAttribute_SpellChanneling = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Cerlin:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1631,11 +1631,11 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 13,
 						Skill4Val = 2,
-						// AosAttribute_BonusHits = 2,
-						// AosAttribute_BonusStam = 2,
-						// AosAttribute_BonusMana = 2,
-						// AosAttribute_SpellChanneling = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_BonusHits = 2,
+						AosAttribute_BonusStam = 2,
+						AosAttribute_BonusMana = 2,
+						AosAttribute_SpellChanneling = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Durafiber:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1645,12 +1645,12 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 23,
 						Skill4Val = 2,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_LowerManaCost = 3,
-						// AosAttribute_SpellChanneling = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenHits = 1,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_LowerManaCost = 3,
+						AosAttribute_SpellChanneling = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Flexicris:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1660,13 +1660,13 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 27,
 						Skill4Val = 2,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_CastRecovery = 5,
-						// AosAttribute_LowerRegCost = 3,
-						// AosAttribute_SpellChanneling = 1,
-						// AosAttribute_NightSight = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenStam = 1,
+						AosAttribute_BonusDex = 1,
+						AosAttribute_CastRecovery = 5,
+						AosAttribute_LowerRegCost = 3,
+						AosAttribute_SpellChanneling = 1,
+						AosAttribute_NightSight = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Hypercloth:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1676,10 +1676,10 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 2,
 						Skill4Val = 2,
-						// AosAttribute_BonusMana = 3,
-						// AosAttribute_WeaponDamage = 5,
-						// AosAttribute_SpellChanneling = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_BonusMana = 3,
+						AosAttribute_WeaponDamage = 5,
+						AosAttribute_SpellChanneling = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Nylar:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1689,10 +1689,10 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 50,
 						Skill4Val = 2,
-						// AosAttribute_BonusHits = 3,
-						// AosAttribute_WeaponSpeed = 5,
-						// AosAttribute_SpellChanneling = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_BonusHits = 3,
+						AosAttribute_WeaponSpeed = 5,
+						AosAttribute_SpellChanneling = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Nylonite:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1702,11 +1702,11 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 46,
 						Skill4Val = 2,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_SpellChanneling = 1,
-						// AosAttribute_NightSight = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenStam = 1,
+						AosAttribute_BonusDex = 1,
+						AosAttribute_SpellChanneling = 1,
+						AosAttribute_NightSight = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Polyfiber:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1716,10 +1716,10 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 52,
 						Skill4Val = 2,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_BonusStam = 3,
-						// AosAttribute_SpellChanneling = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 1,
+						AosAttribute_BonusStam = 3,
+						AosAttribute_SpellChanneling = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Syncloth:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1729,13 +1729,13 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 6,
 						Skill4Val = 2,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_SpellDamage = 3,
-						// AosAttribute_CastRecovery = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_EnhancePotions = 5,
-						// AosAttribute_SpellChanneling = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_BonusInt = 1,
+						AosAttribute_SpellDamage = 3,
+						AosAttribute_CastRecovery = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_EnhancePotions = 5,
+						AosAttribute_SpellChanneling = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.Thermoweave:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1745,12 +1745,12 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 15,
 						Skill4Val = 2,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosAttribute_SpellChanneling = 1,
-						// AosAttribute_NightSight = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenHits = 1,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_ReflectPhysical = 3,
+						AosAttribute_SpellChanneling = 1,
+						AosAttribute_NightSight = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 
 				case CraftResource.RegularWood:
@@ -1786,18 +1786,18 @@ namespace Server.Items
 						Skill4Val = 2,
 						Skill3 = 10,
 						Skill3Val = 2,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_AttackChance = 5,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_WeaponDamage = 7,
-						// AosAttribute_WeaponSpeed = 7,
-						// AosAttribute_EnhancePotions = 7,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_SelfRepair = 2,
-						// AosWeaponAttribute_HitLowerDefend = 20,
-						// AosArmorAttribute_SelfRepair = 2,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 1,
+						AosAttribute_AttackChance = 5,
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_WeaponDamage = 7,
+						AosAttribute_WeaponSpeed = 7,
+						AosAttribute_EnhancePotions = 7,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_SelfRepair = 2,
+						AosWeaponAttribute_HitLowerDefend = 20,
+						AosArmorAttribute_SelfRepair = 2,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.BorlTree:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1805,11 +1805,11 @@ namespace Server.Items
 						Slayer2 = SlayerName.EarthShatter,
 						Skill5 = 15,
 						Skill5Val = 2,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_WeaponDamage = 5,
-						// AosAttribute_EnhancePotions = 5,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitFireball = 20
+						AosAttribute_RegenStam = 1,
+						AosAttribute_WeaponDamage = 5,
+						AosAttribute_EnhancePotions = 5,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitFireball = 20
 					}); break;
 				case CraftResource.CosianTree:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1817,10 +1817,10 @@ namespace Server.Items
 						Slayer2 = SlayerName.WeedRuin,
 						Skill5 = 23,
 						Skill5Val = 2,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_WeaponDamage = 5,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitPoisonArea = 20
+						AosAttribute_RegenHits = 1,
+						AosAttribute_WeaponDamage = 5,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitPoisonArea = 20
 					}); break;
 				case CraftResource.GreelTree:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1828,11 +1828,11 @@ namespace Server.Items
 						Slayer2 = SlayerName.GargoylesFoe,
 						Skill5 = 99,
 						Skill5Val = 2,
-						// AosAttribute_BonusHits = 3,
-						// AosAttribute_WeaponDamage = 5,
-						// AosAttribute_EnhancePotions = 7,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitEnergyArea = 20
+						AosAttribute_BonusHits = 3,
+						AosAttribute_WeaponDamage = 5,
+						AosAttribute_EnhancePotions = 7,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitEnergyArea = 20
 					}); break;
 				case CraftResource.JaporTree:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1840,11 +1840,11 @@ namespace Server.Items
 						Slayer2 = SlayerName.Ophidian,
 						Skill5 = 19,
 						Skill5Val = 2,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_WeaponDamage = 6,
-						// AosAttribute_WeaponSpeed = 5,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitColdArea = 20
+						AosAttribute_BonusDex = 1,
+						AosAttribute_WeaponDamage = 6,
+						AosAttribute_WeaponSpeed = 5,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitColdArea = 20
 					}); break;
 				case CraftResource.KyshyyykTree:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1852,12 +1852,12 @@ namespace Server.Items
 						Slayer2 = SlayerName.ScorpionsBane,
 						Skill5 = 99,
 						Skill5Val = 2,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_BonusHits = 3,
-						// AosAttribute_WeaponDamage = 7,
-						// AosAttribute_WeaponSpeed = 8,
-						// AosAttribute_EnhancePotions = 10,
-						// AosWeaponAttribute_HitPhysicalArea = 20
+						AosAttribute_BonusStr = 1,
+						AosAttribute_BonusHits = 3,
+						AosAttribute_WeaponDamage = 7,
+						AosAttribute_WeaponSpeed = 8,
+						AosAttribute_EnhancePotions = 10,
+						AosWeaponAttribute_HitPhysicalArea = 20
 					}); break;
 				case CraftResource.LaroonTree:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1865,16 +1865,16 @@ namespace Server.Items
 						Slayer2 = SlayerName.Terathan,
 						Skill5 = 44,
 						Skill5Val = 2,
-						// AosAttribute_BonusMana = 3,
-						// AosAttribute_WeaponDamage = 8,
-						// AosAttribute_WeaponSpeed = 11,
-						// AosAttribute_SpellDamage = 2,
-						// AosAttribute_CastRecovery = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_LowerManaCost = 3,
-						// AosAttribute_LowerRegCost = 3,
-						// AosWeaponAttribute_HitLightning = 20,
-						// AosArmorAttribute_SelfRepair = 1
+						AosAttribute_BonusMana = 3,
+						AosAttribute_WeaponDamage = 8,
+						AosAttribute_WeaponSpeed = 11,
+						AosAttribute_SpellDamage = 2,
+						AosAttribute_CastRecovery = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_LowerManaCost = 3,
+						AosAttribute_LowerRegCost = 3,
+						AosWeaponAttribute_HitLightning = 20,
+						AosArmorAttribute_SelfRepair = 1
 					}); break;
 				case CraftResource.TeejTree:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1882,14 +1882,14 @@ namespace Server.Items
 						Slayer2 = SlayerName.SnakesBane,
 						Skill5 = 99,
 						Skill5Val = 2,
-						// AosAttribute_BonusHits = 2,
-						// AosAttribute_BonusStam = 2,
-						// AosAttribute_WeaponDamage = 9,
-						// AosAttribute_WeaponSpeed = 12,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosWeaponAttribute_HitLeechHits = 10,
-						// AosWeaponAttribute_HitLeechStam = 10,
-						// AosArmorAttribute_SelfRepair = 1
+						AosAttribute_BonusHits = 2,
+						AosAttribute_BonusStam = 2,
+						AosAttribute_WeaponDamage = 9,
+						AosAttribute_WeaponSpeed = 12,
+						AosAttribute_ReflectPhysical = 3,
+						AosWeaponAttribute_HitLeechHits = 10,
+						AosWeaponAttribute_HitLeechStam = 10,
+						AosArmorAttribute_SelfRepair = 1
 					}); break;
 				case CraftResource.VeshokTree:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1897,14 +1897,14 @@ namespace Server.Items
 						Slayer2 = SlayerName.SummerWind,
 						Skill5 = 22,
 						Skill5Val = 2,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_WeaponDamage = 10,
-						// AosAttribute_WeaponSpeed = 13,
-						// AosAttribute_EnhancePotions = 12,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitLeechStam = 10,
-						// AosWeaponAttribute_HitLeechMana = 10,
-						// AosArmorAttribute_SelfRepair = 2
+						AosAttribute_BonusInt = 1,
+						AosAttribute_WeaponDamage = 10,
+						AosAttribute_WeaponSpeed = 13,
+						AosAttribute_EnhancePotions = 12,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitLeechStam = 10,
+						AosWeaponAttribute_HitLeechMana = 10,
+						AosArmorAttribute_SelfRepair = 2
 					}); break;
 
 				case CraftResource.Fabric:
@@ -1914,39 +1914,39 @@ namespace Server.Items
 				case CraftResource.SilkFabric:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
-						// AosAttribute_BonusDex = 2,
-						// AosAttribute_EnhancePotions = 2,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_BonusDex = 2,
+						AosAttribute_EnhancePotions = 2,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.HauntedFabric:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Skill5 = 44,
 						Skill5Val = 2,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_EnhancePotions = 5,
-						// AosAttribute_NightSight = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_EnhancePotions = 5,
+						AosAttribute_NightSight = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.ArcticFabric:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Slayer2 = SlayerName.FlameDousing,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_EnhancePotions = 7,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenStam = 1,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_EnhancePotions = 7,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.PyreFabric:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Slayer2 = SlayerName.WaterDissipation,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_EnhancePotions = 7,
-						// AosWeaponAttribute_HitFireball = 10,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenStam = 1,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_EnhancePotions = 7,
+						AosWeaponAttribute_HitFireball = 10,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.VenomousFabric:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1954,11 +1954,11 @@ namespace Server.Items
 						Slayer2 = SlayerName.ElementalHealth,
 						Skill5 = 40,
 						Skill5Val = 2,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_EnhancePotions = 7,
-						// AosWeaponAttribute_HitPoisonArea = 10,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenHits = 1,
+						AosAttribute_BonusDex = 1,
+						AosAttribute_EnhancePotions = 7,
+						AosWeaponAttribute_HitPoisonArea = 10,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.MysteriousFabric:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1968,21 +1968,21 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 32,
 						Skill4Val = 2,
-						// AosAttribute_RegenMana = 2,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_SpellDamage = 2,
-						// AosAttribute_CastRecovery = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_LowerRegCost = 3,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_EnhancePotions = 10,
-						// AosAttribute_SpellChanneling = 1,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitLeechMana = 15,
-						// AosWeaponAttribute_HitMagicArrow = 10,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 2,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_SpellDamage = 2,
+						AosAttribute_CastRecovery = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_LowerRegCost = 3,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_EnhancePotions = 10,
+						AosAttribute_SpellChanneling = 1,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitLeechMana = 15,
+						AosWeaponAttribute_HitMagicArrow = 10,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.VileFabric:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -1992,18 +1992,18 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 36,
 						Skill4Val = 2,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_AttackChance = 8,
-						// AosAttribute_BonusStr = 2,
-						// AosAttribute_BonusStam = 3,
-						// AosAttribute_WeaponDamage = 7,
-						// AosAttribute_WeaponSpeed = 7,
-						// AosAttribute_EnhancePotions = 10,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitLeechHits = 15,
-						// AosWeaponAttribute_HitHarm = 10,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenHits = 1,
+						AosAttribute_RegenStam = 1,
+						AosAttribute_AttackChance = 8,
+						AosAttribute_BonusStr = 2,
+						AosAttribute_BonusStam = 3,
+						AosAttribute_WeaponDamage = 7,
+						AosAttribute_WeaponSpeed = 7,
+						AosAttribute_EnhancePotions = 10,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitLeechHits = 15,
+						AosWeaponAttribute_HitHarm = 10,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.DivineFabric:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2013,22 +2013,22 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 13,
 						Skill4Val = 2,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_AttackChance = 5,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_BonusHits = 3,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosAttribute_EnhancePotions = 12,
-						// AosAttribute_SpellChanneling = 1,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_SelfRepair = 2,
-						// AosWeaponAttribute_HitLightning = 10,
-						// AosArmorAttribute_SelfRepair = 2,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenHits = 1,
+						AosAttribute_RegenMana = 1,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_AttackChance = 5,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_BonusHits = 3,
+						AosAttribute_ReflectPhysical = 3,
+						AosAttribute_EnhancePotions = 12,
+						AosAttribute_SpellChanneling = 1,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_SelfRepair = 2,
+						AosWeaponAttribute_HitLightning = 10,
+						AosArmorAttribute_SelfRepair = 2,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.FiendishFabric:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2038,19 +2038,19 @@ namespace Server.Items
 						Skill5Val = 4,
 						Skill4 = 32,
 						Skill4Val = 2,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_AttackChance = 5,
-						// AosAttribute_BonusStr = 2,
-						// AosAttribute_BonusInt = 2,
-						// AosAttribute_BonusMana = 3,
-						// AosAttribute_LowerManaCost = 3,
-						// AosAttribute_EnhancePotions = 12,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitLowerAttack = 15,
-						// AosWeaponAttribute_HitFireball = 10,
-						// AosWeaponAttribute_HitFireArea = 15,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenStam = 1,
+						AosAttribute_RegenMana = 1,
+						AosAttribute_AttackChance = 5,
+						AosAttribute_BonusStr = 2,
+						AosAttribute_BonusInt = 2,
+						AosAttribute_BonusMana = 3,
+						AosAttribute_LowerManaCost = 3,
+						AosAttribute_EnhancePotions = 12,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitLowerAttack = 15,
+						AosWeaponAttribute_HitFireball = 10,
+						AosWeaponAttribute_HitFireArea = 15,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 
 				case CraftResource.AmethystBlock:
@@ -2061,9 +2061,9 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 48,
 						Skill4Val = 2,
-						// AosAttribute_DefendChance = 3,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosWeaponAttribute_HitPhysicalArea = 80
+						AosAttribute_DefendChance = 3,
+						AosAttribute_ReflectPhysical = 3,
+						AosWeaponAttribute_HitPhysicalArea = 80
 					}); break;
 				case CraftResource.EmeraldBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2071,38 +2071,38 @@ namespace Server.Items
 						Slayer2 = SlayerName.WeedRuin,
 						Skill5 = 40,
 						Skill5Val = 2,
-						// AosAttribute_RegenHits = 1,
-						// AosAttribute_RegenStam = 1,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_ReflectPhysical = 3
+						AosAttribute_RegenHits = 1,
+						AosAttribute_RegenStam = 1,
+						AosAttribute_RegenMana = 1,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_ReflectPhysical = 3
 					}); break;
 				case CraftResource.GarnetBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Slayer2 = SlayerName.ElementalHealth,
-						// AosAttribute_RegenMana = 2,
-						// AosAttribute_BonusInt = 2,
-						// AosAttribute_SpellDamage = 2,
-						// AosAttribute_CastRecovery = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_LowerManaCost = 3,
-						// AosAttribute_LowerRegCost = 3,
-						// AosAttribute_SpellChanneling = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 2,
+						AosAttribute_BonusInt = 2,
+						AosAttribute_SpellDamage = 2,
+						AosAttribute_CastRecovery = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_LowerManaCost = 3,
+						AosAttribute_LowerRegCost = 3,
+						AosAttribute_SpellChanneling = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.IceBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Slayer2 = SlayerName.FlameDousing,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_AttackChance = 5,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitColdArea = 25
+						AosAttribute_RegenStam = 2,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_AttackChance = 5,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitColdArea = 25
 					}); break;
 				case CraftResource.JadeBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2112,11 +2112,11 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 9,
 						Skill4Val = 2,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_AttackChance = 5,
-						// AosAttribute_BonusDex = 2,
-						// AosAttribute_NightSight = 1
+						AosAttribute_RegenStam = 2,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_AttackChance = 5,
+						AosAttribute_BonusDex = 2,
+						AosAttribute_NightSight = 1
 					}); break;
 				case CraftResource.MarbleBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2125,10 +2125,10 @@ namespace Server.Items
 						Slayer = SlayerName.GolemDestruction,
 						Skill5 = 99,
 						Skill5Val = 3,
-						// AosAttribute_DefendChance = 7,
-						// AosAttribute_BonusStr = 3,
-						// AosAttribute_WeaponDamage = 8,
-						// AosAttribute_ReflectPhysical = 2
+						AosAttribute_DefendChance = 7,
+						AosAttribute_BonusStr = 3,
+						AosAttribute_WeaponDamage = 8,
+						AosAttribute_ReflectPhysical = 2
 					}); break;
 				case CraftResource.OnyxBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2137,40 +2137,40 @@ namespace Server.Items
 						Slayer = SlayerName.Repond,
 						Skill5 = 36,
 						Skill5Val = 2,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_AttackChance = 5,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_BonusMana = 2,
-						// AosAttribute_WeaponDamage = 7,
-						// AosAttribute_SpellDamage = 2,
-						// AosAttribute_CastRecovery = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_LowerManaCost = 3,
-						// AosAttribute_LowerRegCost = 3,
-						// AosAttribute_SpellChanneling = 1,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitLeechMana = 5,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenStam = 2,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_AttackChance = 5,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_BonusMana = 2,
+						AosAttribute_WeaponDamage = 7,
+						AosAttribute_SpellDamage = 2,
+						AosAttribute_CastRecovery = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_LowerManaCost = 3,
+						AosAttribute_LowerRegCost = 3,
+						AosAttribute_SpellChanneling = 1,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitLeechMana = 5,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.QuartzBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Slayer2 = SlayerName.WaterDissipation,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_AttackChance = 8,
-						// AosAttribute_BonusDex = 3,
-						// AosAttribute_ReflectPhysical = 2
+						AosAttribute_DefendChance = 5,
+						AosAttribute_AttackChance = 8,
+						AosAttribute_BonusDex = 3,
+						AosAttribute_ReflectPhysical = 2
 					}); break;
 				case CraftResource.RubyBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Slayer2 = SlayerName.BloodDrinking,
-						// AosAttribute_DefendChance = 7,
-						// AosAttribute_AttackChance = 7,
-						// AosAttribute_BonusStr = 2,
-						// AosWeaponAttribute_HitFireball = 10,
-						// AosWeaponAttribute_HitFireArea = 20
+						AosAttribute_DefendChance = 7,
+						AosAttribute_AttackChance = 7,
+						AosAttribute_BonusStr = 2,
+						AosWeaponAttribute_HitFireball = 10,
+						AosWeaponAttribute_HitFireArea = 20
 					}); break;
 				case CraftResource.SapphireBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2184,12 +2184,12 @@ namespace Server.Items
 						Skill3Val = 3,
 						Skill2 = 33,
 						Skill2Val = 3,
-						// AosAttribute_RegenMana = 2,
-						// AosAttribute_BonusInt = 2,
-						// AosAttribute_SpellDamage = 2,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_SpellChanneling = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 2,
+						AosAttribute_BonusInt = 2,
+						AosAttribute_SpellDamage = 2,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_SpellChanneling = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.SilverBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2197,23 +2197,23 @@ namespace Server.Items
 						Slayer2 = SlayerName.Silver,
 						Skill5 = 13,
 						Skill5Val = 2,
-						// AosAttribute_RegenHits = 2,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_DefendChance = 7,
-						// AosAttribute_AttackChance = 9,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_NightSight = 1
+						AosAttribute_RegenHits = 2,
+						AosAttribute_RegenStam = 2,
+						AosAttribute_DefendChance = 7,
+						AosAttribute_AttackChance = 9,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_NightSight = 1
 					}); break;
 				case CraftResource.SpinelBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Slayer2 = SlayerName.Fey,
-						// AosAttribute_RegenMana = 2,
-						// AosAttribute_WeaponDamage = 8,
-						// AosAttribute_LowerManaCost = 3,
-						// AosAttribute_LowerRegCost = 3,
-						// AosAttribute_SpellChanneling = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 2,
+						AosAttribute_WeaponDamage = 8,
+						AosAttribute_LowerManaCost = 3,
+						AosAttribute_LowerRegCost = 3,
+						AosAttribute_SpellChanneling = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.StarRubyBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2221,21 +2221,21 @@ namespace Server.Items
 						Slayer2 = SlayerName.GargoylesFoe,
 						Skill5 = 55,
 						Skill5Val = 2,
-						// AosAttribute_RegenHits = 2,
-						// AosAttribute_DefendChance = 7,
-						// AosAttribute_AttackChance = 8,
-						// AosAttribute_BonusStr = 2,
-						// AosAttribute_WeaponDamage = 8
+						AosAttribute_RegenHits = 2,
+						AosAttribute_DefendChance = 7,
+						AosAttribute_AttackChance = 8,
+						AosAttribute_BonusStr = 2,
+						AosAttribute_WeaponDamage = 8
 					}); break;
 				case CraftResource.TopazBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Slayer2 = SlayerName.ReptilianDeath,
-						// AosAttribute_RegenHits = 2,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_WeaponDamage = 7,
-						// AosWeaponAttribute_SelfRepair = 2,
-						// AosArmorAttribute_SelfRepair = 2
+						AosAttribute_RegenHits = 2,
+						AosAttribute_RegenStam = 2,
+						AosAttribute_WeaponDamage = 7,
+						AosWeaponAttribute_SelfRepair = 2,
+						AosArmorAttribute_SelfRepair = 2
 					}); break;
 				case CraftResource.CaddelliteBlock:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2245,12 +2245,12 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 32,
 						Skill4Val = 3,
-						// AosAttribute_WeaponDamage = 9,
-						// AosWeaponAttribute_SelfRepair = 2,
-						// AosWeaponAttribute_HitLeechMana = 5,
-						// AosWeaponAttribute_HitLightning = 10,
-						// AosWeaponAttribute_HitEnergyArea = 30,
-						// AosArmorAttribute_SelfRepair = 2
+						AosAttribute_WeaponDamage = 9,
+						AosWeaponAttribute_SelfRepair = 2,
+						AosWeaponAttribute_HitLeechMana = 5,
+						AosWeaponAttribute_HitLightning = 10,
+						AosWeaponAttribute_HitEnergyArea = 30,
+						AosArmorAttribute_SelfRepair = 2
 					}); break;
 
 				case CraftResource.DemonSkin:
@@ -2259,15 +2259,15 @@ namespace Server.Items
 						Slayer2 = SlayerName.DaemonDismissal,
 						Skill5 = 32,
 						Skill5Val = 2,
-						// AosAttribute_RegenMana = 2,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_SpellDamage = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_LowerManaCost = 3,
-						// AosAttribute_LowerRegCost = 3,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_NightSight = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 2,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_SpellDamage = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_LowerManaCost = 3,
+						AosAttribute_LowerRegCost = 3,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_NightSight = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.DragonSkin:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2275,25 +2275,25 @@ namespace Server.Items
 						Slayer2 = SlayerName.DragonSlaying,
 						Skill5 = 99,
 						Skill5Val = 2,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosWeaponAttribute_HitFireball = 20
+						AosAttribute_RegenStam = 2,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_ReflectPhysical = 3,
+						AosWeaponAttribute_HitFireball = 20
 					}); break;
 				case CraftResource.NightmareSkin:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Skill5 = 99,
 						Skill5Val = 2,
-						// AosAttribute_BonusMana = 2,
-						// AosAttribute_LowerManaCost = 2,
-						// AosAttribute_SpellChanneling = 1,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitLowerAttack = 25,
-						// AosWeaponAttribute_HitLowerDefend = 25,
-						// AosWeaponAttribute_HitHarm = 20,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_BonusMana = 2,
+						AosAttribute_LowerManaCost = 2,
+						AosAttribute_SpellChanneling = 1,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitLowerAttack = 25,
+						AosWeaponAttribute_HitLowerDefend = 25,
+						AosWeaponAttribute_HitHarm = 20,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.SnakeSkin:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2301,38 +2301,38 @@ namespace Server.Items
 						Slayer2 = SlayerName.SnakesBane,
 						Skill5 = 40,
 						Skill5Val = 2,
-						// AosAttribute_DefendChance = 6,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosWeaponAttribute_HitPoisonArea = 25,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_DefendChance = 6,
+						AosAttribute_BonusDex = 1,
+						AosAttribute_CastSpeed = 1,
+						AosWeaponAttribute_HitPoisonArea = 25,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.TrollSkin:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Slayer2 = SlayerName.TrollSlaughter,
-						// AosAttribute_RegenHits = 2,
-						// AosAttribute_BonusStr = 1,
-						// AosWeaponAttribute_SelfRepair = 3,
-						// AosArmorAttribute_SelfRepair = 3
+						AosAttribute_RegenHits = 2,
+						AosAttribute_BonusStr = 1,
+						AosWeaponAttribute_SelfRepair = 3,
+						AosArmorAttribute_SelfRepair = 3
 					}); break;
 				case CraftResource.UnicornSkin:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
 					{
 						Skill5 = 99,
 						Skill5Val = 2,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_BonusMana = 2,
-						// AosAttribute_SpellDamage = 2,
-						// AosAttribute_CastRecovery = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_LowerManaCost = 3,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitLowerAttack = 25,
-						// AosWeaponAttribute_HitLowerDefend = 25,
-						// AosWeaponAttribute_HitMagicArrow = 30,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 1,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_BonusMana = 2,
+						AosAttribute_SpellDamage = 2,
+						AosAttribute_CastRecovery = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_LowerManaCost = 3,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitLowerAttack = 25,
+						AosWeaponAttribute_HitLowerDefend = 25,
+						AosWeaponAttribute_HitMagicArrow = 30,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.IcySkin:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2340,11 +2340,11 @@ namespace Server.Items
 						Slayer2 = SlayerName.FlameDousing,
 						Skill5 = 99,
 						Skill5Val = 2,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosWeaponAttribute_HitColdArea = 20
+						AosAttribute_RegenStam = 2,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_ReflectPhysical = 3,
+						AosWeaponAttribute_HitColdArea = 20
 					}); break;
 				case CraftResource.LavaSkin:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2352,11 +2352,11 @@ namespace Server.Items
 						Slayer2 = SlayerName.WaterDissipation,
 						Skill5 = 99,
 						Skill5Val = 2,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosWeaponAttribute_HitFireArea = 20
+						AosAttribute_RegenStam = 2,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_ReflectPhysical = 3,
+						AosWeaponAttribute_HitFireArea = 20
 					}); break;
 				case CraftResource.Seaweed:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2364,12 +2364,12 @@ namespace Server.Items
 						Slayer2 = SlayerName.NeptunesBane,
 						Skill5 = 19,
 						Skill5Val = 2,
-						// AosAttribute_RegenHits = 2,
-						// AosAttribute_LowerRegCost = 4,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitLightning = 20,
-						// AosWeaponAttribute_HitPoisonArea = 30,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenHits = 2,
+						AosAttribute_LowerRegCost = 4,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitLightning = 20,
+						AosWeaponAttribute_HitPoisonArea = 30,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.DeadSkin:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2379,12 +2379,12 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 22,
 						Skill4Val = 5,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_SelfRepair = 2
+						AosAttribute_RegenStam = 2,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_SelfRepair = 2
 					}); break;
 
 				case CraftResource.BrittleSkeletal:
@@ -2437,17 +2437,17 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 22,
 						Skill4Val = 1,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_BonusMana = 3,
-						// AosAttribute_SpellDamage = 2,
-						// AosAttribute_CastRecovery = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_LowerRegCost = 3,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitMagicArrow = 15,
-						// AosWeaponAttribute_HitDispel = 10,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 1,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_BonusMana = 3,
+						AosAttribute_SpellDamage = 2,
+						AosAttribute_CastRecovery = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_LowerRegCost = 3,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitMagicArrow = 15,
+						AosWeaponAttribute_HitDispel = 10,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.VampireSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2457,15 +2457,15 @@ namespace Server.Items
 						Skill5Val = 2,
 						Skill4 = 22,
 						Skill4Val = 1,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_DefendChance = 5,
-						// AosAttribute_BonusStam = 2,
-						// AosAttribute_LowerManaCost = 3,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitLeechHits = 10,
-						// AosWeaponAttribute_HitHarm = 10,
-						// AosWeaponAttribute_HitColdArea = 15
+						AosAttribute_RegenStam = 2,
+						AosAttribute_DefendChance = 5,
+						AosAttribute_BonusStam = 2,
+						AosAttribute_LowerManaCost = 3,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitLeechHits = 10,
+						AosWeaponAttribute_HitHarm = 10,
+						AosWeaponAttribute_HitColdArea = 15
 					}); break;
 				case CraftResource.LichSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2475,18 +2475,18 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 22,
 						Skill4Val = 1,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_BonusMana = 3,
-						// AosAttribute_SpellDamage = 2,
-						// AosAttribute_CastRecovery = 1,
-						// AosAttribute_CastSpeed = 1,
-						// AosAttribute_LowerRegCost = 3,
-						// AosAttribute_EnhancePotions = 2,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitLeechMana = 5,
-						// AosWeaponAttribute_HitDispel = 5,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 1,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_BonusMana = 3,
+						AosAttribute_SpellDamage = 2,
+						AosAttribute_CastRecovery = 1,
+						AosAttribute_CastSpeed = 1,
+						AosAttribute_LowerRegCost = 3,
+						AosAttribute_EnhancePotions = 2,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitLeechMana = 5,
+						AosWeaponAttribute_HitDispel = 5,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.SphinxSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2496,14 +2496,14 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 22,
 						Skill4Val = 2,
-						// AosAttribute_WeaponDamage = 3,
-						// AosAttribute_LowerManaCost = 3,
-						// AosAttribute_ReflectPhysical = 3,
-						// AosWeaponAttribute_HitLowerAttack = 5,
-						// AosWeaponAttribute_HitLowerDefend = 5,
-						// AosWeaponAttribute_HitLightning = 10,
-						// AosWeaponAttribute_HitPhysicalArea = 20,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_WeaponDamage = 3,
+						AosAttribute_LowerManaCost = 3,
+						AosAttribute_ReflectPhysical = 3,
+						AosWeaponAttribute_HitLowerAttack = 5,
+						AosWeaponAttribute_HitLowerDefend = 5,
+						AosWeaponAttribute_HitLightning = 10,
+						AosWeaponAttribute_HitPhysicalArea = 20,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.DevilSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2513,15 +2513,15 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 22,
 						Skill4Val = 2,
-						// AosAttribute_RegenMana = 1,
-						// AosAttribute_BonusInt = 2,
-						// AosAttribute_BonusStam = 2,
-						// AosAttribute_SpellDamage = 2,
-						// AosAttribute_LowerRegCost = 5,
-						// AosWeaponAttribute_SelfRepair = 1,
-						// AosWeaponAttribute_HitFireArea = 15,
-						// AosArmorAttribute_SelfRepair = 1,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_RegenMana = 1,
+						AosAttribute_BonusInt = 2,
+						AosAttribute_BonusStam = 2,
+						AosAttribute_SpellDamage = 2,
+						AosAttribute_LowerRegCost = 5,
+						AosWeaponAttribute_SelfRepair = 1,
+						AosWeaponAttribute_HitFireArea = 15,
+						AosArmorAttribute_SelfRepair = 1,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.DracoSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2531,13 +2531,13 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 22,
 						Skill4Val = 2,
-						// AosAttribute_AttackChance = 5,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_BonusHits = 3,
-						// AosAttribute_WeaponDamage = 5,
-						// AosAttribute_WeaponSpeed = 3,
-						// AosWeaponAttribute_HitFireball = 25,
-						// AosWeaponAttribute_HitFireArea = 25
+						AosAttribute_AttackChance = 5,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_BonusHits = 3,
+						AosAttribute_WeaponDamage = 5,
+						AosAttribute_WeaponSpeed = 3,
+						AosWeaponAttribute_HitFireball = 25,
+						AosWeaponAttribute_HitFireArea = 25
 					}); break;
 				case CraftResource.XenoSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2547,13 +2547,13 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 22,
 						Skill4Val = 3,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusStam = 2,
-						// AosAttribute_WeaponDamage = 3,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitEnergyArea = 15,
-						// AosArmorAttribute_SelfRepair = 1
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusStam = 2,
+						AosAttribute_WeaponDamage = 3,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitEnergyArea = 15,
+						AosArmorAttribute_SelfRepair = 1
 					}); break;
 				case CraftResource.AndorianSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2563,9 +2563,9 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 22,
 						Skill4Val = 2,
-						// AosAttribute_EnhancePotions = 5,
-						// AosWeaponAttribute_HitLowerAttack = 10,
-						// AosWeaponAttribute_HitColdArea = 20
+						AosAttribute_EnhancePotions = 5,
+						AosWeaponAttribute_HitLowerAttack = 10,
+						AosWeaponAttribute_HitColdArea = 20
 					}); break;
 				case CraftResource.CardassianSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2575,15 +2575,15 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 22,
 						Skill4Val = 2,
-						// AosAttribute_DefendChance = 3,
-						// AosAttribute_BonusMana = 2,
-						// AosAttribute_WeaponDamage = 2,
-						// AosAttribute_SpellChanneling = 1,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_SelfRepair = 1,
-						// AosWeaponAttribute_HitFireArea = 10,
-						// AosWeaponAttribute_HitEnergyArea = 10,
-						// AosArmorAttribute_SelfRepair = 1
+						AosAttribute_DefendChance = 3,
+						AosAttribute_BonusMana = 2,
+						AosAttribute_WeaponDamage = 2,
+						AosAttribute_SpellChanneling = 1,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_SelfRepair = 1,
+						AosWeaponAttribute_HitFireArea = 10,
+						AosWeaponAttribute_HitEnergyArea = 10,
+						AosArmorAttribute_SelfRepair = 1
 					}); break;
 				case CraftResource.MartianSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2593,11 +2593,11 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 22,
 						Skill4Val = 2,
-						// AosAttribute_RegenHits = 2,
-						// AosAttribute_RegenStam = 2,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_NightSight = 1,
-						// AosWeaponAttribute_HitPoisonArea = 20
+						AosAttribute_RegenHits = 2,
+						AosAttribute_RegenStam = 2,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_NightSight = 1,
+						AosWeaponAttribute_HitPoisonArea = 20
 					}); break;
 				case CraftResource.RodianSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2607,13 +2607,13 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 22,
 						Skill4Val = 2,
-						// AosAttribute_AttackChance = 3,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosAttribute_EnhancePotions = 2,
-						// AosWeaponAttribute_HitPoisonArea = 10,
-						// AosWeaponAttribute_HitEnergyArea = 10,
-						// AosArmorAttribute_MageArmor = 1
+						AosAttribute_AttackChance = 3,
+						AosAttribute_BonusInt = 1,
+						AosAttribute_ReflectPhysical = 2,
+						AosAttribute_EnhancePotions = 2,
+						AosWeaponAttribute_HitPoisonArea = 10,
+						AosWeaponAttribute_HitEnergyArea = 10,
+						AosArmorAttribute_MageArmor = 1
 					}); break;
 				case CraftResource.TuskenSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2623,10 +2623,10 @@ namespace Server.Items
 						Skill5Val = 3,
 						Skill4 = 22,
 						Skill4Val = 2,
-						// AosAttribute_BonusHits = 2,
-						// AosAttribute_WeaponDamage = 4,
-						// AosWeaponAttribute_HitFireArea = 20,
-						// AosWeaponAttribute_HitPhysicalArea = 25
+						AosAttribute_BonusHits = 2,
+						AosAttribute_WeaponDamage = 4,
+						AosWeaponAttribute_HitFireArea = 20,
+						AosWeaponAttribute_HitPhysicalArea = 25
 					}); break;
 				case CraftResource.TwilekSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2638,11 +2638,11 @@ namespace Server.Items
 						Skill4Val = 3,
 						Skill3 = 16,
 						Skill3Val = 2,
-						// AosAttribute_DefendChance = 3,
-						// AosAttribute_BonusStr = 1,
-						// AosAttribute_SpellChanneling = 1,
-						// AosWeaponAttribute_HitLightning = 5,
-						// AosWeaponAttribute_HitEnergyArea = 20
+						AosAttribute_DefendChance = 3,
+						AosAttribute_BonusStr = 1,
+						AosAttribute_SpellChanneling = 1,
+						AosWeaponAttribute_HitLightning = 5,
+						AosWeaponAttribute_HitEnergyArea = 20
 					}); break;
 				case CraftResource.XindiSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2652,11 +2652,11 @@ namespace Server.Items
 						Skill5Val = 4,
 						Skill4 = 48,
 						Skill4Val = 3,
-						// AosAttribute_BonusInt = 1,
-						// AosAttribute_ReflectPhysical = 2,
-						// AosWeaponAttribute_HitColdArea = 10,
-						// AosWeaponAttribute_HitPoisonArea = 10,
-						// AosWeaponAttribute_HitEnergyArea = 10
+						AosAttribute_BonusInt = 1,
+						AosAttribute_ReflectPhysical = 2,
+						AosWeaponAttribute_HitColdArea = 10,
+						AosWeaponAttribute_HitPoisonArea = 10,
+						AosWeaponAttribute_HitEnergyArea = 10
 					}); break;
 				case CraftResource.ZabrakSkeletal:
 					ResourceMods.ModifyItem(item, resource, reduce, new ResourceModInfo
@@ -2668,15 +2668,15 @@ namespace Server.Items
 						Skill4Val = 3,
 						Skill3 = 38,
 						Skill3Val = 2,
-						// AosAttribute_AttackChance = 3,
-						// AosAttribute_BonusDex = 1,
-						// AosAttribute_BonusStam = 2,
-						// AosAttribute_WeaponDamage = 3,
-						// AosWeaponAttribute_SelfRepair = 2,
-						// AosWeaponAttribute_HitLeechStam = 5,
-						// AosWeaponAttribute_HitFireArea = 10,
-						// AosWeaponAttribute_HitEnergyArea = 10,
-						// AosArmorAttribute_SelfRepair = 2
+						AosAttribute_AttackChance = 3,
+						AosAttribute_BonusDex = 1,
+						AosAttribute_BonusStam = 2,
+						AosAttribute_WeaponDamage = 3,
+						AosWeaponAttribute_SelfRepair = 2,
+						AosWeaponAttribute_HitLeechStam = 5,
+						AosWeaponAttribute_HitFireArea = 10,
+						AosWeaponAttribute_HitEnergyArea = 10,
+						AosArmorAttribute_SelfRepair = 2
 					}); break;
 			}
 		}
