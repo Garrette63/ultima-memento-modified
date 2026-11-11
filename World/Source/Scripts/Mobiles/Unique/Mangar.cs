@@ -331,33 +331,30 @@ namespace Server.Items
 					if ( 50 <= from.Skills[SkillName.Musicianship].Value ){ IamBard = (int)from.Skills[SkillName.Musicianship].Value; }
 					if ( 50 <= from.Skills[SkillName.Elementalism].Value ){ IamElemental = (int)from.Skills[SkillName.Elementalism].Value; }
 
-					if ( !Server.Misc.PlayerSettings.GetSpecialsKilled( from, "Mangar" ) )
-					{
-						Server.Misc.PlayerSettings.SetSpecialsKilled( from, "Mangar", true );
-						ManualOfItems lexicon = new ManualOfItems();
-							lexicon.Hue = 0x497;
-							lexicon.Name = "Chest of Mangar Relics";
-							lexicon.m_Charges = 1;
-							lexicon.m_Skill_1 = 17;
-							lexicon.m_Skill_2 = 31;
-							lexicon.m_Skill_3 = 32;
-							lexicon.m_Skill_4 = 33;
-							lexicon.m_Skill_5 = 36;
-							lexicon.m_Value_1 = 5.0;
-							lexicon.m_Value_2 = 5.0;
-							lexicon.m_Value_3 = 5.0;
-							lexicon.m_Value_4 = 5.0;
-							lexicon.m_Value_5 = 5.0;
-							lexicon.m_Slayer_1 = 0;
-							lexicon.m_Slayer_2 = 0;
-							lexicon.m_Owner = from;
-							lexicon.m_Extra = "of Mangar the Dark";
-							lexicon.m_FromWho = "Taken from Mangar";
-							lexicon.m_HowGiven = "Acquired by";
-							lexicon.m_Points = 200;
-							lexicon.m_Hue = 0x497;
-							MyChest.DropItem( lexicon );
-					}
+					Server.Misc.PlayerSettings.SetSpecialsKilled( from, "Mangar", true );
+					ManualOfItems lexicon = new ManualOfItems();
+						lexicon.Hue = 0x497;
+						lexicon.Name = "Chest of Mangar Relics";
+						lexicon.m_Charges = 1;
+						lexicon.m_Skill_1 = 17;
+						lexicon.m_Skill_2 = 31;
+						lexicon.m_Skill_3 = 32;
+						lexicon.m_Skill_4 = 33;
+						lexicon.m_Skill_5 = 36;
+						lexicon.m_Value_1 = 5.0;
+						lexicon.m_Value_2 = 5.0;
+						lexicon.m_Value_3 = 5.0;
+						lexicon.m_Value_4 = 5.0;
+						lexicon.m_Value_5 = 5.0;
+						lexicon.m_Slayer_1 = 0;
+						lexicon.m_Slayer_2 = 0;
+						lexicon.m_Owner = from;
+						lexicon.m_Extra = "of Mangar the Dark";
+						lexicon.m_FromWho = "Taken from Mangar";
+						lexicon.m_HowGiven = "Acquired by";
+						lexicon.m_Points = 300;
+						lexicon.m_Hue = 0x497;
+						MyChest.DropItem( lexicon );
 
 					var highestSkill = Math.Max( Math.Max( IamMage, IamNecro ), Math.Max( IamElemental, IamBard ) );
 					if ( highestSkill > 0 )

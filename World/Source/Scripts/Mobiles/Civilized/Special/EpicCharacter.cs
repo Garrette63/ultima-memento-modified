@@ -59,7 +59,7 @@ namespace Server.Mobiles
 			Body = 400;
 			MyItemText = "";
 			MyItemHue = 0;
-			MyItemPower = 150;
+			MyItemPower = 300;
 			MyAlignment = "neutral";
 			AI = AIType.AI_Citizen;
 			FightMode = FightMode.None;
@@ -1177,7 +1177,7 @@ namespace Server.Mobiles
 						Type itemType = ScriptCompiler.FindTypeByName( sType );
 						var reward = (Item)Activator.CreateInstance(itemType);
 
-						int points = tribute.MyItemPower;
+						int points = 300;
 						if ( reward is IGiftable )
 						{
 							var gift = (IGiftable)reward;

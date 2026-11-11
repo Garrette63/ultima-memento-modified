@@ -170,7 +170,7 @@ namespace Server.Mobiles
 						{
 							foreach ( PartyMemberInfo pmi in p.Members )
 							{
-								if ( pmi.Mobile is PlayerMobile && pmi.Mobile.InRange(this.Location, 20) && pmi.Mobile.Map == this.Map && !pmi.Mobile.Blessed && !Server.Misc.PlayerSettings.GetSpecialsKilled( pmi.Mobile, this.Name ) )
+								if ( pmi.Mobile is PlayerMobile && pmi.Mobile.InRange(this.Location, 20) && pmi.Mobile.Map == this.Map && !pmi.Mobile.Blessed )
 								{
 									Server.Misc.PlayerSettings.SetSpecialsKilled( pmi.Mobile, this.Name, true );
 									ManualOfItems book = new ManualOfItems();
@@ -193,7 +193,7 @@ namespace Server.Mobiles
 										book.m_Extra = "of the Shadows";
 										book.m_FromWho = "Spawned from the Shadowlords";
 										book.m_HowGiven = "Acquired by";
-										book.m_Points = 200;
+										book.m_Points = 300;
 										book.m_Hue = 0x541;
 										pmi.Mobile.AddToBackpack( book );
 
@@ -201,7 +201,7 @@ namespace Server.Mobiles
 								}
 							}
 						}
-						else if ( !Server.Misc.PlayerSettings.GetSpecialsKilled( winner, this.Name ) )
+						else
 						{
 							Server.Misc.PlayerSettings.SetSpecialsKilled( winner, this.Name, true );
 							ManualOfItems book = new ManualOfItems();
@@ -224,7 +224,7 @@ namespace Server.Mobiles
 								book.m_Extra = "of the Shadows";
 								book.m_FromWho = "Spawned from the Shadowlords";
 								book.m_HowGiven = "Acquired by";
-								book.m_Points = 200;
+								book.m_Points = 300;
 								book.m_Hue = 0x541;
 								winner.AddToBackpack( book );
 

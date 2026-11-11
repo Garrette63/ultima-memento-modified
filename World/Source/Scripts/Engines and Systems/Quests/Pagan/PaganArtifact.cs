@@ -155,7 +155,7 @@ namespace Server.Items
 			{
 				Mobile from = sender.Mobile;
 
-				if ( m_Artifact.PaganPoints < 1 ){ m_Artifact.PaganPoints = Utility.RandomMinMax( 80, 100 ); }
+				if ( m_Artifact.PaganPoints < 1 ){ m_Artifact.PaganPoints = 150; }
 
 				from.SendSound( 0x2C );
 

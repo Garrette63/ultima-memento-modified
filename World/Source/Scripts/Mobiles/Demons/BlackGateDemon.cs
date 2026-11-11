@@ -111,7 +111,7 @@ namespace Server.Mobiles
 			int killerLuck = MobileUtilities.GetLuckFromKiller( this );
 			PlayerMobile killer = MobileUtilities.TryGetKillingPlayer( this );
 
-			if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 && !Server.Misc.PlayerSettings.GetSpecialsKilled( killer, "BlackGateDemon" ) )
+			if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 )
 			{
 				Server.Misc.PlayerSettings.SetSpecialsKilled( killer, "BlackGateDemon", true );
 				ManualOfItems book = new ManualOfItems();
@@ -134,7 +134,7 @@ namespace Server.Mobiles
 					book.m_Extra = "of the Black Gate";
 					book.m_FromWho = "Found within the Black Gate";
 					book.m_HowGiven = "Acquired by";
-					book.m_Points = 150;
+					book.m_Points = 300;
 					book.m_Hue = 0x497;
 					MyChest.AddItem( book );
 			}

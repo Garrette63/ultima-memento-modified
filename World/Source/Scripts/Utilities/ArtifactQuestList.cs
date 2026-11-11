@@ -1,10 +1,30 @@
+using System;
 using Server.Items;
 
 namespace Server.Utilities
 {
 	public static class ArtifactQuestList
 	{
-		public const int MaxNumber = 308;
+		/// <summary>
+		/// The highest valid artefact number in the catalogue below. This is calculated once
+		/// from <see cref="GetArtifact" /> rather than being maintained by hand, so it can never
+		/// fall out of sync when artefacts are added to or removed from the list.
+		/// </summary>
+		public static readonly int MaxNumber = CountArtifacts();
+
+		/// <summary>
+		/// Counts the catalogue by walking it until <see cref="GetArtifact" /> returns no type
+		/// name, which only happens once the end of the list has been passed.
+		/// </summary>
+		private static int CountArtifacts()
+		{
+			int count = 0;
+
+			while ( !String.IsNullOrEmpty( GetArtifact( count + 1, 2 ) ) )
+				++count;
+
+			return count;
+		}
 
 		public static string GetArtifact(int artifact, int part)
 		{

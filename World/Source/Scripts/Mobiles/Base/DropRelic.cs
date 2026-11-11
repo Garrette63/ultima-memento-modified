@@ -261,8 +261,8 @@ namespace Server.Misc
 				if ( ( GetPlayerInfo.LuckyKiller( killerLuck ) || Utility.RandomMinMax( 1, 20 ) == 1 ) && ( from is EvilMage || from is EvilMageLord ) )
 				{
 					PaganArtifact pagan = new PaganArtifact(0);
-					pagan.PaganPoints = Utility.RandomMinMax( 80, 100 );
-						if ( from is EvilMageLord ){ pagan.PaganPoints = Utility.RandomMinMax( 100, 120 ); }
+					pagan.PaganPoints = 150;
+						if ( from is EvilMageLord ){ pagan.PaganPoints = 200; }
 					c.DropItem( pagan );
 				}
 			}
@@ -272,7 +272,7 @@ namespace Server.Misc
 				if ( ( GetPlayerInfo.LuckyKiller( killerLuck ) || Utility.RandomMinMax( 1, 10 ) == 1 ) && from is KhumashGor )
 				{
 					PaganArtifact pagan = new PaganArtifact(16);
-					pagan.PaganPoints = Utility.RandomMinMax( 100, 150 );
+					pagan.PaganPoints = 300;
 					c.DropItem( pagan );
 				}
 			}

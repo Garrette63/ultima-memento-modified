@@ -67,7 +67,7 @@ namespace Server.Mobiles
 			int killerLuck = MobileUtilities.GetLuckFromKiller( this );
 			PlayerMobile killer = MobileUtilities.TryGetKillingPlayer( this );
 
-			if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 && !Server.Misc.PlayerSettings.GetSpecialsKilled( killer, "BloodDemigod" ) )
+			if ( GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 )
 			{
 				Server.Misc.PlayerSettings.SetSpecialsKilled( killer, "BloodDemigod", true );
 				ManualOfItems book = new ManualOfItems();
@@ -90,7 +90,7 @@ namespace Server.Mobiles
 					book.m_Extra = "of Blood";
 					book.m_FromWho = "Taken from the Demigoddess of Blood";
 					book.m_HowGiven = "Acquired by";
-					book.m_Points = 150;
+					book.m_Points = 300;
 					book.m_Hue = 0x870;
 					c.DropItem( book );
 			}

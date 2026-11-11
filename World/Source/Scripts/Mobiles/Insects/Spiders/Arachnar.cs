@@ -166,7 +166,7 @@ namespace Server.Items
 
 				if ( from is PlayerMobile )
 				{
-					if ( GetPlayerInfo.LuckyKiller( from.Luck ) && !Server.Misc.PlayerSettings.GetSpecialsKilled( from, "Arachnar" ) )
+					if ( GetPlayerInfo.LuckyKiller( from.Luck ) )
 					{
 						if ( GetPlayerInfo.LuckyKiller( from.Luck ) )
 						{
@@ -194,7 +194,7 @@ namespace Server.Items
 							lexicon.m_Extra = "of Arachnar the Deep Crawler";
 							lexicon.m_FromWho = "Taken from Arachnar";
 							lexicon.m_HowGiven = "Acquired by";
-							lexicon.m_Points = 200;
+							lexicon.m_Points = 300;
 							lexicon.m_Hue = 0x4F6;
 							MyChest.DropItem( lexicon );
 					}

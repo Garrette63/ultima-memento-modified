@@ -110,7 +110,7 @@ namespace Server.Mobiles
 						book.m_Extra = "of the Archmage";
 						book.m_FromWho = "Gifted from Kylearan";
 						book.m_HowGiven = "Gifted to";
-						book.m_Points = 150;
+						book.m_Points = 300;
 						book.m_Hue = 0xA20;
 						m_Mobile.AddToBackpack( book );
 						m_Mobile.SendMessage( "A small chest has been added to your pack!" );
