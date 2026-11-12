@@ -10,7 +10,7 @@ namespace Server.Misc
 			// points = points * 10;
 			// points = 200 - points;
 			// if ( points < 50 ){ points = 50; }
-			int points = 0;
+			int points = 200;
 
 			if ( item is IGiftable )
 			{

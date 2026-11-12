@@ -113,7 +113,6 @@ namespace Server.Misc
 					builder.Append("- Item - Powerscrolls purchases can now use Checks in your Bank<br>");
 					builder.Append("- Item - Powerscrolls purchases can now use Gold in your Inventory<br>");
 					builder.Append("- Item - The luck bonus for Lucky horse shoe is now 100 per item<br>");
-					builder.Append("- Item - Artifacts no longer have enchantment points<br>");
 					builder.Append("- Item - Dungeon Chests now allow for multiple Stealing attempts<br>");
 					builder.Append("- Item - Oil cloth are now stackable<br>");
 					builder.Append("- Item - Quiver Damage Modifier has been reduced to 10%<br>");
