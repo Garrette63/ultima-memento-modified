@@ -205,6 +205,8 @@ namespace Server.Items
 				BaseCreature monster = (BaseCreature)mob;
 
 				SetDifficultyForMonster( monster );
+				if ( Prisoner == "Nosferatu the Vampire" ){ monster.SetHits( 2000 ); } // NOSFERATU HAS 2000 HIT POINTS PER FORM
+				else { monster.SetHits( 3000 ); } // ALL OTHER MAGICAL PRISON PRISONERS HAVE 3000 HIT POINTS
 
 				Map map = from.Map;
 

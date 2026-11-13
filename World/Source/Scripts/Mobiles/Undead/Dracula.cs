@@ -181,7 +181,7 @@ namespace Server.Mobiles
 			Hue = 0x497;
 			BaseSoundID = 372;
 
-			SetHits( 350, 400 );
+			SetHits( 2000, 2400 );
 
 			Say("Arrrrrgh!"); 
 		}

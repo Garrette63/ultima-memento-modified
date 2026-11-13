@@ -195,7 +195,14 @@ namespace Server.Mobiles
 			Hue = 0x497;
 			BaseSoundID = 372;
 
-			SetHits( 100, 150 );
+			if ( this.EmoteHue == 505 ) // NOSFERATU KEEPS HIS 2000 HIT POINTS IN BOTH FORMS
+			{
+				SetHits( 2000 );
+			}
+			else
+			{
+				SetHits( 100, 150 );
+			}
 
 			Say("Arrrrrgh!"); 
 		}
