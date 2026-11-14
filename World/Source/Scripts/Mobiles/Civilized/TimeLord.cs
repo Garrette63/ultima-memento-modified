@@ -18,7 +18,7 @@ namespace Server.Mobiles
 			{
 				if ( DateTime.Now >= m_NextTalk && InRange( m, 4 ) && InLOS( m ) )
 				{
-					switch ( Utility.Random( 9 ))
+					switch ( Utility.Random( 11 ))
 					{
 						case 0: Say("The Stranger has saved Sosaria from Exodus."); break;
 						case 1: Say("Castle Exodus lies in ruins, no one knowing what evil lurks below."); break;
@@ -29,6 +29,8 @@ namespace Server.Mobiles
 						case 6: Say("The order was Love, Sol, Moon, and Death."); break;
 						case 7: Say("Maybe one day the Stranger will achieve Avatarhood."); break;
 						case 8: Say("The strings of time show the Guardian is coming."); break;
+						case 9: Say("The crystals of the Sorcerer Cave will burn a spell out of a mage's memory, for a price."); break;
+						case 10: Say("A gypsy can reweave the look of armor for coin, but never the truth of what it is."); break;
 					};
 
 					m_NextTalk = (DateTime.Now + TimeSpan.FromSeconds( 30 ));

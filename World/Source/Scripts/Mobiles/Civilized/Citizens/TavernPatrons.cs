@@ -923,6 +923,26 @@ namespace Server.Misc
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		// Tips only the wandering adventurers (AdventurerEast/West/South/North) trade as
+		// they pass: they point at the magic-forgetting crystals and at the gypsy's
+		// reshape service.
+		public static void GetAdventurerTips( Mobile patron )
+		{
+			string sSpeech = "Keep an eye on cursed monsters. They swallow gems worth a new face.";
+
+			switch( Utility.RandomMinMax( 1, 6 ) )
+			{
+				case 1: sSpeech = "They say the crystals in the Sorcerer Cave will burn a spell right out of your head."; break;
+				case 2: sSpeech = "The crystals in the Conjurer's Cave can make you forget a whole school of magic."; break;
+				case 3: sSpeech = "I had this very gorget reshaped by a gypsy. You would never know it was the same piece."; break;
+				case 4: sSpeech = "That gypsy asks two thousand for an artifact's look, but only two hundred for plain iron."; break;
+				case 5: sSpeech = "Ask the gypsy about a parchment and she will tell you whether it lies."; break;
+				case 6: sSpeech = "Keep an eye on the paragons. They swallow gems worth a new face."; break;
+			}
+
+			patron.Say( sSpeech );
+		}
+
 		public static void GetChatter( Mobile patron )
 		{
 			string relics = QuestCharacters.QuestItems( false );
@@ -1007,7 +1027,7 @@ namespace Server.Misc
 
 			int relic = Utility.RandomMinMax( 1, 59 );	
 
-			int CommonTalkingCount = 58;
+			int CommonTalkingCount = 60;
 			string sSpeech = "We are supposed to wait for " + sThey + ".";
 			switch( Utility.RandomMinMax( 1, CommonTalkingCount ) )
 			{
@@ -1680,6 +1700,8 @@ namespace Server.Misc
 					sSpeech = "We will " + misc + " " + sThey + " in " + dungeon + "";
 					if ( Utility.RandomBool() ){ sSpeech = sSpeech + " tomorrow"; } sSpeech = sSpeech + ".";
 				break;
+				case 59: sSpeech = "They say the crystals hidden deep in " + dungeon + " will make a mage forget everything he ever learned."; break;
+				case 60: sSpeech = "A gypsy will reshape your armor for coin. Plain iron is cheap, but an artifact's look costs dear."; break;
 			}
 
 			string sGossip = sSpeech;	

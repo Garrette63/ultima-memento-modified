@@ -964,7 +964,13 @@ namespace Server.Mobiles
 			{
 				if ( DateTime.Now >= m_NextTalk && InRange( m, 30 ) )
 				{
-					if ( Utility.RandomBool() ){ TavernPatrons.GetChatter( this ); }
+					if ( Utility.RandomBool() )
+				{
+					if ( this is AdventurerEast || this is AdventurerWest || this is AdventurerSouth || this is AdventurerNorth )
+						TavernPatrons.GetAdventurerTips( this );
+					else
+						TavernPatrons.GetChatter( this );
+				}
 					m_NextTalk = (DateTime.Now + TimeSpan.FromSeconds( Utility.RandomMinMax( 15, 45 ) ));
 				}
 			}

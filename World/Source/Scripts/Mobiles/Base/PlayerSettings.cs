@@ -769,7 +769,17 @@ namespace Server.Misc
 				val = pm.Preferences.MyChat;
 
 				if ( val == null || val == "" )
-					pm.Preferences.MyChat = val = "0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#";
+					pm.Preferences.MyChat = val = "0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#";
+
+				// Profiles saved before the conversation list grew carry fewer slots than
+				// there are conversations, which would make the newest topic unmemorisable.
+				int slots = 0;
+				foreach ( char c in val ){ if ( c == '#' ){ slots++; } }
+				if ( slots < 48 )
+				{
+					while ( slots < 48 ){ val = val + "0#"; slots++; }
+					pm.Preferences.MyChat = val;
+				}
 			}
 			return val;
 		}
@@ -804,7 +814,7 @@ namespace Server.Misc
 				PlayerMobile pm = (PlayerMobile)m;
 
 				string keys = ValChatConfig( m );
-				int records = 47; // TOTAL ENTRIES
+				int records = 48; // TOTAL ENTRIES
 				string entry = "";
 				int nEntry = 1;
 

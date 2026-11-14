@@ -125,7 +125,9 @@ namespace Server.Mobiles
 			private GypsyLady m_GypsyLady;
 			private Mobile m_From;
 
-			public TruthEntry( GypsyLady GypsyLady, Mobile from ) : base( 2058, 12 )
+			// 6120 + the client's 3,000,000 context-menu offset = cliloc 3006120, "Hire".
+			// (2058 used to resolve to 3002058, which is the Reveal *spell* name.)
+			public TruthEntry( GypsyLady GypsyLady, Mobile from ) : base( 6120, 12 )
 			{
 				m_GypsyLady = GypsyLady;
 				m_From = from;
@@ -142,7 +144,7 @@ namespace Server.Mobiles
             if ( Deleted || !from.Alive )
                 return;
 
-			SayTo(from, "So you want me to reveal the truth of a parchment for you?");
+			SayTo(from, "So you want me to reveal the truth of a parchment for you... or would you have me reshape a piece of armor?");
 
             from.Target = new RevealTarget(this);
         }
@@ -365,9 +367,44 @@ namespace Server.Mobiles
 					}
 				}
 				///////////////////////////////////////////////////////////////////////////////////
+				else if ( targeted is BaseArmor || targeted is BaseClothing )
+				{
+					Item garb = (Item)targeted;
+
+					if ( !TransmogrifyTool.CanReach( from, garb ) )
+					{
+						m_GypsyLady.SayTo(from, "I can only work with what you wear or carry.");
+					}
+					else if ( TransmogrifyCatalog.CountFor( garb.Layer ) == 0 )
+					{
+						m_GypsyLady.SayTo(from, "The spirits show me nothing that this could become.");
+					}
+					else
+					{
+						int nCost = TransmogrifyFees.Discount( from, TransmogrifyFees.For( garb ) );
+
+						if ( pack == null || pack.GetAmount( typeof( Gold ) ) < nCost )
+						{
+							m_GypsyLady.SayTo(from, "I require {0} gold for my visions.", nCost);
+						}
+						else
+						{
+							m_GypsyLady.SayTo(from, "The spirits ask {0} gold for that. Let me show you what they could make of it...", nCost);
+
+							// The same picker the gems open. The fee travels with it and is
+							// only taken on Apply, so nothing is lost by looking.
+							TransmogrifyGump gump = new TransmogrifyGump( from, garb, null, -1, 0, false, nCost );
+
+							from.SendGump( gump );
+
+							gump.OpenPaperdoll( from );
+						}
+					}
+				}
+				///////////////////////////////////////////////////////////////////////////////////
 				else
 				{
-					m_GypsyLady.SayTo(from, "That is not a book or parchment.");
+					m_GypsyLady.SayTo(from, "That is not a book, a parchment, or a piece of armor.");
 				}
             }
         }

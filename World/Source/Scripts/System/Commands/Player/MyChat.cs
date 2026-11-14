@@ -192,6 +192,7 @@ namespace Server.Gumps
 				case 45: txt = "Art Collector"; spk = "Variety"; break;
 				case 46: txt = "Weaponsmith"; spk = "Weaponsmith"; break;
 				case 47: txt = "Xardok"; spk = "Xardok"; break;
+				case 48: txt = "Memento Collector"; spk = "MementoCollector"; break;
 			}
 
 			if ( part == 1 )
@@ -254,6 +255,7 @@ namespace Server.Gumps
 			else if ( chat == "Variety" ){ num = 45; }
 			else if ( chat == "Weaponsmith" ){ num = 46; }
 			else if ( chat == "Xardok" ){ num = 47; }
+			else if ( chat == "MementoCollector" ){ num = 48; }
 
 			if ( num > 0 )
 			{

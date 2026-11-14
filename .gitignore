@@ -73,3 +73,12 @@ World/Saves/Items/Items.tdb
 World/Saves/Mobiles/Mobiles.bin
 World/Saves/Mobiles/Mobiles.idx
 World/Saves/Mobiles/Mobiles.tdb
+World/Source/Tools/WorldLinux.exe
+*.log
+World/Saves/Mobiles/Mobiles.tdb
+World/Saves/Mobiles/Mobiles.idx
+World/Saves/Mobiles/Mobiles.bin
+World/Saves/Items/Items.tdb
+World/Saves/Items/Items.idx
+World/Saves/Items/Items.bin
+World/Saves/Accounts/accounts.xml
