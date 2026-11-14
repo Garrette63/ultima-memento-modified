@@ -406,6 +406,8 @@ namespace Server.Items
 						MyChest.DropItem( wand );
 					}
 
+					FragmentOfInfinityDrops.TryDropChance( MyChest );
+
 					MyChest.MoveToWorld( from.Location, from.Map );
 
 					LoggingFunctions.LogGenericQuest( from, "defeated Mangar and escaped Skara Brae" );

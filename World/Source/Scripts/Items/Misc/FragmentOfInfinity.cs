@@ -1,5 +1,6 @@
 using System;
 using Server;
+using Server.Mobiles;
 using Server.Targeting;
 
 namespace Server.Items
@@ -110,6 +111,110 @@ namespace Server.Items
 			base.Deserialize( reader );
 
 			int version = reader.ReadInt();
+		}
+	}
+
+	// Drop rule for the fragment: a flat 10% chance whenever one of the named
+	// bosses, or any of the 25 Magical Prison bosses, is killed.
+	public static class FragmentOfInfinityDrops
+	{
+		private const double DropChance = 0.10;
+
+		// OnKilledBy fires once per looter, so remember the last corpse we rolled
+		// for and never roll twice for the same kill.
+		private static int m_HandledCorpse;
+
+		public static void Initialize()
+		{
+			EventSink.OnKilledBy += new OnKilledByEventHandler( OnKilledBy );
+		}
+
+		private static bool IsFragmentCarrier( BaseCreature bc )
+		{
+			if ( bc == null )
+				return false;
+
+			// SummonPrison stamps all 25 Magical Prison escapees with EmoteHue 505
+			// when it releases them, so this catches every prison boss without
+			// catching the ordinary creatures they are based on.
+			if ( bc.EmoteHue == 505 )
+				return true;
+
+			Type type = bc.GetType();
+
+			return type == typeof( BlackGateDemon )
+				|| type == typeof( BloodDemigod )
+				|| type == typeof( DragonKing )
+				|| type == typeof( OrkDemigod )
+				|| type == typeof( LichKing )
+				|| type == typeof( Dracula )
+				|| type == typeof( Jormungandr )
+				|| type == typeof( Xurtzar )
+				|| type == typeof( CaddelliteDragon )
+				|| type == typeof( Vulcrum )
+				|| type == typeof( Arachnar )
+				|| type == typeof( Surtaz )
+				|| type == typeof( Mangar )
+				|| type == typeof( Shadowlord )
+				|| type == typeof( Tarjan )
+				|| type == typeof( TitanHydros )
+				|| type == typeof( TitanLithos )
+				|| type == typeof( TitanPyros )
+				|| type == typeof( TitanStratos )
+				|| type == typeof( KhumashGor )
+				|| type == typeof( Satan )
+				|| type == typeof( SlasherOfVoid )
+				|| type == typeof( Exodus );
+		}
+
+		// Shared roll used by the corpse drops and by the bosses that replace
+		// their corpse with a reward chest (BlackGateDemon, Mangar).
+		public static void TryDrop( BaseCreature bc, Container destination )
+		{
+			if ( bc == null || !IsFragmentCarrier( bc ) )
+				return;
+
+			TryDropChance( destination );
+		}
+
+		// Rolls only the 10% chance, for callers that already know the container
+		// belongs to one of the bosses (Mangar's vault is built when it is opened).
+		public static void TryDropChance( Container destination )
+		{
+			if ( destination == null || destination.Deleted )
+				return;
+
+			if ( Utility.RandomDouble() >= DropChance )
+				return;
+
+			destination.DropItem( new FragmentOfInfinity() );
+		}
+
+		private static void OnKilledBy( OnKilledByArgs e )
+		{
+			BaseCreature bc = e.Killed as BaseCreature;
+
+			if ( bc == null || !IsFragmentCarrier( bc ) )
+				return;
+
+			// These two leave a reward chest instead of a corpse; their own
+			// OnBeforeDeath routes the roll into that chest.
+			if ( bc.DeleteCorpseOnDeath )
+				return;
+
+			Container corpse = e.Corpse;
+
+			if ( corpse == null || corpse.Deleted )
+				return;
+
+			int serial = corpse.Serial.Value;
+
+			if ( serial == m_HandledCorpse )
+				return;
+
+			m_HandledCorpse = serial;
+
+			TryDrop( bc, corpse );
 		}
 	}
 }

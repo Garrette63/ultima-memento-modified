@@ -17,7 +17,7 @@ This document tracks every file created or edited for the Memento Coin / Artefac
 | `Compile-Windows.bat` | Batch script (shortcut) | Windows shortcut in the `World` folder. Resolves the repo base folder (parent of `World`) via `%~dp0..`, runs `git pull` there, then `pushd`s to `Source\Tools` and `call`s `compile-world-win.bat` (.NET 4.0 `csc` → `World.exe`). Aborts before compiling if the pull fails. |
 | `Source/Scripts/Items/Technology/ZorkPad.cs` | C# item + gump | `ZorkPad : Item` — **named `Zork!`**, DataPad art (`0x27FB`/`0x27FC`) pinned to the shard's green hue `0x85D` (`ZorkPad.GreenHue`), `Technology`, weight 1, `Circle150` light. Dropped by **Exodus**. Double-click (within 4 tiles) opens `ZorkPadGump`, a large (740×780) black terminal with green phosphor text, scrolling transcript, typeable prompt + ENTER, that drives `ZorkGame`. |
 | `Source/Scripts/Items/Technology/ZorkGame.cs` | C# engine | `ZorkGame` — a compact, playable Zork I "White House" text adventure: 11 rooms, a real verb parser, items (mailbox/leaflet, sword, brass lantern, rug/trap door, trophy case, rope), lamp-driven darkness + grue death, and per-player state keyed by mobile serial. |
-| `Source/Scripts/Items/Misc/FragmentOfInfinity.cs` | C# item | `FragmentOfInfinity : Item` — **"Fragment of Infinity"**, graphic `7964`, hue `1266`, weight 1. Single-use: double-click in the backpack → target an artefact (`IGiftable`) you are wearing or carrying → adds **10 enchantment points** (`Points += 10`) and the fragment is consumed. A non-artefact target answers **"This only works on artefacts."** and the fragment is kept. The tooltip line "Adds 10 points of enchantment to any artefact" is drawn beneath the name in hue `71e26c` (`ColorText3`/`ColorHue3`). |
+| `Source/Scripts/Items/Misc/FragmentOfInfinity.cs` | C# item + drop rule | `FragmentOfInfinity : Item` — **"Fragment of Infinity"**, graphic `7964`, hue `1266`, weight 1. Single-use: double-click in the backpack → target an artefact (`IGiftable`) you are wearing or carrying → adds **10 enchantment points** (`Points += 10`) and the fragment is consumed. A non-artefact target answers **"This only works on artefacts."** and the fragment is kept. The tooltip line "Adds 10 points of enchantment to any artefact" is drawn beneath the name in hue `71e26c` (`ColorText3`/`ColorHue3`). Also holds `FragmentOfInfinityDrops`: a flat **10%** corpse drop from the 23 named bosses plus all 25 Magical Prison bosses. |
 
 ## Files Edited
 
@@ -50,6 +50,8 @@ This document tracks every file created or edited for the Memento Coin / Artefac
 
 | `Source/System/Network/PacketHandlers.cs` | Registered a `0xAC` (TextEntry) handler so pressing **Enter** in a gump text entry reaches the server. It locates the gump by serial (via `state.Gumps`) and calls the new `Gump.OnTextEntry`, using a defensive dual-layout parse (with/without a 2-byte button field) plus a printable-text check. Backed up as `Backups/PacketHandlers.cs.2026-11-09-180202.bak`. — **reverted in #93** (file restored to original). |
 | `Source/System/Gumps/Gump.cs` | Added `public virtual void OnTextEntry(NetState, TextRelay)` (default no-op) — the hook the `0xAC` handler invokes. Backed up as `Backups/Gump.cs.2026-11-09-180202.bak`. — **reverted in #94** (file restored to original). |
+| `Source/Scripts/Mobiles/Demons/BlackGateDemon.cs` | Added `FragmentOfInfinityDrops.TryDrop( this, MyChest )` in `OnBeforeDeath`, so its 10% fragment roll goes into the `demonic chest` it leaves behind (this boss deletes its corpse). |
+| `Source/Scripts/Mobiles/Unique/Mangar.cs` | Added `FragmentOfInfinityDrops.TryDropChance( MyChest )` where `BardMangarPack.OnDoubleClick` builds Mangar's Vault `LootChest`, since Mangar leaves a marker vault rather than a corpse. |
 
 No other files were modified.
 
@@ -487,6 +489,13 @@ No other files were modified.
   - **Use:** double-click while in the backpack → target an artefact you are **wearing or carrying** → adds **10** to its `IGiftable.Points` (`item.InvalidateProperties()` refreshes the tooltip) and consumes the fragment. `IGiftable` is the shard's enchantment-point field, implemented by every `BaseGift*` artefact weapon/armour/shield/jewel/clothing class.
   - **Refusals:** a non-artefact target (or a mobile) answers exactly **"This only works on artefacts."** and the fragment stays in the pack. An artefact outside reach answers "You can only enchant artefacts you are wearing or carrying." and is likewise not consumed.
   - Compile: scripts 11 warnings, **zero errors** (csc 4.0 over `Info/Scripts` + `Source/Scripts` against `World.exe`).
+164. **Fragment of Infinity — 10% boss drop** — added `FragmentOfInfinityDrops` to `Source/Scripts/Items/Misc/FragmentOfInfinity.cs`; no other new files.
+  - **Chance:** a flat **10%** per kill (`Utility.RandomDouble() < 0.10`), no Luck scaling. One roll per corpse — `EventSink.OnKilledBy` fires once per looter, so the handler remembers the last corpse serial.
+  - **Named bosses (exact types):** `BlackGateDemon`, `BloodDemigod`, `DragonKing`, `OrkDemigod`, `LichKing`, `Dracula`, `Jormungandr` (the shard's spelling of "Jormungand"), `Xurtzar`, `CaddelliteDragon`, `Vulcrum`, `Arachnar`, `Surtaz`, `Mangar`, `Shadowlord`, `Tarjan`, `TitanHydros`, `TitanLithos`, `TitanPyros`, `TitanStratos`, `KhumashGor`, `Satan`, `SlasherOfVoid`, `Exodus`. Exact `GetType()` matching means ordinary creatures of the same base class do not drop it.
+  - **All 25 Magical Prison bosses:** matched by `BaseCreature.EmoteHue == 505`, the marker `SummonPrison` stamps on every escapee when it releases one (`SummonPrison.cs:248`). This covers every pick from Tiamat through Lolth without matching their ordinary base creatures.
+  - **Corpse drops:** normal bosses use `corpse.DropItem( new FragmentOfInfinity() )` through `EventSink.OnKilledBy`.
+  - **Corpse-less bosses:** `BlackGateDemon` and `Mangar` both set `DeleteCorpseOnDeath`. BlackGateDemon's roll goes into the `demonic chest` created in its `OnBeforeDeath`; Mangar's roll goes into the `LootChest` built when his `BardMangarPack` vault is first opened. The event handler skips any `DeleteCorpseOnDeath` creature so neither can roll twice.
+  - Compile: scripts 11 warnings, **zero errors**.
 
 
 ---
@@ -619,4 +628,7 @@ No other files were modified.
 - **Use:** double-click it while it is in your backpack, then target an artefact you are wearing or carrying. The target gains **10 enchantment points** (`IGiftable.Points`), its tooltip refreshes immediately, a magic sound plays, and the fragment is consumed.
 - **Accepted targets:** anything implementing `IGiftable` — every `BaseGift*` artefact weapon, armour piece, shield, jewel and clothing item. Those are the items whose tooltip/gump already call the field "Enchantment Points".
 - **Refusals:** anything that cannot accept points answers **"This only works on artefacts."** and the fragment is **not** consumed. An artefact that is not worn or carried answers "You can only enchant artefacts you are wearing or carrying." and is likewise not consumed.
+- **Drop chance:** a flat **10%** per kill, rolled once per corpse. The named carriers are `BlackGateDemon`, `BloodDemigod`, `DragonKing`, `OrkDemigod`, `LichKing`, `Dracula`, `Jormungandr`, `Xurtzar`, `CaddelliteDragon`, `Vulcrum`, `Arachnar`, `Surtaz`, `Mangar`, `Shadowlord`, `Tarjan`, `TitanHydros`, `TitanLithos`, `TitanPyros`, `TitanStratos`, `KhumashGor`, `Satan`, `SlasherOfVoid` and `Exodus`.
+- **Magical Prison bosses:** all **25** are covered via `EmoteHue == 505` (stamped by `SummonPrison` when it releases one), so ordinary `AncientWyrm`, `DaemonTemplate`, `Berserker`, etc. creatures do **not** drop fragments.
+- **Corpse-less bosses:** `BlackGateDemon` and `Mangar` delete their corpses; their fragment roll goes into BlackGateDemon's `demonic chest` and Mangar's Vault loot chest respectively.
 

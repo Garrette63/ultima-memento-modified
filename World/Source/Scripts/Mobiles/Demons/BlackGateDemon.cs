@@ -139,6 +139,8 @@ namespace Server.Mobiles
 					MyChest.AddItem( book );
 			}
 
+			FragmentOfInfinityDrops.TryDrop( this, MyChest );
+
 			m_MoonTimer = new InternalTimer (this);
 			m_MoonTimer.Start ();
 			return base.OnBeforeDeath();
