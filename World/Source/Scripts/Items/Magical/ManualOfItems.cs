@@ -7,6 +7,7 @@ namespace Server.Items
 	public class ManualOfItems : Item
 	{
 		public const int NUMBER_OF_ARTIFACTS = 290;
+		public const int SKILL_WEAPON_OR_NECROMANCY = 101; // weapons gain their own weapon skill, everything else gains Necromancy
 
 		[Constructable]
 		public ManualOfItems() : base( 0x1C0E )
@@ -548,6 +549,7 @@ namespace Server.Items
 				if ( slay2 > 0 ){ ((BaseWeapon)item).Slayer2 = ResourceMods.GetSlayer( slay2 ); }
 
 				if ( val1 == 99 ){ ((BaseWeapon)item).SkillBonuses.SetValues(0, ((BaseWeapon)item).Skill, sk1); }
+				else if ( val1 == SKILL_WEAPON_OR_NECROMANCY ){ ((BaseWeapon)item).SkillBonuses.SetValues(0, ((BaseWeapon)item).Skill, sk1); }
 				else if ( val1 > 0 ){ ((BaseWeapon)item).SkillBonuses.SetValues(0, ResourceMods.GetSkill( val1 ), sk1); }
 				if ( val2 > 0 ){ ((BaseWeapon)item).SkillBonuses.SetValues(1, ResourceMods.GetSkill( val2 ), sk2); }
 				if ( val3 > 0 ){ ((BaseWeapon)item).SkillBonuses.SetValues(2, ResourceMods.GetSkill( val3 ), sk3); }
@@ -558,6 +560,7 @@ namespace Server.Items
 			else if ( item is BaseArmor )
 			{
 				if ( val1 == 99 && item is BaseShield ){ ((BaseShield)item).SkillBonuses.SetValues(0, SkillName.Parry, sk1); }
+				else if ( val1 == SKILL_WEAPON_OR_NECROMANCY ){ ((BaseArmor)item).SkillBonuses.SetValues(0, SkillName.Necromancy, sk1); }
 				else if ( val1 > 0 ){ ((BaseArmor)item).SkillBonuses.SetValues(0, ResourceMods.GetSkill( val1 ), sk1); }
 				if ( val2 > 0 ){ ((BaseArmor)item).SkillBonuses.SetValues(1, ResourceMods.GetSkill( val2 ), sk2); }
 				if ( val3 > 0 ){ ((BaseArmor)item).SkillBonuses.SetValues(2, ResourceMods.GetSkill( val3 ), sk3); }
@@ -568,6 +571,7 @@ namespace Server.Items
 			else if ( item is BaseClothing )
 			{
 				if ( val1 == 99 ){}
+				else if ( val1 == SKILL_WEAPON_OR_NECROMANCY ){ ((BaseClothing)item).SkillBonuses.SetValues(0, SkillName.Necromancy, sk1); }
 				else if ( val1 > 0 ){ ((BaseClothing)item).SkillBonuses.SetValues(0, ResourceMods.GetSkill( val1 ), sk1); }
 				if ( val2 > 0 ){ ((BaseClothing)item).SkillBonuses.SetValues(1, ResourceMods.GetSkill( val2 ), sk2); }
 				if ( val3 > 0 ){ ((BaseClothing)item).SkillBonuses.SetValues(2, ResourceMods.GetSkill( val3 ), sk3); }
@@ -578,6 +582,7 @@ namespace Server.Items
 			else if ( item is BaseTrinket )
 			{
 				if ( val1 == 99 ){}
+				else if ( val1 == SKILL_WEAPON_OR_NECROMANCY ){ ((BaseTrinket)item).SkillBonuses.SetValues(0, SkillName.Necromancy, sk1); }
 				else if ( val1 > 0 ){ ((BaseTrinket)item).SkillBonuses.SetValues(0, ResourceMods.GetSkill( val1 ), sk1); }
 				if ( val2 > 0 ){ ((BaseTrinket)item).SkillBonuses.SetValues(1, ResourceMods.GetSkill( val2 ), sk2); }
 				if ( val3 > 0 ){ ((BaseTrinket)item).SkillBonuses.SetValues(2, ResourceMods.GetSkill( val3 ), sk3); }

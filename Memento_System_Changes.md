@@ -52,6 +52,8 @@ This document tracks every file created or edited for the Memento Coin / Artefac
 | `Source/System/Gumps/Gump.cs` | Added `public virtual void OnTextEntry(NetState, TextRelay)` (default no-op) — the hook the `0xAC` handler invokes. Backed up as `Backups/Gump.cs.2026-11-09-180202.bak`. — **reverted in #94** (file restored to original). |
 | `Source/Scripts/Mobiles/Demons/BlackGateDemon.cs` | Added `FragmentOfInfinityDrops.TryDrop( this, MyChest )` in `OnBeforeDeath`, so its 10% fragment roll goes into the `demonic chest` it leaves behind (this boss deletes its corpse). |
 | `Source/Scripts/Mobiles/Unique/Mangar.cs` | Added `FragmentOfInfinityDrops.TryDropChance( MyChest )` where `BardMangarPack.OnDoubleClick` builds Mangar's Vault `LootChest`, since Mangar leaves a marker vault rather than a corpse. |
+| `Source/Scripts/Mobiles/Demons/Satan.cs` | Added the red **Chest of Satanic Relics** relic-chest drop to `Satan.OnDeath`, using the same LuckyKiller-gated 1-in-5 roll as LichKing's relic chest. |
+| `Source/Scripts/Items/Magical/ManualOfItems.cs` | Added `ManualOfItems.SKILL_WEAPON_OR_NECROMANCY` (`101`) and taught `GiveItemBonus` to apply it: weapons gain their own weapon skill, while armour/shields, clothing and trinkets gain Necromancy. |
 
 No other files were modified.
 
@@ -496,6 +498,12 @@ No other files were modified.
   - **Corpse drops:** normal bosses use `corpse.DropItem( new FragmentOfInfinity() )` through `EventSink.OnKilledBy`.
   - **Corpse-less bosses:** `BlackGateDemon` and `Mangar` both set `DeleteCorpseOnDeath`. BlackGateDemon's roll goes into the `demonic chest` created in its `OnBeforeDeath`; Mangar's roll goes into the `LootChest` built when his `BardMangarPack` vault is first opened. The event handler skips any `DeleteCorpseOnDeath` creature so neither can roll twice.
   - Compile: scripts 11 warnings, **zero errors**.
+165. **Chest of Satanic Relics — Satan's relic chest** — `Satan.OnDeath` now rolls the same LuckyKiller-gated **1-in-5** chance as LichKing's relic chest and drops a red `ManualOfItems` named **"Chest of Satanic Relics"** into the corpse. The killer must be a player and becomes the chest's owner.
+  - **Chest:** hue `0x21` (red), one charge, 300 enchantment points, `m_Extra = "of Satan"`, `m_FromWho = "Taken from the Devil Lord"`.
+  - **Generated items:** hued `0x21` (red), named **"<item> of Satan"**, and given 300 enchantment points (`IGiftable.Points`).
+  - **Bonuses:** weapons receive **Fey Slayer** (`SlayerName.Fey`) and **+20 of their own weapon skill**; every other item (armour, shields, clothing, jewellery, and the candle/lantern/torch trinkets) receives **+20 Necromancy**.
+  - **Engine:** added `ManualOfItems.SKILL_WEAPON_OR_NECROMANCY` (`101`) so one chest can grant a weapon skill to weapons and Necromancy to everything else; `ManualOfItems.GiveItemBonus` handles the new code in its `BaseWeapon`, `BaseArmor`, `BaseClothing` and `BaseTrinket` branches. Existing skill codes (`99`, `100`, `1`-`55`) are unchanged.
+  - Compile: csc 4.0 over `Info/Scripts` + `Source/Scripts` against `World.exe` — **zero errors**.
 
 
 ---
@@ -631,4 +639,11 @@ No other files were modified.
 - **Drop chance:** a flat **10%** per kill, rolled once per corpse. The named carriers are `BlackGateDemon`, `BloodDemigod`, `DragonKing`, `OrkDemigod`, `LichKing`, `Dracula`, `Jormungandr`, `Xurtzar`, `CaddelliteDragon`, `Vulcrum`, `Arachnar`, `Surtaz`, `Mangar`, `Shadowlord`, `Tarjan`, `TitanHydros`, `TitanLithos`, `TitanPyros`, `TitanStratos`, `KhumashGor`, `Satan`, `SlasherOfVoid` and `Exodus`.
 - **Magical Prison bosses:** all **25** are covered via `EmoteHue == 505` (stamped by `SummonPrison` when it releases one), so ordinary `AncientWyrm`, `DaemonTemplate`, `Berserker`, etc. creatures do **not** drop fragments.
 - **Corpse-less bosses:** `BlackGateDemon` and `Mangar` delete their corpses; their fragment roll goes into BlackGateDemon's `demonic chest` and Mangar's Vault loot chest respectively.
+
+### Chest of Satanic Relics (`Satan`)
+- **Drop:** `Satan` rolls `GetPlayerInfo.LuckyKiller( luck ) && Utility.RandomMinMax( 1, 5 ) == 1` in `OnDeath` (the same 1-in-5 chance as LichKing's relic chest) and places a **Chest of Satanic Relics** in his corpse. The killer must be a player and becomes the chest's owner.
+- **Chest:** `ManualOfItems` with hue `0x21` (red), one charge, 300 enchantment points, `m_Extra = "of Satan"` and `m_FromWho = "Taken from the Devil Lord"`.
+- **Generated items:** red (`m_Hue = 0x21`), named **"<item> of Satan"**, and given 300 enchantment points (`IGiftable.Points`).
+- **Weapon:** Fey Slayer plus **+20** of the weapon's own skill (`ManualOfItems.SKILL_WEAPON_OR_NECROMANCY` = `101`).
+- **Everything else:** **+20 Necromancy** — armour, shields, clothing, jewellery and the candle/lantern/torch trinkets.
 
