@@ -17,6 +17,7 @@ This document tracks every file created or edited for the Memento Coin / Artefac
 | `Compile-Windows.bat` | Batch script (shortcut) | Windows shortcut in the `World` folder. Resolves the repo base folder (parent of `World`) via `%~dp0..`, runs `git pull` there, then `pushd`s to `Source\Tools` and `call`s `compile-world-win.bat` (.NET 4.0 `csc` → `World.exe`). Aborts before compiling if the pull fails. |
 | `Source/Scripts/Items/Technology/ZorkPad.cs` | C# item + gump | `ZorkPad : Item` — **named `Zork!`**, DataPad art (`0x27FB`/`0x27FC`) pinned to the shard's green hue `0x85D` (`ZorkPad.GreenHue`), `Technology`, weight 1, `Circle150` light. Dropped by **Exodus**. Double-click (within 4 tiles) opens `ZorkPadGump`, a large (740×780) black terminal with green phosphor text, scrolling transcript, typeable prompt + ENTER, that drives `ZorkGame`. |
 | `Source/Scripts/Items/Technology/ZorkGame.cs` | C# engine | `ZorkGame` — a compact, playable Zork I "White House" text adventure: 11 rooms, a real verb parser, items (mailbox/leaflet, sword, brass lantern, rug/trap door, trophy case, rope), lamp-driven darkness + grue death, and per-player state keyed by mobile serial. |
+| `Source/Scripts/Items/Misc/FragmentOfInfinity.cs` | C# item | `FragmentOfInfinity : Item` — **"Fragment of Infinity"**, graphic `7964`, hue `1266`, weight 1. Single-use: double-click in the backpack → target an artefact (`IGiftable`) you are wearing or carrying → adds **10 enchantment points** (`Points += 10`) and the fragment is consumed. A non-artefact target answers **"This only works on artefacts."** and the fragment is kept. The tooltip line "Adds 10 points of enchantment to any artefact" is drawn beneath the name in hue `71e26c` (`ColorText3`/`ColorHue3`). |
 
 ## Files Edited
 
@@ -481,6 +482,11 @@ No other files were modified.
   - `GetAdventurerTips` is a six‑line table: crystals of the Sorcerer Cave, crystals of the Conjurer's Cave, a reshaped gorget anecdote, the gypsy's 2000/200 price tiers, her parchment truths, and a nudge to search paragons for gems.
   - **Rumours** also went into the general town chatter pool: `TavernPatrons.GetChatter` grew to **60** entries (`CommonTalkingCount = 58 → 60`) with *"They say the crystals hidden deep in <dungeon> will make a mage forget everything he ever learned."* and *"A gypsy will reshape your armor for coin. Plain steel is cheap, but an artifact's look costs dear."*
   - Compile: core 7 warnings, scripts 14, zero errors.
+163. **Fragment of Infinity — enchantment-point consumable** — new `Source/Scripts/Items/Misc/FragmentOfInfinity.cs`, no existing file touched.
+  - **Item:** class `FragmentOfInfinity`, displayed name **"Fragment of Infinity"**, graphic **`7964`**, hue **`1266`**, weight **1 stone**. The tooltip adds the line *"Adds 10 points of enchantment to any artefact"* beneath the name in hue **`71e26c`**, using the existing `ColorText3`/`ColorHue3` OPL mechanism (same as `MagicPigment`).
+  - **Use:** double-click while in the backpack → target an artefact you are **wearing or carrying** → adds **10** to its `IGiftable.Points` (`item.InvalidateProperties()` refreshes the tooltip) and consumes the fragment. `IGiftable` is the shard's enchantment-point field, implemented by every `BaseGift*` artefact weapon/armour/shield/jewel/clothing class.
+  - **Refusals:** a non-artefact target (or a mobile) answers exactly **"This only works on artefacts."** and the fragment stays in the pack. An artefact outside reach answers "You can only enchant artefacts you are wearing or carrying." and is likewise not consumed.
+  - Compile: scripts 11 warnings, **zero errors** (csc 4.0 over `Info/Scripts` + `Source/Scripts` against `World.exe`).
 
 
 ---
@@ -606,3 +612,11 @@ No other files were modified.
 - **Refusals:** non-armor/clothing targets answer "That is not armor or clothing."; a slot with no known appearances answers with the slot name plus the catalogue totals (diagnostic).
 - **Catalogue scope:** every `[Constructable]` `BaseArmor` / `BaseClothing` / `BaseWeapon` / `BaseTrinket` in the script assemblies — 1,342 classes, deduplicated per slot by art. Built lazily on first use and cached; `TransmogrifyCatalog.Rebuild()` refreshes it.
 - **Known caveat:** option art offsets in the grid are fixed estimates, so very large graphics (shields, robes) can sit slightly off-centre until they are sized per art (e.g. via `AddImageTiledButton`, as `PolymorphGump` does).
+
+### Fragment of Infinity (`FragmentOfInfinity`)
+- **Item:** "Fragment of Infinity" — graphic `7964`, hue `1266`, weight 1. Spawn it with `[add FragmentOfInfinity`.
+- **Tooltip:** beneath the name, *"Adds 10 points of enchantment to any artefact"* in hue `71e26c` (`ColorText3` / `ColorHue3`).
+- **Use:** double-click it while it is in your backpack, then target an artefact you are wearing or carrying. The target gains **10 enchantment points** (`IGiftable.Points`), its tooltip refreshes immediately, a magic sound plays, and the fragment is consumed.
+- **Accepted targets:** anything implementing `IGiftable` — every `BaseGift*` artefact weapon, armour piece, shield, jewel and clothing item. Those are the items whose tooltip/gump already call the field "Enchantment Points".
+- **Refusals:** anything that cannot accept points answers **"This only works on artefacts."** and the fragment is **not** consumed. An artefact that is not worn or carried answers "You can only enchant artefacts you are wearing or carrying." and is likewise not consumed.
+
