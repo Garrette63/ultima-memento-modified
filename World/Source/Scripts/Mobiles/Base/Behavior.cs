@@ -3760,6 +3760,7 @@ namespace Server.Misc
 		public static void BeforeMyBirth( Mobile from )
 		{
 			int PackGear = 1;
+			int PackStaff = 1;
 
 			Region reg = Region.Find( from.Location, from.Map );
 
@@ -3797,6 +3798,7 @@ namespace Server.Misc
 			{
 				from.EmoteHue = EmoteHues.Undead;
 				PackGear = 0;
+				if ( from is LichKing ){ PackStaff = 0; } // the Lich King fights in melee, so he carries no mage staff
 			}
 			else if ( from is UndeadDruid )
 			{
@@ -4191,7 +4193,9 @@ namespace Server.Misc
 
 			if ( PackGear == 1 ){ Server.Misc.IntelligentAction.GiveAdventureGear( (BaseCreature)from ); }
 
-			WizardStaff caster = new WizardStaff();
+			if ( PackStaff == 1 )
+			{
+				WizardStaff caster = new WizardStaff();
 				if ( from.FindItemOnLayer( Layer.OneHanded ) != null ) { from.FindItemOnLayer( Layer.OneHanded ).Delete(); }
 				if ( from.FindItemOnLayer( Layer.TwoHanded ) != null ) { from.FindItemOnLayer( Layer.TwoHanded ).Delete(); }
 				((BaseCreature)from).SetSkill( SkillName.Marksmanship, from.Skills[SkillName.Magery].Value );
@@ -4216,6 +4220,7 @@ namespace Server.Misc
 				else if ( from.EmoteHue == EmoteHues.FireWizard ){ caster.damageType = 1; } 	// Fire Wizards
 				else if ( from.EmoteHue == EmoteHues.SerpentMage ){ caster.damageType = 4; } 	// Serpent Mages
 				from.AddItem( caster );
+			}
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

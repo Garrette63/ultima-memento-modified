@@ -90,6 +90,10 @@ namespace Server.Mobiles
 		{
 			get
 			{
+				// The Lich King fights in melee, so he never tries to hold a ranged distance.
+				if ( m_Mobile is LichKing )
+					return false;
+
 				if (m_CanUseMagery || m_CanUseNecromancy)
 				{
 					var delta = m_Mobile.RawInt - m_Mobile.RawStr;
