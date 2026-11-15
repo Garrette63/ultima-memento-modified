@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<accounts count="5">
+	<account>
+		<username>Admin</username>
+		<newCryptPassword>E5-DA-45-BF-74-F6-A7-6E-10-58-50-68-B5-1C-D2-81-60-BD-A0-92</newCryptPassword>
+		<accessLevel>Owner</accessLevel>
+		<flags>2</flags>
+		<created>2012-09-03T12:33:27.63475-04:00</created>
+		<lastLogin>2018-05-31T16:35:09.970277-04:00</lastLogin>
+		<totalGameTime>P55DT17H24M6.9763392S</totalGameTime>
+		<chars>
+			<char index="0">1</char>
+		</chars>
+		<addressList count="1">
+			<ip>192.168.2.4</ip>
+		</addressList>
+	</account>
+	<account>
+		<username>Feesh</username>
+		<newCryptPassword>C6-47-07-22-0A-31-E3-A4-5B-FD-87-D6-C7-E3-0F-36-B5-F9-B1-BC</newCryptPassword>
+		<flags>2</flags>
+		<created>2026-08-28T15:56:20.5680199-04:00</created>
+		<lastLogin>2026-08-28T15:56:20.5680199-04:00</lastLogin>
+		<totalGameTime>P18DT3H7M39.4102225S</totalGameTime>
+		<chars>
+			<char index="0">266360</char>
+			<char index="1">54113</char>
+		</chars>
+		<comments>
+			<comment addedBy="System" lastModified="2026-09-13T07:10:21.7812086-04:00">Character #1 0x228A "Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T12:43:00.5288345-04:00">Character #1 0x59AE "Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T12:43:11.6125659-04:00">Character #3 0xFD28 "Test Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T12:43:15.0874593-04:00">Character #4 0xF814 "Test Test Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T12:43:18.5251448-04:00">Character #5 0xEBD8 "Test Test Test T" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T12:48:48.4260524-04:00">Character #1 0x138C8 "Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T12:52:19.745278-04:00">Character #1 0x1417B "Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T13:04:56.8108772-04:00">Character #1 0x145F8 "Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T13:09:57.9874778-04:00">Character #1 0x2403 "Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T13:17:39.0389128-04:00">Character #1 0x6F07 "Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T13:21:52.6755954-04:00">Character #1 0xAD60 "Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T13:24:46.5118548-04:00">Character #1 0xB5A9 "Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-13T13:27:12.7516777-04:00">Character #1 0xBAEE "Test" deleted by 146.70.171.95</comment>
+			<comment addedBy="System" lastModified="2026-09-26T07:42:54.0866584-04:00">Character #1 0xBACC "Test" deleted by 192.168.1.51</comment>
+			<comment addedBy="System" lastModified="2026-10-05T20:54:52.8472622-04:00">Character #1 0xD175 "Test" deleted by 192.168.1.46</comment>
+		</comments>
+		<addressList count="1">
+			<ip>23.234.100.231</ip>
+		</addressList>
+	</account>
+	<account>
+		<username>Dungeon Master</username>
+		<newCryptPassword>3F-15-25-21-6C-53-CE-89-0C-8E-9F-D1-03-2A-9F-24-82-0B-34-55</newCryptPassword>
+		<created>2026-08-28T16:11:20.052581-04:00</created>
+		<lastLogin>2026-08-28T16:11:20.052581-04:00</lastLogin>
+		<totalGameTime>PT0S</totalGameTime>
+		<chars />
+		<addressList count="1">
+			<ip>23.234.100.231</ip>
+		</addressList>
+	</account>
+	<account>
+		<username>Grim1234</username>
+		<newCryptPassword>D1-02-FC-11-DB-36-0D-7D-12-E9-D8-AA-96-FA-2A-3B-8B-91-DE-0F</newCryptPassword>
+		<flags>2</flags>
+		<created>2026-08-29T20:51:19.4598758-04:00</created>
+		<lastLogin>2026-08-29T20:51:19.4598758-04:00</lastLogin>
+		<totalGameTime>P31DT14H19M5.6151808S</totalGameTime>
+		<chars>
+			<char index="0">53507</char>
+		</chars>
+		<addressList count="1">
+			<ip>68.49.63.61</ip>
+		</addressList>
+	</account>
+	<account>
+		<username>Grim</username>
+		<newCryptPassword>48-07-2C-21-2E-24-23-E6-CD-60-2F-63-9D-B8-20-4D-3E-1B-8A-EF</newCryptPassword>
+		<created>2026-08-31T21:21:24.4290709-04:00</created>
+		<lastLogin>2026-08-31T21:21:24.4290709-04:00</lastLogin>
+		<totalGameTime>PT0S</totalGameTime>
+		<chars />
+		<addressList count="1">
+			<ip>68.49.63.61</ip>
+		</addressList>
+	</account>
+</accounts>
