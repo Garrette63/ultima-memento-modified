@@ -831,13 +831,21 @@ namespace Server
 			if ( !rarity )
 				return max;
 
-			int xtra = max-min-9;
-				if ( xtra > 1 )
-					xtra = Utility.Random( xtra );
-						if ( xtra < 1 )
-							xtra = 0;
+			// Rarity() returns 1-10 (1 being the common material), but the first material of a
+			// family sits at 'min' - so without the (min-1) offset every family above the metals
+			// (leather 16, fabric 27, wood 52, skeletal 92) was clamped straight back down to
+			// 'min' and could never actually change material at all.
+			int rare = min + Rarity( resource ) - 1;
 
-			int rare = Rarity( resource ) + xtra;
+			// Families holding more than ten materials need a spill, otherwise the rarest entry
+			// at 'max' is unreachable (e.g. FiendishFabric was impossible).
+			int xtra = ( max - min + 1 ) - 10;
+			if ( xtra > 0 )
+				xtra = Utility.Random( xtra + 1 );
+			else
+				xtra = 0;
+
+			rare = rare + xtra;
 
 			if ( rare > max )
 				return max;
