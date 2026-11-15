@@ -82,33 +82,6 @@ namespace Server.Mobiles
 				c.DropItem( fork );
 			}
 
-			if ( killer != null && GetPlayerInfo.LuckyKiller( killerLuck ) && Utility.RandomMinMax( 1, 5 ) == 1 )
-			{
-				ManualOfItems book = new ManualOfItems();
-					book.Hue = 0x21;
-					book.Name = "Chest of Satanic Relics";
-					book.m_Charges = 1;
-					book.m_Skill_1 = ManualOfItems.SKILL_WEAPON_OR_NECROMANCY;
-					book.m_Skill_2 = 0;
-					book.m_Skill_3 = 0;
-					book.m_Skill_4 = 0;
-					book.m_Skill_5 = 0;
-					book.m_Value_1 = 20.0;
-					book.m_Value_2 = 0.0;
-					book.m_Value_3 = 0.0;
-					book.m_Value_4 = 0.0;
-					book.m_Value_5 = 0.0;
-					book.m_Slayer_1 = (int)SlayerName.Fey;
-					book.m_Slayer_2 = 0;
-					book.m_Owner = killer;
-					book.m_Extra = "of Satan";
-					book.m_FromWho = "Taken from the Devil Lord";
-					book.m_HowGiven = "Acquired by";
-					book.m_Points = 300;
-					book.m_Hue = 0x21;
-					c.DropItem( book );
-			}
-
 			ArrayList targets = new ArrayList();
 			foreach ( Item item in World.Items.Values )
 			if ( item is OrbOfTheAbyss )
