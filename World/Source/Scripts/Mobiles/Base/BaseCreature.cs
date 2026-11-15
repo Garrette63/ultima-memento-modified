@@ -1951,6 +1951,16 @@ namespace Server.Mobiles
 					suffix = String.Concat( suffix, " (cursed)" );
 			}
 
+			// Bosses are tagged after any paragon marker, so "(boss)" is always
+			// the final part of the displayed name.
+			if ( MobileUtilities.IsBoss( this ) )
+			{
+				if ( suffix.Length == 0 )
+					suffix = "(boss)";
+				else
+					suffix = String.Concat( suffix, " (boss)" );
+			}
+
 			return base.ApplyNameSuffix( suffix );
 		}
 
