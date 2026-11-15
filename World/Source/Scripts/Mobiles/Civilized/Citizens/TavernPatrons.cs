@@ -928,7 +928,7 @@ namespace Server.Misc
 		// reshape service.
 		public static void GetAdventurerTips( Mobile patron )
 		{
-			string sSpeech = "Keep an eye on cursed monsters. They swallow gems worth a new face.";
+			string sSpeech = "Keep an eye on cursed monsters. They swallow enchanted gems.";
 
 			switch( Utility.RandomMinMax( 1, 6 ) )
 			{
@@ -937,7 +937,7 @@ namespace Server.Misc
 				case 3: sSpeech = "I had this very gorget reshaped by a gypsy. You would never know it was the same piece."; break;
 				case 4: sSpeech = "That gypsy asks two thousand for an artifact's look, but only two hundred for plain iron."; break;
 				case 5: sSpeech = "Ask the gypsy about a parchment and she will tell you whether it lies."; break;
-				case 6: sSpeech = "Keep an eye on the paragons. They swallow gems worth a new face."; break;
+				case 6: sSpeech = "Keep an eye on the cursed monsters. They swallow enchanted gems."; break;
 			}
 
 			patron.Say( sSpeech );
