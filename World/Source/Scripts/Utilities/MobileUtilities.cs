@@ -1,3 +1,4 @@
+using System;
 using Server;
 using Server.Mobiles;
 
@@ -77,5 +78,47 @@ public class MobileUtilities
 		var lastDamager = m.FindMostRecentDamager(true);
 
 		return TryGetMasterPlayer(lastDamager);
+	}
+
+	/// <summary>
+	/// Returns true for the shard's named bosses and every Magical Prison escapee.
+	/// Used for the "(boss)" name tag and the Fragment of Infinity drop rule.
+	/// </summary>
+	public static bool IsBoss(BaseCreature bc)
+	{
+		if (bc == null)
+			return false;
+
+		// SummonPrison stamps all 25 Magical Prison escapees with this hue
+		// when it releases them, so this catches every prison boss without
+		// catching the ordinary creatures they are based on.
+		if (bc.EmoteHue == 505)
+			return true;
+
+		Type type = bc.GetType();
+
+		return type == typeof(BlackGateDemon)
+			|| type == typeof(BloodDemigod)
+			|| type == typeof(DragonKing)
+			|| type == typeof(OrkDemigod)
+			|| type == typeof(LichKing)
+			|| type == typeof(Dracula)
+			|| type == typeof(Jormungandr)
+			|| type == typeof(Xurtzar)
+			|| type == typeof(CaddelliteDragon)
+			|| type == typeof(Vulcrum)
+			|| type == typeof(Arachnar)
+			|| type == typeof(Surtaz)
+			|| type == typeof(Mangar)
+			|| type == typeof(Shadowlord)
+			|| type == typeof(Tarjan)
+			|| type == typeof(TitanHydros)
+			|| type == typeof(TitanLithos)
+			|| type == typeof(TitanPyros)
+			|| type == typeof(TitanStratos)
+			|| type == typeof(KhumashGor)
+			|| type == typeof(Satan)
+			|| type == typeof(SlasherOfVoid)
+			|| type == typeof(Exodus);
 	}
 }
