@@ -295,6 +295,22 @@ namespace Server
 
 		public static int S_LootChance = 100;
 
+	// When an item that CAN take a material (armor, weapon, clothing, tool) has already passed the
+	// creature/chest level check, this is the percent chance it actually gets a random material.
+	// 25 reproduces the old hard-coded roll (nothing before this change went past 25). 100 means
+	// every eligible item is materialled. This raises or lowers the amount of dull copper, shadow
+	// iron, barbed leather, ash wood, drow bone and so on in the world.
+
+		public static int S_LootMaterialChance = 75;
+
+	// Skews every material roll toward the rarer end of its family.
+	//   0 = use the rolled tier as-is, so the base material dominates
+	//   1 = one tier higher, which drops the base material to a third of rolls   <-- current default
+	//   2 = two tiers higher, which levels the first three materials
+	// The result is clamped inside each family, so the base material never disappears entirely.
+
+		public static int S_LootMaterialBoost = 1;
+
 	// The amount of minutes before you can take a bulletin board quest after finishing one.
 
 		public static int S_GetTimeBetweenQuests = 60;

@@ -800,16 +800,21 @@ namespace Server
 		{
 			if (RarityIgnore(resource)) return Utility.RandomMinMax(1, 10);
 
-			int check = Utility.Random(1024);
-			if (check < 2) return 10;
-			if (check < 4) return 9;
-			if (check < 8) return 8;
-			if (check < 16) return 7;
-			if (check < 32) return 6;
-			if (check < 64) return 5;
-			if (check < 128) return 4;
-			if (check < 256) return 3;
-			if (check < 512) return 2;
+			// Tier 1 is a family's base material, tier 10 its rarest. The buckets below are out of 1024,
+			// so the shares are 32.4 / 21.9 / 12.5 / 8.2 / 6.3 / 5.1 / 3.9 / 3.5 / 3.1 / 3.1 %.
+			// The tail is deliberately fatter than the old 1024-halving curve, which left the top four
+			// tiers only 1.6 % between them; see Memento_System_Changes.md #170, #171 and #172.
+
+			int check = Utility.Random( 1024 );
+			if (check < 32) return 10;
+			if (check < 64) return 9;
+			if (check < 100) return 8;
+			if (check < 140) return 7;
+			if (check < 192) return 6;
+			if (check < 256) return 5;
+			if (check < 340) return 4;
+			if (check < 468) return 3;
+			if (check < 692) return 2;
 
 			else return 1;
 		}
@@ -835,7 +840,7 @@ namespace Server
 			// family sits at 'min' - so without the (min-1) offset every family above the metals
 			// (leather 16, fabric 27, wood 52, skeletal 92) was clamped straight back down to
 			// 'min' and could never actually change material at all.
-			int rare = min + Rarity( resource ) - 1;
+			int rare = min + Rarity( resource ) - 1 + MySettings.S_LootMaterialBoost;
 
 			// Families holding more than ten materials need a spill, otherwise the rarest entry
 			// at 'max' is unreachable (e.g. FiendishFabric was impossible).
@@ -868,7 +873,9 @@ namespace Server
 				rarity = false;
 			}
 
-			if ( uncommon && Utility.Random( 4 ) > 0 )
+			// how often an eligible item actually takes a material - see MySettings.S_LootMaterialChance.
+			// 25 here is the old hard-coded Utility.Random( 4 ) > 0 roll.
+			if ( uncommon && Utility.Random( 100 ) >= MySettings.S_LootMaterialChance )
 				return;
 
 			if ( item.NotModAble )
