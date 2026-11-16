@@ -571,9 +571,19 @@ namespace Server
 						case 5: min += 15; break;
 						case 6: min += 20; break;
 
-						// Bonus property
-						case 7: ++bonusProps; break;
-						case 8: ++bonusProps; break;
+						// Bonus property - but only while the pack still has room under its ceiling,
+						// which is m_MaxProps ("never 6 properties"). When there is no room the reward
+						// becomes an intensity bump instead, so a heat 4 region can never hand out
+						// worse loot than a heat 3 one (maxProps 0/1 packs always had the bonus
+						// swallowed, and rich packs lost it on the top ~10% of rolls).
+						case 7:
+						if ( 1 + bonusProps < m_MaxProps ){ ++bonusProps; }
+						else { min += 20; max += 15; }
+						break;
+						case 8:
+						if ( 1 + bonusProps < m_MaxProps ){ ++bonusProps; }
+						else { min += 30; max += 15; }
+						break;
 
 						// Ensure a bare minimum is set
 						case 9: min = 70; break;
@@ -1250,7 +1260,12 @@ namespace Server
 
 		public static int MonsterLevel( int level )
 		{
-			level = (int)( level / 10 );
+			// A creature tops out around creature level 75 because fame, |karma| and stats are all
+			// capped at 15000 in IntelligentAction.GetCreatureLevel, so the old /10 pinned every
+			// elite at loot level 7 and left 8-12 unreachable. /7 puts elites at 10 (11 for the
+			// very top end), matching the ceiling LootPack.MakeFixedDrop already uses. See #174.
+
+			level = (int)( level / 7 );
 
 			if ( level < 1 )
 				level = 1;
