@@ -147,6 +147,7 @@ namespace Server.Misc
 							henchThing.HenchTimer = from.Fame;
 							henchThing.HenchBandages = from.Hunger;
 							henchThing.LootType = LootType.Regular;
+							henchThing.HenchSerial = 0;
 
 							if ( item is HenchmanArcherItem ){ henchThing.Name = "archer henchman"; }
 							else if ( item is HenchmanFighterItem ){ henchThing.Name = "fighter henchman"; }
@@ -348,6 +349,7 @@ namespace Server.Misc
 				henchThing.HenchTimer = from.Fame;
 				henchThing.HenchBandages = from.Hunger;
 				henchThing.LootType = LootType.Regular;
+				henchThing.HenchSerial = 0;
 
 				if ( item is HenchmanArcherItem ){ henchThing.Name = "dead archer henchman"; }
 				else if ( item is HenchmanFighterItem ){ henchThing.Name = "dead fighter henchman"; }
