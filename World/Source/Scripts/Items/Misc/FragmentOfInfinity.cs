@@ -5,8 +5,10 @@ using Server.Targeting;
 
 namespace Server.Items
 {
-	// A single-use consumable that tops up the enchantment points every artefact
-	// weapon, armour piece, shield, jewel or clothing item carries through IGiftable.
+	// A single-use consumable that tops up the enchantment points carried by
+	// artefact equipment. Gift artefacts store them through IGiftable; legendary
+	// (leveling) artefacts store the same kind of spendable points through
+	// ILevelable.
 	public class FragmentOfInfinity : Item
 	{
 		// How many points one fragment is worth.
@@ -73,9 +75,10 @@ namespace Server.Items
 
 				Item item = targeted as Item;
 
-				// Only artefacts carry the Points field, so anything else answers
-				// with the refusal message and leaves the fragment untouched.
-				if ( item == null || item.Deleted || !( item is IGiftable ) )
+				// Two artefact families expose a spare-points pool: gift artefacts
+				// through IGiftable and legendary leveling artefacts through
+				// ILevelable. Anything else gets the refusal and keeps the fragment.
+				if ( item == null || item.Deleted || ( !( item is IGiftable ) && !( item is ILevelable ) ) )
 				{
 					from.SendMessage( "This only works on artefacts." );
 					return;
@@ -87,9 +90,15 @@ namespace Server.Items
 					return;
 				}
 
-				IGiftable gift = (IGiftable)item;
+				if ( item is IGiftable )
+				{
+					( (IGiftable)item ).Points += EnchantmentPoints;
+				}
+				else if ( item is ILevelable )
+				{
+					( (ILevelable)item ).Points += EnchantmentPoints;
+				}
 
-				gift.Points += EnchantmentPoints;
 				item.InvalidateProperties();
 
 				from.PlaySound( 0x1F7 );
