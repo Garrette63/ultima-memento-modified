@@ -55,6 +55,7 @@ This document tracks every file created or edited for the Memento Coin / Artefac
 | `Source/Scripts/Mobiles/Unique/Mangar.cs` | Added `FragmentOfInfinityDrops.TryDropChance( MyChest )` where `BardMangarPack.OnDoubleClick` builds Mangar's Vault `LootChest`, since Mangar leaves a marker vault rather than a corpse. |
 | `Source/Scripts/Mobiles/Demons/Satan.cs` | Added the red **Chest of Satanic Relics** relic-chest drop to `Satan.OnDeath`, using the same LuckyKiller-gated 1-in-5 roll as LichKing's relic chest. |
 | `Source/Scripts/Items/Magical/ManualOfItems.cs` | Added `ManualOfItems.SKILL_WEAPON_OR_NECROMANCY` (`101`) and taught `GiveItemBonus` to apply it: weapons gain their own weapon skill, while armour/shields, clothing and trinkets gain Necromancy. |
+| `Source/Scripts/Items/Magical/Artifacts/Clothing/Outer/Artifact_HoodedShroudOfShadows.cs` | Now displayed as **"Hooded Shroud of Shadows"** and built on the hooded shroud art `0x2684` (`[Flipable( 0x2684, 0x2683 )]`), the same base as `GiftHoodedShroudOfShadows`, instead of the plain robe art `0x2B69`. Skill bonuses, `ArtifactLevel`, hue `0x455`, weight and loot type are unchanged. Serialisation version moved to 2 and `Deserialize` migrates saved copies (plain-robe art → `0x2684`, old name → new name), leaving transmogrified and clothing-placeholder items' current art alone. Backed up as `Backups/Artifact_HoodedShroudOfShadows.cs.2026-11-18-180232.bak`. |
 
 No other files were modified.
 
@@ -571,6 +572,12 @@ No other files were modified.
   - **Fix:** the acceptance check now allows either `IGiftable` or `ILevelable`. The +10 is applied to `IGiftable.Points` for gift artefacts and to `ILevelable.Points` for legendary leveling artefacts. Items with neither pool still get the same refusal and keep the fragment; reachability and consumption behaviour are unchanged.
   - **No double-application:** the two interfaces remain disjoint (no item implements both), so the `if / else if` adds exactly 10 once.
   - Compile: csc 4.0 over `Info/Scripts` + `Source/Scripts` against `World.exe` — 11 warnings, **zero errors**.
+176. **"Shroud of Shadows" is now the Hooded Shroud of Shadows** — one file, `Source/Scripts/Items/Magical/Artifacts/Clothing/Outer/Artifact_HoodedShroudOfShadows.cs`; nothing else touched.
+  - **Displayed name** changed from "Shroud of Shadows" to **"Hooded Shroud of Shadows"** — the same name `ArtifactQuestList` already printed for this artefact, so the item and the artefact list now agree.
+  - **Base item type** changed from the plain robe art `0x2B69` to the hooded shroud art `0x2684`, exactly the base `GiftHoodedShroudOfShadows` and `LevelHoodedShroudOfShadows` use. The class now carries `[Flipable( 0x2684, 0x2683 )]` like those two, so `[flip` still folds the hood back. `Item.isShroud` already lists `0x2684`, so the hood takes part in the normal shroud clothing flow (helm/hair hidden, `0x6474` placeholder when hidden).
+  - **Stats untouched:** Hiding +50, Stealth +50, `ArtifactLevel.StandardArtefact`, `Arty.ArtySetup( this, 10, "" )`, hue `0x455`, `GiftRobe` weight 3.0, dyeable, normal loot type — all exactly as before.
+  - **Existing copies migrate on load:** serialisation version 1 → 2. A copy still on the plain-robe art is moved to `0x2684` (with its `GraphicID`), a copy hidden behind the clothing placeholder (`Item.doMod`, `0x6474`) only has its stored `GraphicID` moved so the placeholder restores to the new art, a transmogrified copy keeps the art its owner picked, and the old default name is replaced. New items are written as version 2 and skip the migration.
+  - Compile: csc 4.0 over `Info/Scripts` + `Source/Scripts` against `World.exe` — 11 warnings, **zero errors** (same 11 pre-existing warnings as #175).
 
 ---
 
