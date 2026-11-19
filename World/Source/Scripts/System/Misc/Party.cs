@@ -116,17 +116,6 @@ namespace Server.Engines.PartySystem
 		}
 	}
 
-	public sealed class PartyInvitation : Packet
-	{
-		public PartyInvitation( Mobile leader ) : base( 0xBF )
-		{
-			EnsureCapacity( 10 );
-
-			m_Stream.Write( (short) 0x0006 );
-			m_Stream.Write( (byte) 0x07 );
-			m_Stream.Write( (int) leader.Serial );
-		}
-	}
 }
 
 namespace Server.Engines.PartySystem
@@ -554,7 +543,6 @@ namespace Server.Engines.PartySystem
 
 			from.SendLocalizedMessage( 1008090 ); // You have invited them to join the party.
 
-			target.Send( new PartyInvitation( from ) );
 			target.Party = from;
 
 			DeclineTimer.Start( target, from );
