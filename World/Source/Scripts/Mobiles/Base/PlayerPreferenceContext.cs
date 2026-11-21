@@ -12,6 +12,8 @@ namespace Server.Mobiles
 			ModernLockpickingEnabled = true;
 			ModernRemoveTrapEnabled = true;
 			ModernTrackingEnabled = true;
+			ShowLootTiers = true;
+			ShowVendorValues = true;
 			VendorContainerSellCompactItemsPerPage = VendorContainerSellConfigGump.DefaultVendorContainerSellCompactItemsPerPage;
 			VendorContainerSellLargeItemsPerPage = VendorContainerSellConfigGump.DefaultVendorContainerSellLargeItemsPerPage;
 			VendorContainerSellSelectionBehavior = VendorContainerSellSelectionBehavior.AsManyAsPossible;
@@ -85,6 +87,8 @@ namespace Server.Mobiles
 
 			SuppressSystemMessages = 8 < version ? reader.ReadBool() : false;
 			ModernTrackingEnabled = 9 < version ? reader.ReadBool() : true;
+			ShowLootTiers = 10 < version ? reader.ReadBool() : true;
+			ShowVendorValues = 11 < version ? reader.ReadBool() : true;
 		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
@@ -169,6 +173,12 @@ namespace Server.Mobiles
 		public bool ShowGumpImages { get; set; }
 
 		[CommandProperty(AccessLevel.GameMaster)]
+		public bool ShowLootTiers { get; set; }
+
+		[CommandProperty(AccessLevel.GameMaster)]
+		public bool ShowVendorValues { get; set; }
+
+		[CommandProperty(AccessLevel.GameMaster)]
 		public bool SingleAttemptID { get; set; }
 
 		[CommandProperty(AccessLevel.GameMaster)]
@@ -200,7 +210,7 @@ namespace Server.Mobiles
 
 		public void Serialize(GenericWriter writer)
 		{
-			writer.Write(10);
+			writer.Write(12);
 
 			writer.Write(DoubleClickID);
 			writer.Write(SuppressVendorTooltip);
@@ -245,6 +255,8 @@ namespace Server.Mobiles
 
 			writer.Write(SuppressSystemMessages);
 			writer.Write(ModernTrackingEnabled);
+			writer.Write(ShowLootTiers);
+			writer.Write(ShowVendorValues);
 		}
 	}
 }

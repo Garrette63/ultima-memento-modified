@@ -236,6 +236,10 @@ namespace Server.Engines.Help
 			Setting_PrivatePlay,
 			Setting_RemoveVendorGoldSafeguard_Info,
 			Setting_RemoveVendorGoldSafeguard,
+			Setting_ShowLootTiers_Info,
+			Setting_ShowLootTiers,
+			Setting_ShowVendorValues_Info,
+			Setting_ShowVendorValues,
 			Setting_SingleAttemptID_Info,
 			Setting_SingleAttemptID,
 			Setting_SkillList_Info,
@@ -917,6 +921,8 @@ namespace Server.Engines.Help
 				case PageActionType.Setting_DoubleClickToTalk: return from.Preferences.DoubleClickToTalk;
 				case PageActionType.Setting_OrdinaryResources: return from.HarvestOrdinary;
 				case PageActionType.Setting_RemoveVendorGoldSafeguard: return from.Preferences.IgnoreVendorGoldSafeguard;
+				case PageActionType.Setting_ShowLootTiers: return from.Preferences.ShowLootTiers;
+				case PageActionType.Setting_ShowVendorValues: return from.Preferences.ShowVendorValues;
 				case PageActionType.Setting_SuppressVendorTooltips: return from.Preferences.SuppressVendorTooltip;
 				case PageActionType.Setting_SuppressSystemMessages: return from.Preferences.SuppressSystemMessages;
 				case PageActionType.Setting_SingleAttemptID: return from.Preferences.SingleAttemptID;
@@ -1426,6 +1432,22 @@ namespace Server.Engines.Help
 				{
 					from.CloseGump( typeof( ModernSkillSetupGump ) );
 					from.SendGump( new ModernSkillSetupGump( from, (int)PageActionType.Show_Preferences ) );
+					break;
+				}
+				case PageActionType.Setting_ShowLootTiers:
+				{
+					reopenPage = true;
+					from.Preferences.ShowLootTiers = !from.Preferences.ShowLootTiers;
+					VendorValue.RefreshTooltips( from );
+					from.SendMessage( from.Preferences.ShowLootTiers ? "Loot tier display enabled. Tooltips refreshed." : "Loot tier display disabled. Tooltips refreshed." );
+					break;
+				}
+				case PageActionType.Setting_ShowVendorValues:
+				{
+					reopenPage = true;
+					from.Preferences.ShowVendorValues = !from.Preferences.ShowVendorValues;
+					VendorValue.RefreshTooltips( from );
+					from.SendMessage( from.Preferences.ShowVendorValues ? "Worth display enabled. Tooltips refreshed." : "Worth display disabled. Tooltips refreshed." );
 					break;
 				}
 				case PageActionType.Setting_SingleAttemptID:
@@ -2311,6 +2333,20 @@ namespace Server.Engines.Help
 					break;
 				}
 				
+				case PageActionType.Setting_ShowLootTiers_Info:
+				{
+					title = "Show Loot Tiers";
+					info = "Command: [LootTiers<br><br>When enabled, equipment tooltips show a coloured rarity tier (Common, Magic, Rare, Legendary, Ancient, Primal) and the item name is tinted to match. This is purely cosmetic and has no gameplay effect. Tooltips refresh immediately when you toggle this.";
+					break;
+				}
+
+				case PageActionType.Setting_ShowVendorValues_Info:
+				{
+					title = "Show Worth";
+					info = "Command: [VendorValues<br><br>When enabled, item tooltips show a gold 'Worth' line with the value a merchant would pay for the item at your Mercantile skill. Relic loot always shows its worth, even with this off. Tooltips refresh immediately when you toggle this.";
+					break;
+				}
+
 				case PageActionType.Setting_SuppressVendorTooltips_Info:
 				{
 					title = "Suppress Vendor Tooltips";

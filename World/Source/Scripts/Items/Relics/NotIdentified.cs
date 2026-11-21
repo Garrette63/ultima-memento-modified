@@ -1,5 +1,6 @@
 using Server.Mobiles;
 using Server.Misc;
+using Server.Network;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -11,6 +12,17 @@ namespace Server.Items
 		public override bool DisplayLootType{ get{ return false; } }
 		public override bool DisplaysContent{ get{ return false; } }
 		public override bool DoNotCountContents{ get{ return true; } }
+
+		// The wrapper hides the real item, but its loot tier is still known: let
+		// ItemRank colour the generic name with the tier of the wrapped equipment
+		// (Container.AddNameProperty would bypass the normal coloured-name hook).
+		public override void AddNameProperty( ObjectPropertyList list )
+		{
+			if ( ItemRank.TryAppendColoredName( this, list ) )
+				return;
+
+			base.AddNameProperty( list );
+		}
 
 		[Constructable]
 		public NotIdentified() : base( 0x9A8 )

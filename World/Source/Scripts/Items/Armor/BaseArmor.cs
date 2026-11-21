@@ -1365,6 +1365,9 @@ namespace Server.Items
 
 		public override void AddNameProperty( ObjectPropertyList list )
 		{
+			if ( ItemRank.TryAppendColoredName( this, list ) )
+				return;
+
 			if ( m_Quality == ArmorQuality.Exceptional )
 			{
 				if ( CraftResources.GetClilocLowerCaseName( m_Resource ) > 0 && m_SubResource == CraftResource.None )

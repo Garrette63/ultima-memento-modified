@@ -27,6 +27,7 @@ using Server.Items;
 using Server.ContextMenus;
 using Server.Gumps;
 using System.Globalization;
+using System.Reflection;
 using Server.Targeting;
 
 namespace Server
@@ -1390,6 +1391,9 @@ namespace Server
 		/// </summary>
 		public virtual void AddNameProperty( ObjectPropertyList list )
 		{
+			if ( InvokeColoredName( this, list ) )
+				return;
+
 			string name = this.Name;
 
 			if ( name == null )
@@ -1483,6 +1487,250 @@ namespace Server
 			}
 		}
 
+		private delegate void ItemTierDelegate( Item item, ObjectPropertyList list );
+
+		private static ItemTierDelegate m_ItemTier;
+		private static bool m_ItemTierSearched;
+		private static bool m_ItemTierErrorLogged;
+
+		// Called exactly where the artefact marker would be. The tier logic lives in
+		// the script assembly (Server.ItemRank), so the hook is resolved by
+		// reflection to keep the core free of script assembly references.
+		private static void InvokeItemTier( Item item, ObjectPropertyList list )
+		{
+			if ( !m_ItemTierSearched )
+			{
+				m_ItemTierSearched = true;
+
+				Type type = ScriptCompiler.FindTypeByFullName( "Server.ItemRank" );
+
+				if ( type != null )
+				{
+					MethodInfo method = type.GetMethod( "AppendTier", BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof( Item ), typeof( ObjectPropertyList ) }, null );
+
+					if ( method != null )
+					{
+						try
+						{
+							m_ItemTier = (ItemTierDelegate) Delegate.CreateDelegate( typeof( ItemTierDelegate ), method );
+						}
+						catch
+						{
+							m_ItemTier = null;
+						}
+					}
+				}
+			}
+
+			if ( m_ItemTier != null )
+			{
+				try
+				{
+					m_ItemTier( item, list );
+				}
+				catch ( Exception ex )
+				{
+					m_ItemTier = null;
+
+					if ( !m_ItemTierErrorLogged )
+					{
+						m_ItemTierErrorLogged = true;
+						Console.WriteLine( "Item tier hook disabled: {0}", ex.Message );
+					}
+				}
+			}
+		}
+
+		private delegate bool ItemColoredNameDelegate( Item item, ObjectPropertyList list );
+
+		private static ItemColoredNameDelegate m_ItemColoredName;
+		private static bool m_ItemColoredNameSearched;
+
+		// Lets Server.ItemRank supply a rarity-coloured name, using the same
+		// <BASEFONT COLOR> markup path the shard already uses for ColorText1.
+		private static bool InvokeColoredName( Item item, ObjectPropertyList list )
+		{
+			if ( !m_ItemColoredNameSearched )
+			{
+				m_ItemColoredNameSearched = true;
+
+				Type type = ScriptCompiler.FindTypeByFullName( "Server.ItemRank" );
+
+				if ( type != null )
+				{
+					MethodInfo method = type.GetMethod( "TryAppendColoredName", BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof( Item ), typeof( ObjectPropertyList ) }, null );
+
+					if ( method != null )
+					{
+						try
+						{
+							m_ItemColoredName = (ItemColoredNameDelegate) Delegate.CreateDelegate( typeof( ItemColoredNameDelegate ), method );
+						}
+						catch
+						{
+							m_ItemColoredName = null;
+						}
+					}
+				}
+			}
+
+			if ( m_ItemColoredName == null )
+				return false;
+
+			try
+			{
+				return m_ItemColoredName( item, list );
+			}
+			catch
+			{
+				m_ItemColoredName = null;
+				return false;
+			}
+		}
+
+		private delegate string ItemNameHueDelegate( Item item );
+
+		private static ItemNameHueDelegate m_ItemNameHue;
+		private static bool m_ItemNameHueSearched;
+
+		// Lets Server.ItemRank tint header lines built from ColorText1/2 (e.g.
+		// MagicQuiver's name) with the same rarity hue as the tooltip name.
+		private static string InvokeNameHue( Item item )
+		{
+			if ( !m_ItemNameHueSearched )
+			{
+				m_ItemNameHueSearched = true;
+
+				Type type = ScriptCompiler.FindTypeByFullName( "Server.ItemRank" );
+
+				if ( type != null )
+				{
+					MethodInfo method = type.GetMethod( "GetNameHue", BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof( Item ) }, null );
+
+					if ( method != null )
+					{
+						try
+						{
+							m_ItemNameHue = (ItemNameHueDelegate) Delegate.CreateDelegate( typeof( ItemNameHueDelegate ), method );
+						}
+						catch
+						{
+							m_ItemNameHue = null;
+						}
+					}
+				}
+			}
+
+			if ( m_ItemNameHue == null )
+				return null;
+
+			try
+			{
+				return m_ItemNameHue( item );
+			}
+			catch
+			{
+				m_ItemNameHue = null;
+				return null;
+			}
+		}
+
+		private delegate bool ItemColorText3Delegate( Item item );
+
+		private static ItemColorText3Delegate m_ItemColorText3;
+		private static bool m_ItemColorText3Searched;
+
+		// Lets Server.VendorValue drop the legacy relic "Worth N Gold" header line.
+		// The text stays on saved items (ColorText3 is serialized), it is simply not
+		// printed; the script's own Mercantile-scaled worth line replaces it.
+		private static bool InvokeSuppressColorText3( Item item )
+		{
+			if ( !m_ItemColorText3Searched )
+			{
+				m_ItemColorText3Searched = true;
+
+				Type type = ScriptCompiler.FindTypeByFullName( "Server.VendorValue" );
+
+				if ( type != null )
+				{
+					MethodInfo method = type.GetMethod( "HideLegacyWorthText", BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof( Item ) }, null );
+
+					if ( method != null )
+					{
+						try
+						{
+							m_ItemColorText3 = (ItemColorText3Delegate) Delegate.CreateDelegate( typeof( ItemColorText3Delegate ), method );
+						}
+						catch
+						{
+							m_ItemColorText3 = null;
+						}
+					}
+				}
+			}
+
+			if ( m_ItemColorText3 == null )
+				return false;
+
+			try
+			{
+				return m_ItemColorText3( item );
+			}
+			catch
+			{
+				m_ItemColorText3 = null;
+				return false;
+			}
+		}
+
+		private delegate int ItemLabelHueDelegate( Item item, Mobile from );
+
+		private static ItemLabelHueDelegate m_ItemLabelHue;
+		private static bool m_ItemLabelHueSearched;
+
+		// Lets Server.ItemRank tint the single-click/overhead label of ground
+		// artefacts. The label packet takes a real UO hue id, unlike the cliloc
+		// name line which takes an HTML colour.
+		private static int InvokeLabelHue( Item item, Mobile from )
+		{
+			if ( !m_ItemLabelHueSearched )
+			{
+				m_ItemLabelHueSearched = true;
+
+				Type type = ScriptCompiler.FindTypeByFullName( "Server.ItemRank" );
+
+				if ( type != null )
+				{
+					MethodInfo method = type.GetMethod( "GetLabelHue", BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof( Item ), typeof( Mobile ) }, null );
+
+					if ( method != null )
+					{
+						try
+						{
+							m_ItemLabelHue = (ItemLabelHueDelegate) Delegate.CreateDelegate( typeof( ItemLabelHueDelegate ), method );
+						}
+						catch
+						{
+							m_ItemLabelHue = null;
+						}
+					}
+				}
+			}
+
+			if ( m_ItemLabelHue == null )
+				return 0x3B2;
+
+			try
+			{
+				return m_ItemLabelHue( item, from );
+			}
+			catch
+			{
+				m_ItemLabelHue = null;
+				return 0x3B2;
+			}
+		}
+
 		/// <summary>
 		/// Overridable. Adds header properties. By default, this invokes <see cref="AddNameProperty" />, <see cref="AddBlessedForProperty" /> (if applicable), and <see cref="AddLootTypeProperty" /> (if <see cref="DisplayLootType" />).
 		/// </summary>
@@ -1504,11 +1752,13 @@ namespace Server
 			if ( ColorHue5 == null )
 				CHue5 = "FFFFFF";
 
+			string nameHue = InvokeNameHue( this );
+
 			if ( ColorText1 != null )
-				list.Add( 1072171, "{0}\t{1}", CHue1, ColorText1 );
+				list.Add( 1072171, "{0}\t{1}", nameHue ?? CHue1, ColorText1 );
 
 			if ( ColorText2 != null )
-				list.Add( 1072172, "{0}\t{1}", CHue2, ColorText2 );
+				list.Add( 1072172, "{0}\t{1}", nameHue ?? CHue2, ColorText2 );
 
 			if ( ColorText1 == null || ( !IsStandardResource( Resource ) && Catalog != Catalogs.Book && Catalog != Catalogs.Trinket ) )
 				AddNameProperty( list );
@@ -1522,7 +1772,7 @@ namespace Server
 					list.Add( 1029724 + (int)NotIDSkill );
 			}
 
-			if ( ColorText3 != null )
+			if ( ColorText3 != null && !InvokeSuppressColorText3( this ) )
 				list.Add( 1072173, "{0}\t{1}", CHue3, ColorText3 );
 
 			if ( ColorText4 != null )
@@ -1548,6 +1798,8 @@ namespace Server
 					list.Add( "<BASEFONT COLOR=#C6D11C>Decorative Artefact</BASEFONT>" );
 					break;
 			}
+
+			InvokeItemTier( this, list );
 
 			if ( m_Enchanted != MagicSpell.None )
 			{
@@ -1950,17 +2202,17 @@ namespace Server
 
 		public void LabelTo( Mobile to, int number )
 		{
-			to.Send( new MessageLocalized( m_Serial, m_ItemID, MessageType.Label, 0x3B2, 3, number, "", "" ) );
+			to.Send( new MessageLocalized( m_Serial, m_ItemID, MessageType.Label, InvokeLabelHue( this, to ), 3, number, "", "" ) );
 		}
 
 		public void LabelTo( Mobile to, int number, string args )
 		{
-			to.Send( new MessageLocalized( m_Serial, m_ItemID, MessageType.Label, 0x3B2, 3, number, "", args ) );
+			to.Send( new MessageLocalized( m_Serial, m_ItemID, MessageType.Label, InvokeLabelHue( this, to ), 3, number, "", args ) );
 		}
 
 		public void LabelTo( Mobile to, string text )
 		{
-			to.Send( new UnicodeMessage( m_Serial, m_ItemID, MessageType.Label, 0x3B2, 3, "ENU", "", text ) );
+			to.Send( new UnicodeMessage( m_Serial, m_ItemID, MessageType.Label, InvokeLabelHue( this, to ), 3, "ENU", "", text ) );
 		}
 
 		public void LabelTo( Mobile to, string format, params object[] args )
@@ -1970,12 +2222,12 @@ namespace Server
 
 		public void LabelToAffix( Mobile to, int number, AffixType type, string affix )
 		{
-			to.Send( new MessageLocalizedAffix( m_Serial, m_ItemID, MessageType.Label, 0x3B2, 3, number, "", type, affix, "" ) );
+			to.Send( new MessageLocalizedAffix( m_Serial, m_ItemID, MessageType.Label, InvokeLabelHue( this, to ), 3, number, "", type, affix, "" ) );
 		}
 
 		public void LabelToAffix( Mobile to, int number, AffixType type, string affix, string args )
 		{
-			to.Send( new MessageLocalizedAffix( m_Serial, m_ItemID, MessageType.Label, 0x3B2, 3, number, "", type, affix, args ) );
+			to.Send( new MessageLocalizedAffix( m_Serial, m_ItemID, MessageType.Label, InvokeLabelHue( this, to ), 3, number, "", type, affix, args ) );
 		}
 
 		public virtual void LabelLootTypeTo( Mobile to )
@@ -6793,7 +7045,7 @@ namespace Server
 			ObjectPropertyList opl = this.PropertyList;
 
 			if ( opl.Header > 0 )
-				from.Send( new MessageLocalized( m_Serial, m_ItemID, MessageType.Label, 0x3B2, 3, opl.Header, this.Name, opl.HeaderArgs ) );
+				from.Send( new MessageLocalized( m_Serial, m_ItemID, MessageType.Label, InvokeLabelHue( this, from ), 3, opl.Header, this.Name, opl.HeaderArgs ) );
 		}
 
 		public virtual void OnSingleClick( Mobile from )
@@ -6808,16 +7060,18 @@ namespace Server
 
 			if ( ns != null )
 			{
+				int labelHue = InvokeLabelHue( this, from );
+
 				if ( this.Name == null )
 				{
 					if ( m_Amount <= 1 )
-						ns.Send( new MessageLocalized( m_Serial, m_ItemID, MessageType.Label, 0x3B2, 3, LabelNumber, "", "" ) );
+						ns.Send( new MessageLocalized( m_Serial, m_ItemID, MessageType.Label, labelHue, 3, LabelNumber, "", "" ) );
 					else
-						ns.Send( new MessageLocalizedAffix( m_Serial, m_ItemID, MessageType.Label, 0x3B2, 3, LabelNumber, "", AffixType.Append, String.Format( " : {0}", m_Amount ), "" ) );
+						ns.Send( new MessageLocalizedAffix( m_Serial, m_ItemID, MessageType.Label, labelHue, 3, LabelNumber, "", AffixType.Append, String.Format( " : {0}", m_Amount ), "" ) );
 				}
 				else
 				{
-					ns.Send( new UnicodeMessage( m_Serial, m_ItemID, MessageType.Label, 0x3B2, 3, "ENU", "", this.Name + ( m_Amount > 1 ? " : " + m_Amount : "" ) ) );
+					ns.Send( new UnicodeMessage( m_Serial, m_ItemID, MessageType.Label, labelHue, 3, "ENU", "", this.Name + ( m_Amount > 1 ? " : " + m_Amount : "" ) ) );
 				}
 			}
 		}

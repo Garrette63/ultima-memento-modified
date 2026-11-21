@@ -626,6 +626,9 @@ namespace Server.Items
 
 		public override void AddNameProperty( ObjectPropertyList list )
 		{
+			if ( ItemRank.TryAppendColoredName( this, list ) )
+				return;
+
 			if ( CraftResources.GetClilocLowerCaseName( m_Resource ) > 0 && m_SubResource == CraftResource.None )
 				list.Add( 1053099, "#{0}\t{1}", CraftResources.GetClilocLowerCaseName( m_Resource ), GetNameString() ); // ~1_oretype~ ~2_armortype~
 			else if ( Name == null )

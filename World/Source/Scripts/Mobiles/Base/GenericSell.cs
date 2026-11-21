@@ -41,6 +41,18 @@ namespace Server.Mobiles
 			return price;
 		}
 
+		// The raw table price for the item's type, with no property, material or
+		// barter adjustment. Used to price unidentified loot from what is known
+		// about the base item (its type and material) without leaking modifiers.
+		public int GetBasePriceFor( Item item )
+		{
+			int price = 0;
+
+			m_Table.TryGetValue( item.GetType(), out price );
+
+			return price;
+		}
+
 		public int GetBuyPriceFor( Item item )
 		{
 			return (int)( 1.90 * GetSellPriceFor( item, 0 ) );

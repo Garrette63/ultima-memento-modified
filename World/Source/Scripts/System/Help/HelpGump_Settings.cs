@@ -78,6 +78,12 @@ namespace Server.Engines.Help
 			AddSetting(xs, rowY, from, "Suppress System Messages", PageActionType.Setting_SuppressSystemMessages, PageActionType.Setting_SuppressSystemMessages_Info);
 			if ( isEvenRow ){ rowY += ROW_HEIGHT; isEvenRow=false; xs=FIRST_COL_X; } else { isEvenRow=true; xs=THIRD_COL_X; }
 
+			AddSetting(xs, rowY, from, "Show Loot Tiers", PageActionType.Setting_ShowLootTiers, PageActionType.Setting_ShowLootTiers_Info);
+			if ( isEvenRow ){ rowY += ROW_HEIGHT; isEvenRow=false; xs=FIRST_COL_X; } else { isEvenRow=true; xs=THIRD_COL_X; }
+
+			AddSetting(xs, rowY, from, "Show Worth", PageActionType.Setting_ShowVendorValues, PageActionType.Setting_ShowVendorValues_Info);
+			if ( isEvenRow ){ rowY += ROW_HEIGHT; isEvenRow=false; xs=FIRST_COL_X; } else { isEvenRow=true; xs=THIRD_COL_X; }
+
 
 			if ( isEvenRow ){ rowY += ROW_HEIGHT; isEvenRow=false; xs=FIRST_COL_X; }
 			rowY += (int)(0.5 * ROW_HEIGHT);

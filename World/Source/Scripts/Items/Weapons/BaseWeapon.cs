@@ -3228,12 +3228,15 @@ namespace Server.Items
 
 		public override void AddNameProperty( ObjectPropertyList list )
 		{
-			if ( CraftResources.GetClilocLowerCaseName( m_Resource ) > 0 && m_SubResource == CraftResource.None )
-				list.Add( 1053099, "#{0}\t{1}", CraftResources.GetClilocLowerCaseName( m_Resource ), GetNameString() ); // ~1_oretype~ ~2_armortype~
-			else if ( Name == null )
-				list.Add( LabelNumber );
-			else
-				list.Add( Name );
+			if ( !ItemRank.TryAppendColoredName( this, list ) )
+			{
+				if ( CraftResources.GetClilocLowerCaseName( m_Resource ) > 0 && m_SubResource == CraftResource.None )
+					list.Add( 1053099, "#{0}\t{1}", CraftResources.GetClilocLowerCaseName( m_Resource ), GetNameString() ); // ~1_oretype~ ~2_armortype~
+				else if ( Name == null )
+					list.Add( LabelNumber );
+				else
+					list.Add( Name );
+			}
 
 			if ( !String.IsNullOrEmpty( m_EngravedText ) )
 				list.Add( 1062613, m_EngravedText );
