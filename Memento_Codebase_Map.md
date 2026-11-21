@@ -1,6 +1,6 @@
 # Memento Codebase Map
 
-Generated 2026-11-21 from the `World/` tree. Covers **5300** `.cs` files in **555** source folders, plus every non-source folder.
+Generated 2026-11-21 from the `World/` tree. Covers **5298** `.cs` files in **555** source folders, plus every non-source folder.
 
 ## How to use this map
 
@@ -35,7 +35,6 @@ Generated 2026-11-21 from the `World/` tree. Covers **5300** `.cs` files in **55
 | Relic loot/ID | `World/Source/Scripts/Items/Relics/*` (`DDRelic*`, `HighSeasRelic`, `NotIdentified`, `RelicFunctions`) |
 | Loot generation | `World/Source/Scripts/Items/Containers/LootPack.cs`, `World/Source/Scripts/Mobiles/Base/BaseCreature.cs` |
 | Commands | `World/Source/Scripts/System/Commands/`, `World/Source/Scripts/System/Commands/LootTierCommands.cs` |
-| Dungeon challenge | `World/Source/Scripts/Items/Misc/DungeonChallengeOrb.cs`, `World/Source/System/Map.cs` (`Difficult.InvokeDifficultyBoost`) |
 | Random equipment names | `World/Source/Scripts/System/Misc/RandomThings.cs` (`MagicItemName`, `SpecialName`, `SkipMagicName`) |
 | Spawns/regions | `World/Source/Scripts/System/Spawns/`, `World/Source/Scripts/System/Regions/`, `World/Info/Spawns/` |
 | Persistence | `World/Source/System/Persistence/`, `World/Saves/` |
@@ -54,7 +53,6 @@ Generated 2026-11-21 from the `World/` tree. Covers **5300** `.cs` files in **55
 | Tune prices/vendors | `Scripts/System/Misc/ItemSales.cs`, `Scripts/Mobiles/Base/{BaseVendor,GenericSell}.cs` |
 | Change tooltips/prefs | `Scripts/System/Misc/{VendorValue,ItemRank}.cs`, `Scripts/System/Help/HelpGump*.cs`, `Mobiles/Base/PlayerPreferenceContext.cs` |
 | Add a gump | `Scripts/System/Gumps/`, derive from `Gump` |
-| Respawn/boost a dungeon | `Scripts/Items/Misc/DungeonChallengeOrb.cs` (use item), `Source/System/Map.cs` (heat hook) |
 
 ### Conventions
 
@@ -385,7 +383,7 @@ One line per source folder (direct `.cs` counts). Curated purposes for major fol
 - **Scripts/Items/Magical/God/Weapons/SpearsAndForks** — 9 files — Magical items: Spears and forks. Types: BaseLevelSpear, LevelBladedStaff, LevelDoubleBladedStaff, LevelPike, ....
 - **Scripts/Items/Magical/God/Weapons/Staves** — 5 files — Magical items: Staves. Types: BaseLevelStaff, LevelBlackStaff, LevelGnarledStaff, LevelQuarterStaff, ....
 - **Scripts/Items/Magical/God/Weapons/Swords** — 17 files — Magical items: Swords. Types: BaseLevelSword, LevelBoneHarvester, LevelBroadsword, LevelClaymore, ....
-- **Scripts/Items/Misc** — 61 files — Miscellaneous items (dyes, tools, bodies, fragments, currency).
+- **Scripts/Items/Misc** — 60 files — Miscellaneous items (dyes, tools, bodies, fragments, currency).
 - **Scripts/Items/Misc/Bodies** — 9 files — Items: Bodies. Types: BodyPart, BonePile, Head, LeftArm, ....
 - **Scripts/Items/Misc/Bodies/Corpses** — 4 files — Items: Corpses. Types: Corpse, CorpseNameAttribute, DecayedCorpse, CorpseEquip.
 - **Scripts/Items/Misc/Bodies/LivingDead** — 3 files — Items: Living dead. Types: BookofDead, DarkHeart, SummonCorpse.
@@ -592,7 +590,7 @@ One line per source folder (direct `.cs` counts). Curated purposes for major fol
 - **Scripts/System/Chat/Gumps/3.0 Skin** — 18 files — Support system: 3.0 skin. Types: ChannelGump, ColorsGump, EditNotGump, FilterGump, ....
 - **Scripts/System/Chat/Gumps/Error Reporting** — 3 files — Support system: Error reporting. Types: Errors, ErrorsGump, ErrorsNotifyGump.
 - **Scripts/System/Chat/Gumps/Gumps Plus** — 7 files — Support system: Gumps plus. Types: BackgroundPlus, ButtonPlus, GumpInfo, GumpPlus, ....
-- **Scripts/System/Commands** — 45 files — GM/player commands and command frameworks.
+- **Scripts/System/Commands** — 44 files — GM/player commands and command frameworks.
 - **Scripts/System/Commands/Commands** — 3 files — Command modules: Commands. Types: BaseCommand, TargetCommands, InterfaceCommand.
 - **Scripts/System/Commands/Extensions** — 5 files — Command modules: Extensions. Types: BaseExtension, DistinctExtension, LimitExtension, SortExtension, ....
 - **Scripts/System/Commands/Extensions/Compilers** — 3 files — Command modules: Compilers. Types: ConditionalCompiler, DistinctCompiler, SortCompiler.
@@ -4187,7 +4185,6 @@ Format: `File.cs` — **PrimaryType : Base** — purpose. `(+N types)` = extra t
 - `ClockworkAssembly.cs` — **ClockworkAssembly : Item** — Item. [Constructable]
 - `CommunicationCrystals.cs` — **CrystalRechargeInfo** — Info/data container. [Constructable] (+4 types)
 - `DruidMirror.cs` — **DruidMirror : Item** — Item ("druid mirror"). [Constructable, Flipable]
-- `DungeonChallengeOrb.cs` — **DungeonChallengeOrb : Item** — Consumable orb: respawns region XML spawns plus in-region PremiumSpawner/Spawner items and applies a timed +1 heat boost (`DungeonChallengeBoost`).
 - `EffectController.cs` — **EffectController : Item** — Item. (+2 types)
 - `EffectItem.cs` — **EffectItem : Item** — Item. (+1 type)
 - `Firebomb.cs` — **Firebomb : Item** — Item ("a firebomb"). [Constructable] (+1 type)
@@ -6930,7 +6927,6 @@ Format: `File.cs` — **PrimaryType : Base** — purpose. `(+N types)` = extra t
 - `CleanUp.cs` — **CleanUpCommand** — Commands: [Internal-CountItems, [Internal-DeleteOrphans
 - `ConvertPlayers.cs` — **ConvertPlayers** — Commands: [ConvertPlayers
 - `Docs.cs` — **Docs** — Commands: [DocGen (+10 types)
-- `DungeonChallengeCommands.cs` — **DungeonChallengeCommands** — GM `[DungeonOrb` command: places a DungeonChallengeOrb in the user's backpack.
 - `Dupe.cs` — **Dupe** — Commands: [Dupe, [DupeInBag (+1 type)
 - `ExportWSC.cs` — **ExportCommand** — Commands: [ExportWSC
 - `FaceLog.cs` — **FaceLog** — Commands: [FaceLog
@@ -7470,7 +7466,7 @@ Format: `File.cs` — **PrimaryType : Base** — purpose. `(+N types)` = extra t
 - `ItemBounds.cs` — **ItemBounds** — Static class (~2 public members).
 - `KeywordList.cs` — **KeywordList** — class (~6 public members).
 - `Main.cs` — **Core** — Static system module (Initialize). (+3 types)
-- `Map.cs` — **Map : IComparable** — Core map/sector storage, land lookups, dungeon heat table (`Difficult.GetDifficulty`) and the one-tier `InvokeDifficultyBoost` script hook.
+- `Map.cs` — **Map : IComparable** — Core map/sector storage, item/mobile lookup and update ranges.
 - `Mobile.cs` — **Mobile : IEntity** — Core mobile: movement, skills, visibility, labels, combat base.
 - `Movement.cs` — **Movement** — Static class (~6 public members). (+1 type)
 - `MultiData.cs` — **MultiData** — Data holder. (+2 types)

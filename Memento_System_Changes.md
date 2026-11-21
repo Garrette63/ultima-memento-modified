@@ -9,7 +9,7 @@ This document tracks every file created or edited for the Memento Coin / Artefac
 Every source change leaves two trails:
 
 - **Back up first.** Copy the file *before* editing it into `Backups/` (git-ignored) as `<OriginalFileName>.<YYYY-MM-DD-HHMMSS>.bak` — e.g. `Backups/ResourceMods.cs.2026-11-15-135748.bak`. One backup per editing session, and the numbered entry names it (`Backed up as …`).
-- **Record the change.** Add the next numbered entry to `## Change History (newest last)` (bold one-line summary, indented `-` detail bullets, compile result at the end) and update the `## Files Created` / `## Files Edited` tables plus the matching `## Current Behaviour` section when behaviour changes. The last entry is **212**, so the next entry is **213**.
+- **Record the change.** Add the next numbered entry to `## Change History (newest last)` (bold one-line summary, indented `-` detail bullets, compile result at the end) and update the `## Files Created` / `## Files Edited` tables plus the matching `## Current Behaviour` section when behaviour changes. The last entry is **211**, so the next entry is **212**.
 
 Paths in the tables are relative to the `World` folder — `World/` in this repository, which mirrors the older standalone copy at `/home/Feesh/World` the tables were first written against.
 
@@ -31,8 +31,6 @@ Paths in the tables are relative to the `World` folder — `World/` in this repo
 | `Source/Scripts/System/Misc/ItemRank.cs` | C# tooltip hook | `ItemRank` — Diablo-style colour tier (Common → Primal, with **Artefact** as the top tier `FFC000`), drawn in the same tooltip slot the artefact marker uses. The lower tiers come from the shard's weighted strength budget (`ItemInformation.AddUpBenefits` with the base price removed, plus material and quality; self repair credited at most one point); artefacts are assigned the top tier directly and keep their marker. Unidentified loot wrappers (`NotIdentified`) unwrap to their contained item, so the tier line and coloured name still show while the header text stays the generic "unknown item". Invoked from `Item.AddNameProperties` through a reflection hook. |
 | `Source/Scripts/System/Commands/LootTierCommands.cs` | C# dev commands | `[TierCommon` … `[TierPrimal` (GameMaster) spawn one random equipment item built to that tier; `[TierAll` spawns one of each and `[TierItem <tier>` takes the name. Rolls attributes until `ItemRank.GetPower` lands in the tier band (floors read from `ItemRank`). Also registers the player command `[LootTiers` to toggle the cosmetic display. |
 | `Documentation/Generate-CodebaseMap.py` | Python tool | Regenerates `Memento_Codebase_Map.md` from the current tree: parses every `.cs` file for type/base/commands/summary/AI/name literals, emits repository layout, cross-cutting systems, folder index and per-file catalog. Run with `python3 World/Documentation/Generate-CodebaseMap.py`. |
-| `Source/Scripts/Items/Misc/DungeonChallengeOrb.cs` | C# item + static system | `DungeonChallengeOrb` consumable (graphic `0x122B`) + `DungeonChallengeBoost` static region registry. Use inside a dungeon to respawn its region XML spawns and in-region `PremiumSpawner`/`Spawner` items, then add +1 heat for `BoostMinutes` (default 15, capped 240) to that region and its child regions. |
-| `Source/Scripts/System/Commands/DungeonChallengeCommands.cs` | C# command | GM `[DungeonOrb` command; puts a `DungeonChallengeOrb` in the caller's backpack. |
 
 ## Files Edited
 
@@ -82,7 +80,6 @@ Paths in the tables are relative to the `World` folder — `World/` in this repo
 | `Source/Scripts/System/Help/HelpGump_Settings.cs` | Added the "Show Loot Tiers" and "Show Worth" rows under MobileUO Settings (the value row was originally labelled "Show Vendor Values"; the 12:32 backup is the pre-rename file). Backed up as `Backups/HelpGump_Settings.cs.2026-11-21-115959.bak` and `Backups/HelpGump_Settings.cs.2026-11-21-123204.bak`. |
 | `Source/Scripts/Mobiles/Base/GenericSell.cs` | Added `GetBasePriceFor( Item )`, returning the raw sell-table price for the item's type (no property, material or barter adjustment). Used by `VendorValue` to price unidentified loot from its base item. Backed up as `Backups/GenericSell.cs.2026-11-21-130647.bak`. |
 | `Source/Scripts/Items/Relics/NotIdentified.cs` | Overrides `AddNameProperty` to call `ItemRank.TryAppendColoredName` first, so the generic wrapper name is drawn in the loot-tier hue of the contained equipment (`Container.AddNameProperty` bypasses the normal coloured-name hook). Backed up as `Backups/NotIdentified.cs.2026-11-21-132739.bak`. |
-| `Source/System/Map.cs` | Added the `Difficult.InvokeDifficultyBoost( Region )` reflection hook and applied it in `Difficult.GetDifficulty` after the base heat lookup: a positive script bonus is added and capped at 5 (Deadly), except for negative (disabled) heat. The hook retries if the script assembly is not loaded yet, so world-build calls do not cache a miss. Backed up as `Backups/Map.cs.2026-11-21-162332.bak`. |
 
 No other files were modified.
 
@@ -801,16 +798,9 @@ No other files were modified.
   - Both changes are single entries in `m_Hues`, so tooltip names, tier text and quiver headers all follow automatically; the ground artefact label remains UO hue `0x0B54`.
   - **Verified:** every rank's name/tier text matches the new palette (loop over generated items); artefact tooltips/ground/bagged/wrapped all use `FFC000`; Show Loot Tiers off still defaults; harness **121 / 121**. Scripts compile **14 warnings, 0 errors**; core unchanged. Backup: `Backups/ItemRank.cs.2026-11-21-152943.bak`.
 211. **Codebase reference map** — new `Memento_Codebase_Map.md` at the repository root (beside this file).
-  - Contents: repository layout, cross-cutting systems, common tasks, conventions, a folder index for every source folder (555) and non-source folder (52), and an entry for every `.cs` file (5,300) with primary type, base type and a short purpose.
+  - Contents: repository layout, cross-cutting systems, common tasks, conventions, a folder index for every source folder (555) and non-source folder (52), and an entry for every `.cs` file (5,298) with primary type, base type and a short purpose.
   - Descriptions come from XML summaries, `DefaultDescription`, command registrations, AI/name literals and class/base heuristics; generic classes report their public-member count. Search recipes and entry format are documented at the top.
   - No shard source code changed; generated from the current tree. The regenerator is `World/Documentation/Generate-CodebaseMap.py` (run: `python3 World/Documentation/Generate-CodebaseMap.py`).
-212. **Dungeon Challenge Orb — region respawn + one-tier heat boost** — new `Items/Misc/DungeonChallengeOrb.cs`, new `System/Commands/DungeonChallengeCommands.cs`, core `System/Map.cs`.
-  - **Respawn:** resolves the outermost dungeon `BaseRegion` from the player, calls `Respawn()` on every region `SpawnEntry`, then snapshots and resets in-region `PremiumSpawner`/`Spawner` items (`Respawn` + `Start`). Existing spawns are removed by the spawner APIs; only the chosen region (and its child regions) are touched.
-  - **Boost:** `DungeonChallengeBoost` stores a region→expiry `+1`; core `Difficult.GetDifficulty` asks for it through the new `InvokeDifficultyBoost` reflection hook and adds it after the normal heat lookup, capped at 5 (Deadly). The hook retries when the script assembly is not loaded yet (world-build safety). Duration is `BoostMinutes` (default 15, 1–240), consumed by default; child regions inherit via `Region.IsPartOf`.
-  - **Use:** double-click in a dungeon; broadcasts to players in the region, plays an effect, reports restored spawns/duration, deletes the orb. `[DungeonOrb` (GM) grants one for testing.
-  - **Verified:** core compile **7 warnings, 0 errors** (`WorldLinux.exe` rebuilt); scripts **14 warnings, 0 errors**; focused harness **14/14** (parent/child boost inheritance, expiry, core hook resolves and clears, orb name/graphic/duration bounds/consume flag). Full in-world respawn execution needs a running map/region and was not exercised in the static harness.
-  - Backups: `Backups/Map.cs.2026-11-21-162332.bak`. New files: `Source/Scripts/Items/Misc/DungeonChallengeOrb.cs`, `Source/Scripts/System/Commands/DungeonChallengeCommands.cs`.
-
 ---
 
 ## Current Behaviour
@@ -977,13 +967,6 @@ No other files were modified.
 - Built per player on every property query (the `0xD6` handler is re-registered in **both** the normal and 6017 tables, plus `0xBF/0x10`, by `VendorValue.Initialize()`), and only appended while the player's **Show Worth** preference is on; items without a value still use the cached shared `Item.PropertyList`.
 - Players can hide the line with **Show Worth** (Help → Settings → MobileUO Settings) or `[VendorValues`; relic loot is exempt and always shows its worth. It is independent of the loot tier toggle. Toggling either display calls `VendorValue.RefreshTooltips`, which re-sends tooltips for the backpack, equipment and nearby items so the client updates immediately.
 - Relics (`DDRelic*`, `HighSeasRelic`, `EmptyCanopicJar`) always show the line, even with **Show Worth** off: identified relics use their authored `CoinPrice` on the normal Mercantile curve, unidentified ones the 5–25 estimate, and relics bought from a vendor resell for 1 gold like any purchased item. Their old `ColorText3` "Worth N Gold" header is no longer printed (`Item.AddNameProperties` → `VendorValue.HideLegacyWorthText`, `1072173` skipped); the serialized text is untouched, so old saves behave the same.
-
-### Dungeon Challenge Orb (`DungeonChallengeOrb`)
-- A consumable orb (`0x122B`, default `BoostMinutes` 15, `ConsumeOnUse` true) used from the backpack while inside a dungeon.
-- On use it resolves the outermost dungeon `BaseRegion` from the player's current region (walking parents), respawns every `SpawnEntry` on that region, then finds and resets `PremiumSpawner` and classic `Spawner` items whose region is the target or a child of it. Use is limited to `DungeonRegion`, `CaveRegion`, `BardDungeonRegion`, `DeadRegion`, `OutDoorBadRegion`, `DungeonHomeRegion` and `MazeRegion`. Spawners are snapshotted before respawn so world-item enumeration is not mutated mid-loop.
-- Applies `DungeonChallengeBoost` +1 heat to the target region for `BoostMinutes`; `Difficult.GetDifficulty` adds the bonus after its normal lookup and caps the result at **5 (Deadly)**. Child regions inherit the boost through `Region.IsPartOf`; expired entries prune on query and a server restart clears all boosts.
-- Broadcasts a short warning to players in the region, plays an effect, reports the restored spawn count and boost duration to the user, then deletes itself when `ConsumeOnUse` is true.
-- GM helper: `[DungeonOrb` places one in your backpack.
 
 ### Equipment tier (`ItemRank`)
 - Non-artefact equipment shows a coloured tier line in the same slot the artefact marker uses: Common `C7C7C7`, Magic `6C8CFF`, Rare `FFFF99`, Legendary `FF9C40`, Ancient `FF5A5A`, Primal `D46AFF`. Artefacts are the top tier **Artefact** `FFC000`; their existing marker replaces the tier line, so only the gold name/label shows the tier.

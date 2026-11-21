@@ -262,7 +262,6 @@ def main():
     a("| Relic loot/ID | `World/Source/Scripts/Items/Relics/*` (`DDRelic*`, `HighSeasRelic`, `NotIdentified`, `RelicFunctions`) |")
     a("| Loot generation | `World/Source/Scripts/Items/Containers/LootPack.cs`, `World/Source/Scripts/Mobiles/Base/BaseCreature.cs` |")
     a("| Commands | `World/Source/Scripts/System/Commands/`, `World/Source/Scripts/System/Commands/LootTierCommands.cs` |")
-    a("| Dungeon challenge | `World/Source/Scripts/Items/Misc/DungeonChallengeOrb.cs`, `World/Source/System/Map.cs` (`Difficult.InvokeDifficultyBoost`) |")
     a("| Random equipment names | `World/Source/Scripts/System/Misc/RandomThings.cs` (`MagicItemName`, `SpecialName`, `SkipMagicName`) |")
     a("| Spawns/regions | `World/Source/Scripts/System/Spawns/`, `World/Source/Scripts/System/Regions/`, `World/Info/Spawns/` |")
     a("| Persistence | `World/Source/System/Persistence/`, `World/Saves/` |")
@@ -281,7 +280,6 @@ def main():
     a("| Tune prices/vendors | `Scripts/System/Misc/ItemSales.cs`, `Scripts/Mobiles/Base/{BaseVendor,GenericSell}.cs` |")
     a("| Change tooltips/prefs | `Scripts/System/Misc/{VendorValue,ItemRank}.cs`, `Scripts/System/Help/HelpGump*.cs`, `Mobiles/Base/PlayerPreferenceContext.cs` |")
     a("| Add a gump | `Scripts/System/Gumps/`, derive from `Gump` |")
-    a("| Respawn/boost a dungeon | `Scripts/Items/Misc/DungeonChallengeOrb.cs` (use item), `Source/System/Map.cs` (heat hook) |")
     a("")
     a("### Conventions")
     a("")
@@ -467,10 +465,8 @@ FILE_OVERRIDES = {
     "Info scripts/Merchant.cs": "Vendor SBInfo definitions (Merchant buy/sell tables).",
     "Core/Item.cs": "Core item: serialization, OPL/name hooks, loot/ID flags, container/movement base.",
     "Core/Mobile.cs": "Core mobile: movement, skills, visibility, labels, combat base.",
-    "Core/Map.cs": "Core map/sector storage, land lookups, dungeon heat table (`Difficult.GetDifficulty`) and the one-tier `InvokeDifficultyBoost` script hook.",
+    "Core/Map.cs": "Core map/sector storage, item/mobile lookup and update ranges.",
     "Core/ScriptCompiler.cs": "Compiles/loads the script assembly and resolves script types for core hooks.",
-    "Scripts/Items/Misc/DungeonChallengeOrb.cs": "Consumable orb: respawns region XML spawns plus in-region PremiumSpawner/Spawner items and applies a timed +1 heat boost (`DungeonChallengeBoost`).",
-    "Scripts/System/Commands/DungeonChallengeCommands.cs": "GM `[DungeonOrb` command: places a DungeonChallengeOrb in the user's backpack.",
     "Core/Network/PacketHandlers.cs": "Core packet handler tables and registration (0xD6, 0xBF, etc.).",
     "Core/Network/NetState.cs": "Per-connection state, send queue and encryption.",
 }
