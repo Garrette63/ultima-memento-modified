@@ -22,7 +22,9 @@ namespace Server.Regions
 
 		public override void AlterLightLevel( Mobile m, ref int global, ref int personal )
 		{
-			global = LightCycle.CaveLevel;
+			// The Cave of Virtue is a holy place, so it stays lit like a town and never needs night sight
+			if ( this.Name == "the Cave of Virtue" ){ global = LightCycle.DayLevel; }
+			else { global = LightCycle.CaveLevel; }
 		}
 
 		public override void OnEnter( Mobile m )

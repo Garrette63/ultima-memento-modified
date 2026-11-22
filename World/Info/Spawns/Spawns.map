@@ -20,3 +20,17 @@
 #
 # Data\Scripts\System\Misc\Spawning.cs
 #
+
+##
+## CAVE OF VIRTUE (SOSARIA) - ANGELS AND ARCHANGEL
+## 7 Angel spawners and 1 Archangel spawner, team 0, walking range 1, 1 each
+## MinDelay 45 minutes, MaxDelay 1 hour
+##
+*|Angel||||||5180|1739|0|2|45|1h|1|1|1|1|0|0|0|0|0
+*|Angel||||||5199|1740|0|2|45|1h|1|1|1|1|0|0|0|0|0
+*|Angel||||||5218|1744|0|2|45|1h|1|1|1|1|0|0|0|0|0
+*|Angel||||||5219|1727|0|2|45|1h|1|1|1|1|0|0|0|0|0
+*|Angel||||||5229|1711|0|2|45|1h|1|1|1|1|0|0|0|0|0
+*|Angel||||||5247|1710|0|2|45|1h|1|1|1|1|0|0|0|0|0
+*|Angel||||||5251|1721|0|2|45|1h|1|1|1|1|0|0|0|0|0
+*|Archangel||||||5258|1735|0|2|45|1h|1|1|1|1|0|0|0|0|0
