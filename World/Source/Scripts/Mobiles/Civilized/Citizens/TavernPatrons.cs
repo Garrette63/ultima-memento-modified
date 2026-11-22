@@ -1027,7 +1027,7 @@ namespace Server.Misc
 
 			int relic = Utility.RandomMinMax( 1, 59 );	
 
-			int CommonTalkingCount = 60;
+			int CommonTalkingCount = 61;
 			string sSpeech = "We are supposed to wait for " + sThey + ".";
 			switch( Utility.RandomMinMax( 1, CommonTalkingCount ) )
 			{
@@ -1702,6 +1702,7 @@ namespace Server.Misc
 				break;
 				case 59: sSpeech = "They say the crystals hidden deep in " + dungeon + " will make a mage forget everything he ever learned."; break;
 				case 60: sSpeech = "A gypsy will reshape your armor for coin. Plain iron is cheap, but an artifact's look costs dear."; break;
+				case 61: sSpeech = "It's said that in Umbra the aristocracy is above the law."; break;
 			}
 
 			string sGossip = sSpeech;	

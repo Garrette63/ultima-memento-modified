@@ -7324,6 +7324,11 @@ namespace Server.Mobiles
 
 		public override void CriminalAction( bool message )
 		{
+			Mobile master = GetMaster();
+
+			if ( master is PlayerMobile && this.Region.IsPartOf( typeof( UmbraRegion ) ) && GetPlayerInfo.AboveTheLawInUmbra( master ) )
+				return; // UMBRA: pets and summons of the aristocracy are above the law too
+
 			base.CriminalAction( message );
 
 			if ( Controlled || Summoned )
@@ -8304,7 +8309,7 @@ namespace Server.Mobiles
 			{
 				if ( player != null )
 				{
-					player.Criminal = true;
+					Server.Misc.GetPlayerInfo.MakeCriminal( player );
 					player.Kills += 1;
 					Server.Items.DisguiseTimers.RemoveDisguise( player );
 				}

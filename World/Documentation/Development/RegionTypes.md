@@ -10,6 +10,7 @@ Descriptions of each region type on this shard, based on the region classes unde
 	- Skara Brae only. No housing; town music/logging.
 - **UmbraRegion**
 	- Undercity of Umbra. No housing; night lighting; dungeon-style music.
+	- Guards ignore murderers, and entering the region clears any criminal flag. Players with Fame ≥ 10000 and Karma ≤ -10000 cannot become criminal there, and their pets/summons are ignored by the guards too ("the aristocracy is above the law").
 
 ## Dungeons / underground
 

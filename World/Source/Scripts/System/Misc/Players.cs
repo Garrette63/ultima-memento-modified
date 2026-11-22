@@ -611,11 +611,27 @@ namespace Server.Misc
 			return false;
 		}
 
+		// UMBRA: the aristocracy is above the law
+		public static bool AboveTheLawInUmbra( Mobile m )
+		{
+			if ( m == null || m.Deleted || !( m is PlayerMobile ) )
+				return false;
+
+			return m.Region.IsPartOf( typeof( Server.Regions.UmbraRegion ) ) && m.Fame >= 10000 && m.Karma <= -10000;
+		}
+
+		public static void MakeCriminal( Mobile m )
+		{
+			if ( m == null || m.Deleted || AboveTheLawInUmbra( m ) )
+				return;
+
+			m.Criminal = true;
+		}
+
 		public static string GetWantedStatus( Mobile m )
 		{
 			string warning = "";
 			string safe = "";
-			bool umbra = true;
 
 			if ( m is PlayerMobile )
 			{
@@ -623,12 +639,10 @@ namespace Server.Misc
 				if ( player.Fugitive == 1 || player.Kills > 0 )
 				{
 					warning = warning + "You are wanted for your murderous deeds! ";
-					umbra = false;
 				}
 				else if ( player.Criminal )
 				{
 					warning = warning + "You are being sought as a criminal right now. ";
-					umbra = false;
 				}
 				if ( ( player.Karma < 2500 || player.Fame < 2500 ) && Server.Items.BaseRace.IsEvil( player ) )
 				{
@@ -668,7 +682,7 @@ namespace Server.Misc
 				safe = safe + "<BR>Tavern";
 				safe = safe + "<BR>Tenebrae Fort";
 				safe = safe + "<BR>Thieves Guild";
-				if ( umbra ){ safe = safe + "<BR>Umbra Undercity"; }
+				safe = safe + "<BR>Umbra Undercity"; // UMBRA: murderers, criminals, death knights and monster races are all accepted
 				safe = safe + "<BR>Wizards Guild";
 				safe = safe + "<BR>Xardok's Castle";
 

@@ -1098,6 +1098,17 @@ namespace Server.Misc
 			if ( m is PlayerMobile && m.Region.IsPartOf( typeof( UmbraRegion ) ) && m.Kills > 0 && !m.Criminal )
 				enemy = false; // UMBRA: murderers are left alone UNLESS they commit a fresh crime (attacking an NPC/innocent sets Criminal) — then guards respond
 
+			if ( m is PlayerMobile && m.Region.IsPartOf( typeof( UmbraRegion ) ) && GetPlayerInfo.AboveTheLawInUmbra( m ) )
+				enemy = false; // UMBRA: the aristocracy is above the law, even if a stray criminal flag was set
+
+			if ( m is BaseCreature && m.Region.IsPartOf( typeof( UmbraRegion ) ) )
+			{
+				Mobile master = ((BaseCreature)m).GetMaster();
+
+				if ( master is PlayerMobile && GetPlayerInfo.AboveTheLawInUmbra( master ) )
+					enemy = false; // UMBRA: pets and summons of the aristocracy are left alone
+			}
+
 			if ( checkDisguise || (m.Region).Name == "the Castle of Knowledge" )
 			{
 				if ( DisguiseTimers.IsDisguised( m ) )

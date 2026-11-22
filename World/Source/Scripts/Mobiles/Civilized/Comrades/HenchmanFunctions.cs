@@ -370,7 +370,7 @@ namespace Server.Misc
 
 			if ( ( killer is PlayerMobile ) && ( ((BaseCreature)from).ControlMaster != killer ) )
 			{
-				killer.Criminal = true;
+				Server.Misc.GetPlayerInfo.MakeCriminal( killer );
 				killer.Kills = killer.Kills + 1;
 			}
 		}

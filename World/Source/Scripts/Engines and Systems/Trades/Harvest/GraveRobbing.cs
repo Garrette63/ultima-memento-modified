@@ -222,8 +222,11 @@ namespace Server.Engines.Harvest
 						if ( caught > 0 )
 						{
 							from.PrivateOverheadMessage(MessageType.Regular, 1150, false, "Someone has spotted you in the distance!", from.NetState);
-							from.SendMessage( "You have been reported as a criminal!" );
-							from.Criminal = true;
+							if ( Server.Misc.GetPlayerInfo.AboveTheLawInUmbra( from ) )
+								from.SendMessage( "Someone has spotted you, but no one here seems to care." );
+							else
+								from.SendMessage( "You have been reported as a criminal!" );
+							Server.Misc.GetPlayerInfo.MakeCriminal( from );
 							Server.Items.DisguiseTimers.RemoveDisguise( from );
 						}
 					}

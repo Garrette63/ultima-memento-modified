@@ -220,11 +220,11 @@ namespace Server.Items
 					{
 						if ( owner is PlayerMobile && owner != null )
 						{
-							owner.Criminal = true;
+							Server.Misc.GetPlayerInfo.MakeCriminal( owner );
 						}
 						else if ( m is BaseVendor || m is BasePerson )
 						{
-							owner.Criminal = true;
+							Server.Misc.GetPlayerInfo.MakeCriminal( owner );
 							owner.Kills = owner.Kills + 1;
 						}
 						Effects.PlaySound( m.Location, m.Map, Utility.RandomList( 0x5D2,0x5D3 ) );

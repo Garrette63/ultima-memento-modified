@@ -2654,7 +2654,7 @@ namespace Server.Mobiles
 					((Corpse)c).Criminal = true;
 
 				if ( SkillHandlers.Stealing.ClassicMode )
-					Criminal = true;
+					Server.Misc.GetPlayerInfo.MakeCriminal( this );
 			}
 
 			if ( m_InsuranceAward is PlayerMobile )
@@ -2937,6 +2937,14 @@ namespace Server.Mobiles
 
 				return AosAttributes.GetValue( this, AosAttribute.Luck );
 			}
+		}
+
+		public override void CriminalAction( bool message )
+		{
+			if ( GetPlayerInfo.AboveTheLawInUmbra( this ) )
+				return; // UMBRA: the aristocracy is above the law
+
+			base.CriminalAction( message );
 		}
 
 		public override bool IsHarmfulCriminal( Mobile target )
