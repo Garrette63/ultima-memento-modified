@@ -81,13 +81,19 @@ public class MobileUtilities
 	}
 
 	/// <summary>
-	/// Returns true for the shard's named bosses and every Magical Prison escapee.
-	/// Used for the "(boss)" name tag and the Fragment of Infinity drop rule.
+	/// Returns true for the shard's named bosses, every Magical Prison escapee
+	/// and the champion bosses of champion spawns.
+	/// Used for the "(elite)" name tag and the Fragment of Infinity drop rule.
 	/// </summary>
-	public static bool IsBoss(BaseCreature bc)
+	public static bool IsElite(BaseCreature bc)
 	{
 		if (bc == null)
 			return false;
+
+		// Every champion spawn boss derives from BaseChampion (Semidar,
+		// Mephitis, Rikktor, Lord Oaks, Barracoon, Neira).
+		if (bc is BaseChampion)
+			return true;
 
 		// SummonPrison stamps all 25 Magical Prison escapees with this hue
 		// when it releases them, so this catches every prison boss without

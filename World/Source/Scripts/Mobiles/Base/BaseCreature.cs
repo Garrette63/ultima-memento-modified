@@ -1951,14 +1951,14 @@ namespace Server.Mobiles
 					suffix = String.Concat( suffix, " (cursed)" );
 			}
 
-			// Bosses are tagged after any paragon marker, so "(boss)" is always
+			// Elites are tagged after any paragon marker, so "(elite)" is always
 			// the final part of the displayed name.
-			if ( MobileUtilities.IsBoss( this ) )
+			if ( MobileUtilities.IsElite( this ) )
 			{
 				if ( suffix.Length == 0 )
-					suffix = "(boss)";
+					suffix = "(elite)";
 				else
-					suffix = String.Concat( suffix, " (boss)" );
+					suffix = String.Concat( suffix, " (elite)" );
 			}
 
 			return base.ApplyNameSuffix( suffix );
