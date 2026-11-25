@@ -28,7 +28,12 @@ namespace Server.ContextMenus
 				return;
 
 			m_From.CloseGump( typeof( HenchmanInfoGump ) );
-			m_From.SendGump( new HenchmanInfoGump( m_Henchman, m_From ) );
+			m_From.CloseGump( typeof( HenchmanCreatureInfoGump ) );
+
+			if ( henchman is HenchmanMonster )
+				m_From.SendGump( new HenchmanCreatureInfoGump( m_Henchman, m_From ) );
+			else
+				m_From.SendGump( new HenchmanInfoGump( m_Henchman, m_From ) );
 		}
 	}
 }

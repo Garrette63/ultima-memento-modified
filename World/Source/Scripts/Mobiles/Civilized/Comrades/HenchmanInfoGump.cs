@@ -7,9 +7,9 @@ using Server.Network;
 
 namespace Server.Gumps
 {
-	// Displays the stats of a live henchman. This mirrors the player StatsGump,
-	// but leaves out the player-only fields and adds the henchman resistances,
-	// bandage supply and remaining hire time.
+	// Displays the stats of a live human henchman. This mirrors the player
+	// StatsGump, but leaves out the player-only fields and adds the henchman
+	// resistances, bandage supply and remaining hire time.
 	public class HenchmanInfoGump : Gump
 	{
 		public HenchmanInfoGump( Mobile henchman, Mobile from ) : base( 50, 50 )
