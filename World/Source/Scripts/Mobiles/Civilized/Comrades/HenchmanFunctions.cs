@@ -534,6 +534,39 @@ namespace Server.Misc
 			((BaseCreature)henchman).Loyalty = 100;
 		}
 
+		// The seeded creature maxima (HitsMax/StamMax/ManaMax) do not include the
+		// AosAttributes pool bonuses, so the three human henchman classes add
+		// BonusHits/BonusStam/BonusMana to their own maxima through here. This
+		// mirrors PlayerMobile's formulas and keeps the result inside the same
+		// 1..65000 range BaseCreature uses for its seeded values.
+		public static int GetEquipmentPoolMax( Mobile henchman, AosAttribute attribute, int baseValue )
+		{
+			int value = baseValue + AosAttributes.GetValue( henchman, attribute );
+
+			if ( value < 1 )
+				value = 1;
+			else if ( value > 65000 )
+				value = 65000;
+
+			return value;
+		}
+
+		// A removed item may leave a pool above the new maximum, while a freshly
+		// summoned henchman must start at the equipment-boosted maximum. Passing
+		// fill=false clamps the current values, fill=true restores them to full.
+		// CheckStatTimers() also re-arms the regeneration timers at the new rates.
+		public static void RefreshEquipmentPools( Mobile henchman, bool fill )
+		{
+			if ( henchman == null || henchman.Deleted )
+				return;
+
+			henchman.Hits = ( fill ? henchman.HitsMax : Math.Min( henchman.Hits, henchman.HitsMax ) );
+			henchman.Stam = ( fill ? henchman.StamMax : Math.Min( henchman.Stam, henchman.StamMax ) );
+			henchman.Mana = ( fill ? henchman.ManaMax : Math.Min( henchman.Mana, henchman.ManaMax ) );
+
+			henchman.CheckStatTimers();
+		}
+
 		public static void NormalizeArmor( BaseCreature friend )
 		{
 			if ( friend.ColdResistance > 70 ){ friend.ColdResistSeed = friend.ColdResistSeed - (friend.ColdResistance - friend.ColdResistSeed); }
@@ -1293,16 +1326,25 @@ namespace Server.Misc
 					if ( henchman.FindItemOnLayer( item.Layer ) != null )
 						continue;
 
-					// Staves have their own OnEquip speech (mage eye crystals);
-					// add those silently so they do not talk every summon.
+					// Staves have their own OnEquip speech (mage eye crystals).
+					// It is sent to the henchman, who has no client, so run the
+					// weapon's equip logic (stat and mage-weapon bonuses) and
+					// then attach the staff directly.
 					if ( item is BaseWizardStaff || item is BaseGiftStave || item is BaseLevelStave )
 					{
+						item.OnEquip( henchman );
 						henchman.AddItem( item );
 						continue;
 					}
 
 					if ( !henchman.EquipItem( item ) )
+					{
+						// Fallback for legacy/over-requirement gear: attach it
+						// anyway, but still run the item's own equip logic so its
+						// stat bonuses are applied.
+						item.OnEquip( henchman );
 						henchman.AddItem( item );
+					}
 				}
 			}
 			finally
@@ -1361,6 +1403,10 @@ namespace Server.Misc
 			if ( !IsEquipment( item ) )
 				return;
 
+			// The item is already attached, so the maxima include its pool
+			// bonuses; keep the regen timers in step with them.
+			RefreshEquipmentPools( henchman, false );
+
 			HenchmanItem deed = FindDeed( henchman );
 			if ( deed == null )
 				return;
@@ -1381,6 +1427,10 @@ namespace Server.Misc
 
 			if ( !IsEquipment( item ) )
 				return;
+
+			// The item is already detached, so the maxima no longer include its
+			// pool bonuses; clamp any current value that is now too high.
+			RefreshEquipmentPools( henchman, false );
 
 			HenchmanItem deed = FindDeed( henchman );
 			if ( deed == null || deed.HenchEquipment == null )

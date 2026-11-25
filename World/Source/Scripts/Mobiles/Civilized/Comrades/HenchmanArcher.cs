@@ -5,6 +5,8 @@ using Server.Items;
 using Server.Mobiles; 
 using Server.Network;
 using Server.Regions;
+using System.Collections.Generic;
+using Server.ContextMenus;
 
 namespace Server.Mobiles 
 {
@@ -96,6 +98,14 @@ namespace Server.Mobiles
             base.OnSpeech(e);
         }
 
+		public override void GetContextMenuEntries( Mobile from, List<ContextMenuEntry> list )
+		{
+			base.GetContextMenuEntries( from, list );
+
+			if ( from != null && ControlMaster == from )
+				list.Add( new HenchmanInfoEntry( from, this ) );
+		}
+
 		public override bool ClickTitle{ get{ return false; } }
 		public override bool ShowFameTitle{ get{ return false; } }
 		public override bool AlwaysAttackable{ get{ return true; } }
@@ -125,6 +135,25 @@ namespace Server.Mobiles
 		public override int GetMaxResistance( ResistanceType type )
 		{
 			return 70;
+		}
+
+		// Equipment hit point, stamina and mana bonuses are not part of the
+		// seeded creature maxima, so add them the same way PlayerMobile does.
+		// The current pools are clamped/re-armed whenever gear changes (see
+		// HenchmanFunctions.RefreshEquipmentPools).
+		public override int HitsMax
+		{
+			get { return HenchmanFunctions.GetEquipmentPoolMax( this, AosAttribute.BonusHits, base.HitsMax ); }
+		}
+
+		public override int StamMax
+		{
+			get { return HenchmanFunctions.GetEquipmentPoolMax( this, AosAttribute.BonusStam, base.StamMax ); }
+		}
+
+		public override int ManaMax
+		{
+			get { return HenchmanFunctions.GetEquipmentPoolMax( this, AosAttribute.BonusMana, base.ManaMax ); }
 		}
 
 		// The base damage range is the equipped weapon's. Expose it through

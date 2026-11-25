@@ -5,6 +5,8 @@ using Server.Items;
 using Server.Mobiles; 
 using Server.Network;
 using Server.Regions;
+using System.Collections.Generic;
+using Server.ContextMenus;
 
 namespace Server.Mobiles 
 {
@@ -140,6 +142,14 @@ namespace Server.Mobiles
             }
             base.OnSpeech(e);
         }
+
+		public override void GetContextMenuEntries( Mobile from, List<ContextMenuEntry> list )
+		{
+			base.GetContextMenuEntries( from, list );
+
+			if ( from != null && ControlMaster == from )
+				list.Add( new HenchmanInfoEntry( from, this ) );
+		}
 
 		public override bool ClickTitle{ get{ return false; } }
 		public override bool ShowFameTitle{ get{ return false; } }

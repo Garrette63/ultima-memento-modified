@@ -263,6 +263,10 @@ namespace Server.Items
 
 					HenchmanFunctions.EquipStoredGear( this, friend );
 					HenchmanFunctions.NormalizeArmor( friend );
+
+					// Start the summoned henchman at the full equipment-boosted
+					// hit point, stamina and mana maxima.
+					HenchmanFunctions.RefreshEquipmentPools( friend, true );
 				}
 
 				int nTime = (int)(friend.Fame/5);
