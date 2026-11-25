@@ -384,6 +384,16 @@ namespace Server.Gumps
 			if ( info.ButtonID <= 0 )
 				return; // Canceled
 
+			// Only the henchman's owner may spend points on gear the henchman is
+			// carrying. This also covers a gump that was opened before the item
+			// moved onto a henchman.
+			if ( !HenchmanFunctions.CanSpendHenchmanPoints( m_Item, m_From ) )
+			{
+				m_From.CloseGump( typeof( ItemExperienceGump ) );
+				m_From.SendMessage( HenchmanFunctions.HenchmanPointsRefused );
+				return;
+			}
+
             ILevelable levitem = (ILevelable)m_Item;
 
 			int buttonID = info.ButtonID - 1;

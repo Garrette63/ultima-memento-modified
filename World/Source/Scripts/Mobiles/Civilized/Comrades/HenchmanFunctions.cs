@@ -16,6 +16,21 @@ namespace Server.Misc
 {
     class HenchmanFunctions
     {
+		// Set while equipment is being moved off a henchman so that the
+		// OnItemRemoved hook does not treat our own stash operation as the
+		// player taking an item back.
+		private static Mobile m_StashingGear;
+
+		// Set while saved equipment is being restored to a freshly summoned
+		// henchman, so the normal equip restrictions/messages are not repeated.
+		private static bool m_RestoringGear;
+
+		// Set when an accepted worn item will inhibit passive meditation; the
+		// message is only spoken after base.EquipItem succeeds.
+		private static bool m_MeditationWarning;
+
+		public static bool RestoringGear{ get{ return m_RestoringGear; } }
+
 		public static bool IsInRestRegion(Mobile from)
 		{
 			bool house = false;
@@ -130,6 +145,9 @@ namespace Server.Misc
 					if ( from.Fame < 0 )
 					{
 						from.Fame = 0;
+						// Save the gear before the deed is cleared below and the
+						// henchman deletes itself.
+						StashGear( from );
 						ArrayList targets = new ArrayList();
 						foreach ( Item item in World.Items.Values )
 						if ( item is HenchmanItem )
@@ -331,6 +349,10 @@ namespace Server.Misc
 
 		public static void OnDead( Mobile from )
 		{
+			// Put the henchman's equipment back on the deed before the base
+			// death handling moves it to the (soon deleted) corpse.
+			StashGear( from );
+
 			ArrayList targets = new ArrayList();
 			foreach ( Item item in World.Items.Values )
 			if ( item is HenchmanItem )
@@ -383,6 +405,7 @@ namespace Server.Misc
 				if ( henchman is HenchmanMonster ){ henchman.Say("I could use these bandages. I have " + henchman.Hunger.ToString() + " of them now."); }
 				else { henchman.Say("Ahhh...bandages can be of great use. I have " + henchman.Hunger.ToString() + " of them now."); }
 				dropped.Delete();
+				CheckDurability( henchman );
 			}
 			else if ( dropped is LesserCurePotion || dropped is CurePotion || dropped is GreaterCurePotion )
 			{
@@ -498,6 +521,7 @@ namespace Server.Misc
 						int nTime = (int)(henchman.Fame/5);
 						from.SendMessage("" + henchman.Name + " will probably adventure with you for another " + nTime.ToString() + " minutes.");
 						dropped.Delete();
+						CheckDurability( henchman );
 					}
 				}
 				else
@@ -958,6 +982,445 @@ namespace Server.Misc
 					Bootsy.LootType = LootType.Blessed;
 						friend.AddItem( Bootsy );
 			}
+
+			// The crafted defaults above are intentionally created generously
+			// first (for hue/art selection); apply the henchman equipment rules
+			// in one place so every default piece is movable, regular loot,
+			// strength requirement 10, and properly named.
+			List<Item> defaultGear = new List<Item>( friend.Items );
+			for ( int i = 0; i < defaultGear.Count; ++i )
+			{
+				if ( IsEquipment( defaultGear[i] ) )
+					SetDefaultGearProperties( defaultGear[i] );
+			}
+		}
+
+		public static bool IsEquipment( Item item )
+		{
+			if ( item == null || item.Deleted )
+				return false;
+
+			Layer layer = item.Layer;
+
+			return layer != Layer.Invalid && layer != Layer.Backpack && layer != Layer.Mount
+				&& layer != Layer.Hair && layer != Layer.FacialHair && layer != Layer.Bank
+				&& layer != Layer.ShopBuy && layer != Layer.ShopResale && layer != Layer.ShopSell;
+		}
+
+		private static bool IsHandItem( Item item )
+		{
+			return item != null && ( item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded );
+		}
+
+		private static bool IsFighterWeapon( Item item )
+		{
+			BaseWeapon weapon = item as BaseWeapon;
+			if ( weapon == null )
+				return false;
+
+			SkillName skill = weapon.Skill;
+
+			return skill == SkillName.Swords || skill == SkillName.Bludgeoning || skill == SkillName.Fencing;
+		}
+
+		private static bool IsBowOrCrossbow( Item item )
+		{
+			BaseRanged ranged = item as BaseRanged;
+			if ( ranged == null )
+				return false;
+
+			Type ammo = ranged.AmmoType;
+
+			return ammo == typeof( Arrow ) || ammo == typeof( Bolt );
+		}
+
+		private static bool InhibitsPassiveMeditation( Item item )
+		{
+			BaseArmor armor = item as BaseArmor;
+			if ( armor == null )
+				return false;
+
+			Layer layer = armor.Layer;
+
+			if ( layer != Layer.Neck && layer != Layer.Gloves && layer != Layer.Helm && layer != Layer.Arms
+				&& layer != Layer.InnerLegs && layer != Layer.Pants
+				&& layer != Layer.InnerTorso && layer != Layer.Shirt
+				&& layer != Layer.Shoes && layer != Layer.Cloak && layer != Layer.OuterTorso )
+				return false;
+
+			if ( armor.ArmorAttributes.MageArmor != 0 || armor.Attributes.SpellChanneling != 0 )
+				return false;
+
+			return armor.MeditationAllowance != ArmorMeditationAllowance.All;
+		}
+
+		public static void SetDefaultGearProperties( Item item )
+		{
+			if ( item == null || item.Deleted )
+				return;
+
+			item.Movable = true;
+			item.LootType = LootType.Regular;
+
+			BaseWeapon weapon = item as BaseWeapon;
+			if ( weapon != null )
+			{
+				weapon.StrRequirement = 10;
+				item.Name = "henchman's weapon";
+				return;
+			}
+
+			BaseArmor armor = item as BaseArmor;
+			if ( armor != null )
+			{
+				armor.StrRequirement = 10;
+			}
+			else
+			{
+				BaseClothing clothing = item as BaseClothing;
+				if ( clothing != null )
+					clothing.StrRequirement = 10;
+			}
+
+			item.Name = "henchman's armor";
+		}
+
+		private static void NormalizeLegacyGear( Item item )
+		{
+			if ( item == null || item.Deleted || item.Movable || item.LootType != LootType.Blessed )
+				return;
+
+			SetDefaultGearProperties( item );
+		}
+
+		public static bool CanUseHenchman( Mobile henchman, Mobile from )
+		{
+			if ( henchman == null || from == null || henchman.Deleted || from.Deleted )
+				return false;
+
+			if ( from.AccessLevel >= AccessLevel.GameMaster && from.AccessLevel > henchman.AccessLevel )
+				return true;
+
+			BaseCreature bc = henchman as BaseCreature;
+			if ( bc == null || bc.ControlMaster != from )
+				return false;
+
+			if ( !from.Alive || !henchman.Alive || henchman.Map == Map.Internal )
+				return false;
+
+			if ( from.Map != henchman.Map )
+				return false;
+
+			return from.InRange( henchman.Location, 2 );
+		}
+
+		// Human henchmen (fighter, archer, wizard) take the elemental split of
+		// their attacks from the weapon they wield, exactly like a player.
+		// Creature henchmen keep their own creature damage types.
+		public static bool UsesWeaponDamageTypes( Mobile m )
+		{
+			return m is HenchmanFighter || m is HenchmanArcher || m is HenchmanWizard;
+		}
+
+		// Enchantment-point spending (the IGiftable and ILevelable gumps) is
+		// restricted while the artefact is on a henchman: only that henchman's
+		// owner may spend its points. Items that are not carried by a henchman
+		// are not restricted here. GMs keep their usual override, matching the
+		// paperdoll access rules in CanUseHenchman.
+		public const string HenchmanPointsRefused = "You cannot spend the enchantment points on another person's henchman.";
+
+		public static bool CanSpendHenchmanPoints( Item item, Mobile from )
+		{
+			if ( item == null || item.Deleted || from == null || from.Deleted )
+				return false;
+
+			Mobile holder = item.RootParent as Mobile;
+
+			if ( holder == null || !( holder is HenchmanFighter || holder is HenchmanArcher || holder is HenchmanWizard || holder is HenchmanMonster ) )
+				return true;
+
+			BaseCreature bc = (BaseCreature)holder;
+
+			return from == bc.ControlMaster || ( from.AccessLevel >= AccessLevel.GameMaster && from.AccessLevel > holder.AccessLevel );
+		}
+
+		public static bool ValidateHenchmanEquip( Mobile henchman, Item item )
+		{
+			m_MeditationWarning = false;
+
+			if ( m_RestoringGear )
+				return true;
+
+			if ( item == null || item.Deleted )
+				return false;
+
+			if ( item.Nontransferable || item is Server.Engines.Avatar.IAvatarOnlyItem )
+			{
+				henchman.Say( "I cannot use that." );
+				return false;
+			}
+
+			if ( henchman is HenchmanWizard )
+			{
+				if ( IsHandItem( item ) )
+				{
+					if ( !item.AllowEquipedCast( henchman ) )
+					{
+						henchman.Say( "I can't cast spells while holding that." );
+						return false;
+					}
+				}
+				else if ( InhibitsPassiveMeditation( item ) )
+				{
+					m_MeditationWarning = true;
+				}
+			}
+			else if ( henchman is HenchmanFighter )
+			{
+				if ( IsHandItem( item ) && !( item is BaseShield ) && !IsFighterWeapon( item ) )
+				{
+					henchman.Say( "Give me a proper melee weapon." );
+					return false;
+				}
+			}
+			else if ( henchman is HenchmanArcher )
+			{
+				if ( IsHandItem( item ) && !( item is BaseShield ) && !IsBowOrCrossbow( item ) )
+				{
+					henchman.Say( "Give me a bow or crossbow." );
+					return false;
+				}
+			}
+
+			if ( !HasEnoughStrength( henchman, item ) )
+			{
+				m_MeditationWarning = false;
+				henchman.Say( "I'm not strong enough to use that." );
+				return false;
+			}
+
+			return true;
+		}
+
+		// Mirrors the Strength checks in BaseWeapon/BaseArmor/BaseClothing.CanEquip
+		// so the owner gets a visible refusal instead of the message being sent
+		// to the henchman (who has no client).
+		private static bool HasEnoughStrength( Mobile henchman, Item item )
+		{
+			BaseWeapon weapon = item as BaseWeapon;
+			if ( weapon != null )
+				return henchman.Str >= AOS.Scale( weapon.StrRequirement, 100 - weapon.GetLowerStatReq() );
+
+			BaseArmor armor = item as BaseArmor;
+			if ( armor != null )
+			{
+				int strBonus = armor.ComputeStatBonus( StatType.Str );
+				return henchman.Str >= armor.ComputeStatReq( StatType.Str ) && ( henchman.Str + strBonus ) >= 1;
+			}
+
+			BaseClothing clothing = item as BaseClothing;
+			if ( clothing != null )
+			{
+				int strBonus = clothing.ComputeStatBonus( StatType.Str );
+				return henchman.Str >= clothing.ComputeStatReq( StatType.Str ) && ( henchman.Str + strBonus ) >= 1;
+			}
+
+			return true;
+		}
+
+		public static void AnnounceMeditationWarning( Mobile henchman )
+		{
+			if ( !m_MeditationWarning )
+				return;
+
+			m_MeditationWarning = false;
+			henchman.Say( "I'll wear this, but it will inhibit my meditation." );
+		}
+
+		public static HenchmanItem FindDeed( Mobile henchman )
+		{
+			if ( henchman == null )
+				return null;
+
+			foreach ( Item item in World.Items.Values )
+			{
+				HenchmanItem deed = item as HenchmanItem;
+
+				if ( deed != null && !deed.Deleted && deed.HenchSerial == henchman.Serial )
+					return deed;
+			}
+
+			return null;
+		}
+
+		public static void CaptureGear( HenchmanItem deed, Mobile henchman )
+		{
+			if ( deed == null || henchman == null )
+				return;
+
+			if ( deed.HenchEquipment == null )
+				deed.HenchEquipment = new List<Item>();
+
+			foreach ( Item item in henchman.Items )
+			{
+				if ( IsEquipment( item ) && !deed.HenchEquipment.Contains( item ) )
+					deed.HenchEquipment.Add( item );
+			}
+		}
+
+		public static void EquipStoredGear( HenchmanItem deed, Mobile henchman )
+		{
+			if ( deed == null || henchman == null || deed.HenchEquipment == null )
+				return;
+
+			List<Item> gear = new List<Item>( deed.HenchEquipment );
+			bool oldRestoring = m_RestoringGear;
+			m_RestoringGear = true;
+
+			try
+			{
+				for ( int i = 0; i < gear.Count; ++i )
+				{
+					Item item = gear[i];
+
+					if ( item == null || item.Deleted || !IsEquipment( item ) )
+						continue;
+
+					// Only restore items that are still in our private stash.
+					if ( item.Parent != null || item.HeldBy != null || item.Map != Map.Internal )
+						continue;
+
+					if ( henchman.FindItemOnLayer( item.Layer ) != null )
+						continue;
+
+					// Staves have their own OnEquip speech (mage eye crystals);
+					// add those silently so they do not talk every summon.
+					if ( item is BaseWizardStaff || item is BaseGiftStave || item is BaseLevelStave )
+					{
+						henchman.AddItem( item );
+						continue;
+					}
+
+					if ( !henchman.EquipItem( item ) )
+						henchman.AddItem( item );
+				}
+			}
+			finally
+			{
+				m_RestoringGear = oldRestoring;
+			}
+		}
+
+		public static void StashGear( Mobile henchman )
+		{
+			if ( !( henchman is HenchmanFighter || henchman is HenchmanArcher || henchman is HenchmanWizard ) )
+				return;
+
+			HenchmanItem deed = FindDeed( henchman );
+			if ( deed == null )
+				return;
+
+			if ( deed.HenchEquipment == null )
+				deed.HenchEquipment = new List<Item>();
+
+			List<Item> gear = new List<Item>( henchman.Items );
+			Mobile oldStashing = m_StashingGear;
+			m_StashingGear = henchman;
+
+			try
+			{
+				for ( int i = 0; i < gear.Count; ++i )
+				{
+					Item item = gear[i];
+
+					if ( !IsEquipment( item ) )
+						continue;
+
+					NormalizeLegacyGear( item );
+
+					if ( !deed.HenchEquipment.Contains( item ) )
+						deed.HenchEquipment.Add( item );
+
+					item.Internalize();
+				}
+			}
+			finally
+			{
+				m_StashingGear = oldStashing;
+			}
+
+			if ( deed.HenchEquipment.Count > 0 )
+				deed.HenchGearMade = true;
+		}
+
+		public static void OnHenchmanEquipped( Mobile henchman, Item item )
+		{
+			if ( m_RestoringGear )
+				return;
+
+			if ( !IsEquipment( item ) )
+				return;
+
+			HenchmanItem deed = FindDeed( henchman );
+			if ( deed == null )
+				return;
+
+			if ( deed.HenchEquipment == null )
+				deed.HenchEquipment = new List<Item>();
+
+			if ( !deed.HenchEquipment.Contains( item ) )
+				deed.HenchEquipment.Add( item );
+
+			deed.HenchGearMade = true;
+		}
+
+		public static void OnHenchmanItemRemoved( Mobile henchman, Item item )
+		{
+			if ( m_StashingGear == henchman )
+				return;
+
+			if ( !IsEquipment( item ) )
+				return;
+
+			HenchmanItem deed = FindDeed( henchman );
+			if ( deed == null || deed.HenchEquipment == null )
+				return;
+
+			deed.HenchEquipment.Remove( item );
+		}
+
+		public static void CheckDurability( Mobile henchman )
+		{
+			if ( henchman == null )
+				return;
+
+			bool danger = false;
+			bool worn = false;
+
+			foreach ( Item item in henchman.Items )
+			{
+				IDurability durable = item as IDurability;
+
+				if ( durable == null )
+					continue;
+
+				int max = durable.MaxHitPoints;
+
+				if ( max <= 0 )
+					continue;
+
+				double percent = (double)durable.HitPoints / (double)max;
+
+				if ( percent < 0.05 )
+					danger = true;
+				else if ( percent < 0.20 )
+					worn = true;
+			}
+
+			if ( danger )
+				henchman.Say( "Some of my equipment is in danger of breaking." );
+			else if ( worn )
+				henchman.Say( "Some of my equipment is looking worn." );
 		}
 
 		public static int GetHue( int nValue )

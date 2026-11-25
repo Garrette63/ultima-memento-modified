@@ -7143,6 +7143,10 @@ namespace Server.Mobiles
 						targets.Add( item );
 					}
 				}
+				// Put the equipment back on the deed before the serial is
+				// cleared below; otherwise the henchman's Delete() can no longer
+				// find its deed and the gear is destroyed with the mobile.
+				Server.Misc.HenchmanFunctions.StashGear( m_Mobile );
 				for ( int i = 0; i < targets.Count; ++i )
 				{
 					Item item = ( Item )targets[ i ];

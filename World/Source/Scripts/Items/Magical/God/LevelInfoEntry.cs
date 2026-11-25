@@ -24,6 +24,12 @@ namespace Server.ContextMenus
 
 		public override void OnClick()
 		{
+			if ( !HenchmanFunctions.CanSpendHenchmanPoints( m_Item, m_From ) )
+			{
+				m_From.SendMessage( HenchmanFunctions.HenchmanPointsRefused );
+				return;
+			}
+
 			Owner.From.CloseGump( typeof( ItemExperienceGump ) );
 			Owner.From.SendGump( new ItemExperienceGump( m_From, m_Item, m_Cat ) ); 
 		}

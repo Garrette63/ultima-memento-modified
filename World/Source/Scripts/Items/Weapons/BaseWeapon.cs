@@ -2149,10 +2149,13 @@ namespace Server.Items
 
 		public virtual void GetDamageTypes( Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy, out int chaos, out int direct )
 		{
-			if( wielder is BaseCreature )
-			{
-				BaseCreature bc = (BaseCreature)wielder;
+			BaseCreature bc = wielder as BaseCreature;
 
+			// Human henchmen wield the elemental split of their weapon exactly
+			// like a player; creature henchmen (and every other creature) keep
+			// their own creature damage types.
+			if( bc != null && !Server.Misc.HenchmanFunctions.UsesWeaponDamageTypes( bc ) )
+			{
 				phys = bc.PhysicalDamage;
 				fire = bc.FireDamage;
 				cold = bc.ColdDamage;

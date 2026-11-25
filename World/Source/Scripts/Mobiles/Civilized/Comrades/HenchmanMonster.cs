@@ -31,9 +31,9 @@ namespace Server.Mobiles
 			Body = myBody;
 			BaseSoundID = nSound;
 
-			int nStr = (int)((nStats / 6) * 3);
-			int nDex = (int)((nStats / 6) * 2);
-			int nInt = (int)((nStats / 6) * 1);
+			int nStr = 100;
+			int nDex = 100;
+			int nInt = 50;
 			int nArmor = (int)(nStats / 4);
 			int nProtect = (int)(nStats / 2);
 			int nDamage = (int)(nStats / 10);
@@ -42,9 +42,9 @@ namespace Server.Mobiles
 			{
 				AI = AIType.AI_Mage;
 				RangeFight = 7;
-				nStr = (int)((nStats / 6) * 1);
-				nDex = (int)((nStats / 6) * 2);
-				nInt = (int)((nStats / 6) * 3);
+				nStr = 100;
+				nDex = 50;
+				nInt = 100;
 				nArmor = (int)(nStats / 6);
 				nProtect = (int)(nStats / 4);
 				nDamage = (int)(nStats / 7);
@@ -68,9 +68,9 @@ namespace Server.Mobiles
 			{
 				AI = AIType.AI_Archer;
 				RangeFight = 7;
-				nStr = (int)((nStats / 6) * 2);
-				nDex = (int)((nStats / 6) * 3);
-				nInt = (int)((nStats / 6) * 1);
+				nStr = 100;
+				nDex = 100;
+				nInt = 50;
 				nArmor = (int)(nStats / 5);
 				nProtect = (int)(nStats / 3);
 				nDamage = (int)(nStats / 10);
