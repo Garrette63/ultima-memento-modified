@@ -7133,6 +7133,10 @@ namespace Server.Mobiles
 		{
 			if ( m_Mobile is HenchmanArcher || m_Mobile is HenchmanMonster || m_Mobile is HenchmanFighter || m_Mobile is HenchmanWizard )
 			{
+				// Close any appearance-customization gump before the control
+				// master is cleared below; OnDelete no longer sees the owner.
+				Server.Gumps.HenchmanCustomizeGump.CloseFor( m_Mobile.ControlMaster );
+
 				ArrayList targets = new ArrayList();
 				foreach ( Item item in World.Items.Values )
 				if ( item is HenchmanItem )

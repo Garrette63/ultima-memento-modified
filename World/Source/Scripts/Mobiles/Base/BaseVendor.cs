@@ -1529,62 +1529,6 @@ namespace Server.Mobiles
 					dropped.Delete();
 					return true;
 				}
-				else if ( ( dropped is HenchmanFighterItem || dropped is HenchmanArcherItem || dropped is HenchmanWizardItem ) && ( this is TavernKeeper || this is Barkeeper ) )
-				{
-					int fairTrade = 1;
-					string sMessage = "";
-					switch ( Utility.RandomMinMax( 0, 7 ) )
-					{
-						case 0:	sMessage = "So, this follower is not working out for you?"; break;
-						case 1:	sMessage = "Looking for a replacement henchman eh?"; break;
-						case 2:	sMessage = "Well...this one is looking for fame and fortune."; break;
-						case 3:	sMessage = "Maybe this one will be a better fit in your group."; break;
-						case 4:	sMessage = "Not all relationships work out."; break;
-						case 5:	sMessage = "At you least you parted ways amiably."; break;
-						case 6:	sMessage = "This one has been hanging out around here."; break;
-						case 7:	sMessage = "This one also seeks great treasure.";		break;
-					}
-					if ( dropped is HenchmanFighterItem )
-					{
-						HenchmanFighterItem myFollower = (HenchmanFighterItem)dropped;
-						if ( myFollower.HenchDead > 0 ){ fairTrade = 0; } else
-						{
-							HenchmanFighterItem newFollower = new HenchmanFighterItem();
-							newFollower.HenchTimer = myFollower.HenchTimer;
-							newFollower.HenchBandages = myFollower.HenchBandages;
-							from.AddToBackpack ( newFollower );
-						}
-					}
-					else if ( dropped is HenchmanWizardItem )
-					{
-						HenchmanWizardItem myFollower = (HenchmanWizardItem)dropped;
-						if ( myFollower.HenchDead > 0 ){ fairTrade = 0; } else
-						{
-							HenchmanWizardItem newFollower = new HenchmanWizardItem();
-							newFollower.HenchTimer = myFollower.HenchTimer;
-							newFollower.HenchBandages = myFollower.HenchBandages;
-							from.AddToBackpack ( newFollower );
-						}
-					}
-					else if ( dropped is HenchmanArcherItem )
-					{
-						HenchmanArcherItem myFollower = (HenchmanArcherItem)dropped;
-						if ( myFollower.HenchDead > 0 ){ fairTrade = 0; } else
-						{
-							HenchmanArcherItem newFollower = new HenchmanArcherItem();
-							newFollower.HenchTimer = myFollower.HenchTimer;
-							newFollower.HenchBandages = myFollower.HenchBandages;
-							from.AddToBackpack ( newFollower );
-						}
-					}
-					if ( fairTrade == 1 )
-					{
-						this.PrivateOverheadMessage(MessageType.Regular, 1153, false, sMessage, from.NetState);
-						dropped.Delete();
-						return true;
-					}
-					else { this.PrivateOverheadMessage(MessageType.Regular, 1153, false, "This is not a graveyard! Bury them somewhere else!", from.NetState); }
-				}
 				else if ( dropped is BookBox && ( this is Mage || this is KeeperOfChivalry || this is Witches || this is Necromancer || this is MageGuildmaster ) )
 				{
 					Container pack = (Container)dropped;

@@ -31,6 +31,8 @@ namespace Server.Items
 		public int HenchHue;
 		public int HenchHair;
 		public int HenchHairHue;
+		public int HenchBeard;
+		public int HenchBeardHue;
 		public int HenchGearColor;
 		public string HenchName;
 		public string HenchTitle;
@@ -101,6 +103,12 @@ namespace Server.Items
 		public int Hench_HairHue { get { return HenchHairHue; } set { HenchHairHue = value; InvalidateProperties(); } }
 
 		[CommandProperty(AccessLevel.Owner)]
+		public int Hench_Beard { get { return HenchBeard; } set { HenchBeard = value; InvalidateProperties(); } }
+
+		[CommandProperty(AccessLevel.Owner)]
+		public int Hench_BeardHue { get { return HenchBeardHue; } set { HenchBeardHue = value; InvalidateProperties(); } }
+
+		[CommandProperty(AccessLevel.Owner)]
 		public int Hench_GearColor { get { return HenchGearColor; } set { HenchGearColor = value; InvalidateProperties(); } }
 
 		[CommandProperty(AccessLevel.Owner)]
@@ -122,6 +130,22 @@ namespace Server.Items
 			if ( HenchHue > 0 ){} else { HenchHue = Utility.RandomSkinColor(); }
 			if ( HenchHairHue > 0 ){} else { HenchHairHue = Utility.RandomHairHue(); }
 			if ( HenchHair > 0 ){} else { HenchHair = Utility.RandomList( 0x203B, 0x203C, 0x203D, 0x2044, 0x2045, 0x2047, 0x2049, 0x204A ); }
+
+			// New human henchmen get a random beard that matches their hair
+			// colour. Creature deeds do not use these fields.
+			if ( !(this is HenchmanMonsterItem) )
+			{
+				if ( HenchBody == 401 )
+				{
+					HenchBeard = 0;
+					HenchBeardHue = 0;
+				}
+				else if ( HenchBeard <= 0 )
+				{
+					HenchBeard = Utility.RandomList( 0x2041, 0x203F, 0x204B, 0x203E, 0x204C, 0x2040, 0x204D );
+					HenchBeardHue = HenchHairHue;
+				}
+			}
 
 			if ( HenchName == null )
 			{
@@ -241,6 +265,8 @@ namespace Server.Items
 					friend.Hue = HenchHue;
 					friend.HairItemID = HenchHair;
 					friend.HairHue = HenchHairHue;
+					friend.FacialHairItemID = HenchBeard;
+					friend.FacialHairHue = HenchBeardHue;
 
 					if ( HenchEquipment == null )
 						HenchEquipment = new List<Item>();
@@ -304,7 +330,7 @@ namespace Server.Items
         public override void AddNameProperties(ObjectPropertyList list)
 		{
             base.AddNameProperties(list);
-			string sInfo = HenchName + " " + HenchTitle;
+			string sInfo = ( HenchName + " " + HenchTitle ).Trim();
 			list.Add( 1070722, sInfo );
 			if ( HenchDead > 0 )
 			{
@@ -406,7 +432,7 @@ namespace Server.Items
 			if ( HenchEquipment == null )
 				HenchEquipment = new List<Item>();
 
-			writer.Write( (int) 1 ); // version
+			writer.Write( (int) 2 ); // version
 		    writer.Write( HenchSerial );
 		    writer.Write( HenchTimer );
 		    writer.Write( HenchWeaponID );
@@ -428,6 +454,8 @@ namespace Server.Items
             writer.Write( HenchBandages );
             writer.Write( HenchGearMade );
             writer.WriteItemList<Item>( HenchEquipment, true );
+            writer.Write( HenchBeard );
+            writer.Write( HenchBeardHue );
 		}
 
 		public override void Deserialize( GenericReader reader )
@@ -467,6 +495,17 @@ namespace Server.Items
 
 			if ( HenchEquipment == null )
 				HenchEquipment = new List<Item>();
+
+			if ( version >= 2 )
+			{
+				HenchBeard = reader.ReadInt();
+				HenchBeardHue = reader.ReadInt();
+			}
+			else
+			{
+				HenchBeard = 0;
+				HenchBeardHue = 0;
+			}
 
 			if ( HenchDead > 0 ){ HenchSerial = 0; }
 			LootType = LootType.Regular;

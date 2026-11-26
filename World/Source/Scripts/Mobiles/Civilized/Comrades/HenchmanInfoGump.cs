@@ -12,10 +12,16 @@ namespace Server.Gumps
 	// resistances, bandage supply and remaining hire time.
 	public class HenchmanInfoGump : Gump
 	{
+		private Mobile m_Henchman;
+		private Mobile m_From;
+
 		public HenchmanInfoGump( Mobile henchman, Mobile from ) : base( 50, 50 )
 		{
 			if ( henchman == null || henchman.Deleted || from == null )
 				return;
+
+			m_Henchman = henchman;
+			m_From = from;
 
 			from.SendSound( 0x4A );
 
@@ -38,9 +44,18 @@ namespace Server.Gumps
 
 			name = ( name ?? "henchman" ).ToUpper();
 
-			AddHtml( 15, 15, 400, 20, @"<BODY><BASEFONT Color=" + color + ">" + name + "</BASEFONT></BODY>", (bool)false, (bool)false );
+			// Wide enough for a 32-character name plus a 32-character title on one
+			// line (NameTitleMaxLength in HenchmanCustomizeGumpBase), which is the
+			// longest pair the customization gumps can store.
+			AddHtml( 15, 15, 600, 20, @"<BODY><BASEFONT Color=" + color + ">" + name + "</BASEFONT></BODY>", (bool)false, (bool)false );
 
 			AddButton( 667, 12, 4017, 4017, 0, GumpButtonType.Reply, 0 );
+
+			if ( henchman is HenchmanFighter || henchman is HenchmanArcher || henchman is HenchmanWizard )
+			{
+				AddButton( 15, 38, 0xFA5, 0xFA7, 1, GumpButtonType.Reply, 0 );
+				AddHtml( 50, 40, 100, 18, @"<BODY><BASEFONT Color=" + color + ">Customize</BASEFONT></BODY>", false, false );
+			}
 
 			int SDICap = 1000000;
 			if ( SDICap > MyServerSettings.SpellDamageIncreaseVsMonsters() && MyServerSettings.SpellDamageIncreaseVsMonsters() > 0 ) { SDICap = MyServerSettings.SpellDamageIncreaseVsMonsters(); }
@@ -185,6 +200,24 @@ namespace Server.Gumps
 		{
 			if ( sender.Mobile != null )
 				sender.Mobile.SendSound( 0x4A );
+
+			if ( info.ButtonID == 1 && sender.Mobile != null && sender.Mobile == m_From && m_Henchman != null && !m_Henchman.Deleted
+				&& ( m_Henchman is HenchmanFighter || m_Henchman is HenchmanArcher || m_Henchman is HenchmanWizard ) )
+			{
+				BaseCreature henchman = m_Henchman as BaseCreature;
+
+				if ( henchman != null && henchman.ControlMaster == sender.Mobile )
+				{
+					sender.Mobile.CloseGump( typeof( HenchmanInfoGump ) );
+
+					// Customization is shown next to the henchman's paperdoll (the skin
+					// and gender gumps re-open it), so ask for it as soon as the owner
+					// starts customizing.
+					HenchmanCustomizeGumpBase.ShowPaperdoll( sender.Mobile, henchman );
+
+					sender.Mobile.SendGump( new HenchmanCustomizeGump( sender.Mobile, henchman ) );
+				}
+			}
 		}
 	}
 }

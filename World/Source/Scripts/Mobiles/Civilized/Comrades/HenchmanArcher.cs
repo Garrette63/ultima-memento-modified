@@ -7,6 +7,7 @@ using Server.Network;
 using Server.Regions;
 using System.Collections.Generic;
 using Server.ContextMenus;
+using Server.Gumps;
 
 namespace Server.Mobiles 
 {
@@ -26,7 +27,7 @@ namespace Server.Mobiles
 		public override void OnMovement( Mobile m, Point3D oldLocation )
 		{
 			bool GoAway = HenchmanFunctions.OnMoving( m, oldLocation, this, m_NextMorale );
-			if ( GoAway == true ){ Timer.DelayCall( TimeSpan.FromSeconds( 2.0 ), new TimerCallback( Delete ) ); }
+			if ( GoAway == true ){ HenchmanCustomizeGump.CloseFor( ControlMaster ); Timer.DelayCall( TimeSpan.FromSeconds( 2.0 ), new TimerCallback( Delete ) ); }
 			else { m_NextMorale = (DateTime.Now + TimeSpan.FromSeconds( 60 )); }
 		}
 
@@ -37,7 +38,11 @@ namespace Server.Mobiles
 			Body = myBody;
 			RangeFight = 7;
 
-			if ( Body == 401 ){ this.Female = true; }
+			// BaseCreature's constructor rolls a random gender for the Jako
+			// taming system. Human henchmen must follow the gender stored on
+			// their deed instead, otherwise male henchmen end up flagged as
+			// female while keeping their male body and name.
+			this.Female = ( myBody == 401 );
 
 			int nStr = 100;
 			int nDex = 100;
@@ -218,6 +223,7 @@ namespace Server.Mobiles
 
 		public override void OnDelete()
 		{
+			HenchmanCustomizeGump.CloseFor( ControlMaster );
 			HenchmanFunctions.StashGear( this );
 			base.OnDelete();
 		}
