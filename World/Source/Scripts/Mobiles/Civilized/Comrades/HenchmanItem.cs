@@ -318,8 +318,6 @@ namespace Server.Items
 						case 7: friend.Say("Fame and fortune await!"); break;
 					}
 				}
-
-				HenchmanFunctions.CheckDurability( friend );
 			}
 			else
 			{

@@ -1697,7 +1697,10 @@ namespace Server.Items
 			if ( defender is Slime || defender is Xenomorph || defender is GreenSlime || defender is BlackPudding || defender is LavaPuddle || defender is AcidPuddle || defender is ToxicElemental )
 				acidic = true;
 
-			if ( m_MaxHits > 0 && Density != Density.None && ( ( MaxRange <= 1 && acidic ) || Utility.Random( ruin ) == 0 ) )
+			// A henchman's owner cannot keep the lent gear repaired, so it never
+			// wears while the henchman is the one wielding it (this also skips
+			// the guaranteed acid-blood scar). See HenchmanFunctions.IgnoresDurability.
+			if ( m_MaxHits > 0 && Density != Density.None && !Server.Misc.HenchmanFunctions.IgnoresDurability( attacker ) && ( ( MaxRange <= 1 && acidic ) || Utility.Random( ruin ) == 0 ) )
 			{
 				if ( m_AosWeaponAttributes.SelfRepair > Utility.Random( 10 ) )
 					HitPoints += Utility.RandomMinMax( 1, (int)Density );

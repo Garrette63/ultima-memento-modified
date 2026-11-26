@@ -29,6 +29,11 @@ namespace Server.Misc
 		// message is only spoken after base.EquipItem succeeds.
 		private static bool m_MeditationWarning;
 
+		// Set when a mage henchman accepts a weapon whose required skill is not
+		// Marksmanship (e.g. a spell channelling sword): the weapon is only
+		// carried, so the line is spoken after base.EquipItem succeeds.
+		private static bool m_HandToHandWarning;
+
 		public static bool RestoringGear{ get{ return m_RestoringGear; } }
 
 		public static bool IsInRestRegion(Mobile from)
@@ -405,7 +410,6 @@ namespace Server.Misc
 				if ( henchman is HenchmanMonster ){ henchman.Say("I could use these bandages. I have " + henchman.Hunger.ToString() + " of them now."); }
 				else { henchman.Say("Ahhh...bandages can be of great use. I have " + henchman.Hunger.ToString() + " of them now."); }
 				dropped.Delete();
-				CheckDurability( henchman );
 			}
 			else if ( dropped is LesserCurePotion || dropped is CurePotion || dropped is GreaterCurePotion )
 			{
@@ -521,7 +525,6 @@ namespace Server.Misc
 						int nTime = (int)(henchman.Fame/5);
 						from.SendMessage("" + henchman.Name + " will probably adventure with you for another " + nTime.ToString() + " minutes.");
 						dropped.Delete();
-						CheckDurability( henchman );
 					}
 				}
 				else
@@ -1067,6 +1070,23 @@ namespace Server.Misc
 			return ammo == typeof( Arrow ) || ammo == typeof( Bolt );
 		}
 
+		// Harpoons are throwing weapons (they fire HarpoonRope), so no henchman
+		// class can use one: a fighter cannot melee with it, an archer cannot
+		// fire it like a bow, and a mage cannot aim it at all.
+		private static bool IsHarpoon( Item item )
+		{
+			return item is IHarpoon;
+		}
+
+		// Blowguns (and their darts) are loaded and fired through the Ninjitsu
+		// weapon UI instead of a normal weapon swing, so no henchman class can
+		// use one either. FukiyaDarts are ammunition (Layer.Invalid), so they
+		// are only listed here to keep the rule explicit.
+		private static bool IsBlowgun( Item item )
+		{
+			return item is Fukiya || item is FukiyaDarts;
+		}
+
 		private static bool InhibitsPassiveMeditation( Item item )
 		{
 			BaseArmor armor = item as BaseArmor;
@@ -1155,6 +1175,22 @@ namespace Server.Misc
 			return m is HenchmanFighter || m is HenchmanArcher || m is HenchmanWizard;
 		}
 
+		// Equipment lent to a henchman keeps its condition. The henchman is a
+		// clientless NPC, so its owner cannot keep the gear repaired, and a
+		// worn-out item is destroyed (and dropped from the deed's stash) with
+		// no way to get it back -- so no wear is applied while a henchman is
+		// the one wielding or wearing it, including the acid-blood hits that
+		// otherwise scar a melee weapon. The check is made against the wielder
+		// at hit time, so taking an item back to a player restores normal wear;
+		// no per-item flag or serialization change is involved.
+		public static bool IgnoresDurability( Mobile m )
+		{
+			if ( m == null )
+				return false;
+
+			return m is HenchmanFighter || m is HenchmanArcher || m is HenchmanWizard || m is HenchmanMonster;
+		}
+
 		// Enchantment-point spending (the IGiftable and ILevelable gumps) is
 		// restricted while the artefact is on a henchman: only that henchman's
 		// owner may spend its points. Items that are not carried by a henchman
@@ -1180,6 +1216,7 @@ namespace Server.Misc
 		public static bool ValidateHenchmanEquip( Mobile henchman, Item item )
 		{
 			m_MeditationWarning = false;
+			m_HandToHandWarning = false;
 
 			if ( m_RestoringGear )
 				return true;
@@ -1197,11 +1234,29 @@ namespace Server.Misc
 			{
 				if ( IsHandItem( item ) )
 				{
+					// A mage has no idea how to aim a bow, crossbow, harpoon,
+					// blowgun or a set of throwing gloves, so those are refused
+					// even when the weapon is spell channelling (this check wins
+					// over the cast test below, which only asks whether casting
+					// is allowed).
+					if ( IsBowOrCrossbow( item ) || IsHarpoon( item ) || IsBlowgun( item ) || item is IThrowingGloves )
+					{
+						henchman.Say( "I have no idea how to handle such a weapon." );
+						return false;
+					}
+
 					if ( !item.AllowEquipedCast( henchman ) )
 					{
 						henchman.Say( "I can't cast spells while holding that." );
 						return false;
 					}
+
+					// The weapon is accepted. Anything that is not a Marksmanship
+					// weapon (the staves) is only carried: the mage cannot fight
+					// hand-to-hand with it, so warn once the equip succeeds.
+					BaseWeapon carried = item as BaseWeapon;
+					if ( carried != null && carried.Skill != SkillName.Marksmanship )
+						m_HandToHandWarning = true;
 				}
 				else if ( InhibitsPassiveMeditation( item ) )
 				{
@@ -1210,7 +1265,7 @@ namespace Server.Misc
 			}
 			else if ( henchman is HenchmanFighter )
 			{
-				if ( IsHandItem( item ) && !( item is BaseShield ) && !IsFighterWeapon( item ) )
+				if ( IsHandItem( item ) && !( item is BaseShield ) && ( IsHarpoon( item ) || IsBlowgun( item ) || !IsFighterWeapon( item ) ) )
 				{
 					henchman.Say( "Give me a proper melee weapon." );
 					return false;
@@ -1218,7 +1273,7 @@ namespace Server.Misc
 			}
 			else if ( henchman is HenchmanArcher )
 			{
-				if ( IsHandItem( item ) && !( item is BaseShield ) && !IsBowOrCrossbow( item ) )
+				if ( IsHandItem( item ) && !( item is BaseShield ) && ( IsHarpoon( item ) || IsBlowgun( item ) || !IsBowOrCrossbow( item ) ) )
 				{
 					henchman.Say( "Give me a bow or crossbow." );
 					return false;
@@ -1228,6 +1283,7 @@ namespace Server.Misc
 			if ( !HasEnoughStrength( henchman, item ) )
 			{
 				m_MeditationWarning = false;
+				m_HandToHandWarning = false;
 				henchman.Say( "I'm not strong enough to use that." );
 				return false;
 			}
@@ -1268,6 +1324,15 @@ namespace Server.Misc
 
 			m_MeditationWarning = false;
 			henchman.Say( "I'll wear this, but it will inhibit my meditation." );
+		}
+
+		public static void AnnounceHandToHandWarning( Mobile henchman )
+		{
+			if ( !m_HandToHandWarning )
+				return;
+
+			m_HandToHandWarning = false;
+			henchman.Say( "I'll carry this, but don't expect me to fight hand-to-hand." );
 		}
 
 		public static HenchmanItem FindDeed( Mobile henchman )
@@ -1437,40 +1502,6 @@ namespace Server.Misc
 				return;
 
 			deed.HenchEquipment.Remove( item );
-		}
-
-		public static void CheckDurability( Mobile henchman )
-		{
-			if ( henchman == null )
-				return;
-
-			bool danger = false;
-			bool worn = false;
-
-			foreach ( Item item in henchman.Items )
-			{
-				IDurability durable = item as IDurability;
-
-				if ( durable == null )
-					continue;
-
-				int max = durable.MaxHitPoints;
-
-				if ( max <= 0 )
-					continue;
-
-				double percent = (double)durable.HitPoints / (double)max;
-
-				if ( percent < 0.05 )
-					danger = true;
-				else if ( percent < 0.20 )
-					worn = true;
-			}
-
-			if ( danger )
-				henchman.Say( "Some of my equipment is in danger of breaking." );
-			else if ( worn )
-				henchman.Say( "Some of my equipment is looking worn." );
 		}
 
 		public static int GetHue( int nValue )

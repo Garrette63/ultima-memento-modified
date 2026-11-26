@@ -48,6 +48,11 @@ namespace Server.SkillHandlers
 		{
 			if ( parent == null ) return false;
 
+			// Equipment lent to a henchman never wears while the henchman is the
+			// one wearing it: the owner cannot keep it repaired and a broken item
+			// is destroyed. See HenchmanFunctions.IgnoresDurability.
+			if ( Server.Misc.HenchmanFunctions.IgnoresDurability( parent ) ) return true;
+
 			double armsLore = parent != null ? parent.Skills[SkillName.ArmsLore].Value : 0;
 			if ( armsLore < 5 ) return false;
 			if ( !Utility.RandomBool() ) return false;

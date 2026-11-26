@@ -217,6 +217,7 @@ namespace Server.Mobiles
 
 			HenchmanFunctions.OnHenchmanEquipped( this, item );
 			HenchmanFunctions.AnnounceMeditationWarning( this );
+			HenchmanFunctions.AnnounceHandToHandWarning( this );
 			return true;
 		}
 
