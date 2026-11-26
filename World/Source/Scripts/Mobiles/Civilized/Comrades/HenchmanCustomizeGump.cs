@@ -6,6 +6,7 @@ using Server.Items;
 using Server.Misc;
 using Server.Mobiles;
 using Server.Network;
+using Server.HuePickers;
 
 namespace Server.Gumps
 {
@@ -350,14 +351,16 @@ namespace Server.Gumps
 
 			from.SendSound( 0x4A );
 
-			RenderPanel( 370, 370, "HENCHMAN CUSTOMIZATION" );
+			// 340 tall: the seven options end at y=295 and the footer band starts
+			// at 310, so the panel no longer carries the removed CLOSE row's space.
+			RenderPanel( 370, 340, "HENCHMAN CUSTOMIZATION" );
 
 			AddHtml( 20, 42, 340, 40, "<CENTER><BASEFONT COLOR=#E4E377>" + DisplayName( m_Henchman ) + "</BASEFONT></CENTER>", false, false );
 
 			int y = 85;
 
 			AddButton( 20, y, 0xFA5, 0xFA7, 1, GumpButtonType.Reply, 0 );
-			AddHtml( 55, y + 2, 280, 18, "<BASEFONT COLOR=#FFFFFF>Name/Title</BASEFONT>", false, false );
+			AddHtml( 55, y + 2, 280, 18, "<BASEFONT COLOR=#FFFFFF>Name & Title</BASEFONT>", false, false );
 			y += 30;
 
 			AddButton( 20, y, 0xFA5, 0xFA7, 2, GumpButtonType.Reply, 0 );
@@ -382,10 +385,12 @@ namespace Server.Gumps
 
 			AddButton( 20, y, 0xFA5, 0xFA7, 6, GumpButtonType.Reply, 0 );
 			AddHtml( 55, y + 2, 280, 18, "<BASEFONT COLOR=#FFFFFF>Mount</BASEFONT>", false, false );
+			y += 30;
 
-
-			AddButton( 20, 300, 0xFB1, 0xFB3, 0, GumpButtonType.Reply, 0 );
-			AddHtml( 55, 302, 280, 18, "<BASEFONT COLOR=#FFFFFF>CLOSE</BASEFONT>", false, false );
+			// Chat colour opens the same native hue picker the Knives chat
+			// colours menu uses (Server.HuePickers.HuePicker, art 0x1018).
+			AddButton( 20, y, 0xFA5, 0xFA7, 7, GumpButtonType.Reply, 0 );
+			AddHtml( 55, y + 2, 280, 18, "<BASEFONT COLOR=#FFFFFF>Chat Hue</BASEFONT>", false, false );
 		}
 
 		public override void OnResponse( NetState sender, RelayInfo info )
@@ -433,7 +438,63 @@ namespace Server.Gumps
 					CloseAll();
 					from.SendGump( new HenchmanCustomizeMountGump( from, m_Henchman ) );
 					break;
+				case 7:
+					// Close the menu while the client hue picker is open; the
+					// picker's response saves the colour and re-opens the menu.
+					CloseAll();
+					from.SendHuePicker( new ChatHuePicker( this ) );
+					break;
 
+			}
+		}
+
+		// Spoken once the chat colour is confirmed, so the player immediately
+		// sees the chosen hue in the henchman's own overhead text.
+		private static readonly string[] ChatLines = new string[]
+		{
+			"Ever notice no one has ever seen a baby mongbat?",
+			"What does 'recsu recdu' even mean?",
+			"Lovely weather we're having."
+		};
+
+		private void ApplyChatHue( int hue )
+		{
+			if ( !IsValid() )
+			{
+				CloseAll();
+				return;
+			}
+
+			m_Henchman.SpeechHue = hue;
+
+			if ( m_Deed != null && !m_Deed.Deleted )
+			{
+				m_Deed.HenchSpeech = hue;
+				m_Deed.InvalidateProperties();
+			}
+
+			m_Henchman.Say( ChatLines[Utility.Random( ChatLines.Length )] );
+			m_From.SendSound( 0x248 );
+
+			SendMain();
+		}
+
+		// Knives.Chat3.ColorsGump uses art 0x1018 for every chat colour; the
+		// client clips the answer to the dyed range, which is the range
+		// SpeechHue uses.
+		private class ChatHuePicker : HuePicker
+		{
+			private HenchmanCustomizeGump m_Gump;
+
+			public ChatHuePicker( HenchmanCustomizeGump gump ) : base( 0x1018 )
+			{
+				m_Gump = gump;
+			}
+
+			public override void OnResponse( int hue )
+			{
+				if ( m_Gump != null )
+					m_Gump.ApplyChatHue( hue );
 			}
 		}
 
@@ -462,7 +523,7 @@ namespace Server.Gumps
 
 			from.SendSound( 0x4A );
 
-			RenderPanel( 480, 240, "NAME/TITLE" );
+			RenderPanel( 480, 240, "NAME & TITLE" );
 
 			AddHtml( 20, 60, 100, 18, "<BASEFONT COLOR=#FFFFFF>Name</BASEFONT>", false, false );
 			AddTextEntry( 90, 58, 360, 22, WhiteTextHue, 1, m_Henchman.Name ?? "", NameTitleMaxLength );

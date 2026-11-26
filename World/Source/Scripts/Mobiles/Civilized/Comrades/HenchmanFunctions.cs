@@ -25,10 +25,6 @@ namespace Server.Misc
 		// henchman, so the normal equip restrictions/messages are not repeated.
 		private static bool m_RestoringGear;
 
-		// Set when an accepted worn item will inhibit passive meditation; the
-		// message is only spoken after base.EquipItem succeeds.
-		private static bool m_MeditationWarning;
-
 		// Set when a mage henchman accepts a weapon whose required skill is not
 		// Marksmanship (e.g. a spell channelling sword): the weapon is only
 		// carried, so the line is spoken after base.EquipItem succeeds.
@@ -209,7 +205,7 @@ namespace Server.Misc
 							HenchmanItem henchThing = (HenchmanItem)item;
 							henchThing.HenchTimer = from.Fame;
 							henchThing.HenchBandages = from.Hunger;
-							henchThing.LootType = LootType.Regular;
+							henchThing.LootType = LootType.Blessed;
 							henchThing.HenchSerial = 0;
 
 							if ( item is HenchmanArcherItem ){ henchThing.Name = "archer henchman"; }
@@ -415,7 +411,7 @@ namespace Server.Misc
 				henchThing.HenchDead = ( from.RawStr + from.RawInt + from.RawDex ) * 2;
 				henchThing.HenchTimer = from.Fame;
 				henchThing.HenchBandages = from.Hunger;
-				henchThing.LootType = LootType.Regular;
+				henchThing.LootType = LootType.Blessed;
 				henchThing.HenchSerial = 0;
 
 				if ( item is HenchmanArcherItem ){ henchThing.Name = "dead archer henchman"; }
@@ -1255,7 +1251,6 @@ namespace Server.Misc
 
 		public static bool ValidateHenchmanEquip( Mobile henchman, Item item )
 		{
-			m_MeditationWarning = false;
 			m_HandToHandWarning = false;
 
 			if ( m_RestoringGear )
@@ -1300,7 +1295,11 @@ namespace Server.Misc
 				}
 				else if ( InhibitsPassiveMeditation( item ) )
 				{
-					m_MeditationWarning = true;
+					// Passive meditation is how a mage henchman recovers
+					// mana, so armour that would block it is refused instead
+					// of being worn with a complaint.
+					henchman.Say( "I won't wear that, it would inhibit my meditation." );
+					return false;
 				}
 			}
 			else if ( henchman is HenchmanFighter )
@@ -1322,7 +1321,6 @@ namespace Server.Misc
 
 			if ( !HasEnoughStrength( henchman, item ) )
 			{
-				m_MeditationWarning = false;
 				m_HandToHandWarning = false;
 				henchman.Say( "I'm not strong enough to use that." );
 				return false;
@@ -1355,15 +1353,6 @@ namespace Server.Misc
 			}
 
 			return true;
-		}
-
-		public static void AnnounceMeditationWarning( Mobile henchman )
-		{
-			if ( !m_MeditationWarning )
-				return;
-
-			m_MeditationWarning = false;
-			henchman.Say( "I'll wear this, but it will inhibit my meditation." );
 		}
 
 		public static void AnnounceHandToHandWarning( Mobile henchman )

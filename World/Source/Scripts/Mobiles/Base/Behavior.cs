@@ -7155,7 +7155,9 @@ namespace Server.Mobiles
 				{
 					Item item = ( Item )targets[ i ];
 					HenchmanItem henchThing = (HenchmanItem)item;
-					henchThing.LootType = LootType.Regular;
+					// Deeds are always blessed; releasing the henchman must
+					// not turn the returned deed back into ordinary loot.
+					henchThing.LootType = LootType.Blessed;
 					henchThing.HenchSerial = 0;
 					henchThing.Visible = true;
 					henchThing.HenchTimer = m_Mobile.Fame;

@@ -212,7 +212,6 @@ namespace Server.Mobiles
 				return false;
 
 			HenchmanFunctions.OnHenchmanEquipped( this, item );
-			HenchmanFunctions.AnnounceMeditationWarning( this );
 			return true;
 		}
 

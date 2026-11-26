@@ -162,6 +162,12 @@ namespace Server.Items
 			if ( HenchMount > 0 ){} else { HenchMount = (int)HenchMountType.Horse; }
 
 
+			// The deed is the only way to get the henchman back, so it is
+			// always blessed: it stays with the owner through death instead
+			// of dropping as loot. The creature/fighter/archer/wizard deeds
+			// all derive from this constructor.
+			LootType = LootType.Blessed;
+
 			Name = "henchman";
 			Weight = 1.0;
 		}
@@ -525,7 +531,10 @@ namespace Server.Items
 			}
 
 			if ( HenchDead > 0 ){ HenchSerial = 0; }
-			LootType = LootType.Regular;
+
+			// Deeds are always blessed. Re-bless deeds saved while they
+			// were regular loot so existing henchmen get the same rule.
+			LootType = LootType.Blessed;
 			Visible = true;
 		}
 	}
