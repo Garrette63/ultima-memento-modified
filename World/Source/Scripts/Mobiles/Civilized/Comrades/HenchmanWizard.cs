@@ -32,7 +32,7 @@ namespace Server.Mobiles
 		}
 
 		[Constructable] 
-		public HenchmanWizard( int myBody, int nMounted, double nSkills, int nStats ) : base( AIType.AI_Mage, FightMode.Closest, 10, 1, 0.2, 0.4 ) 
+		public HenchmanWizard( int myBody, int nMounted, double nSkills, int nStats, int nMount ) : base( AIType.AI_Mage, FightMode.Closest, 10, 1, 0.2, 0.4 ) 
 		{
 			m_NextMorale = (DateTime.Now + TimeSpan.FromSeconds( 60 ));
 
@@ -93,7 +93,7 @@ namespace Server.Mobiles
 
 			if ( nMounted > 0 )
 			{
-				new HenchHorse().Rider = this;
+				new HenchMount( nMount ).Rider = this;
 				ActiveSpeed = 0.1;
 				PassiveSpeed = 0.2;
 			}

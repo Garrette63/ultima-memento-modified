@@ -33,6 +33,7 @@ namespace Server.Items
 		public int HenchHairHue;
 		public int HenchBeard;
 		public int HenchBeardHue;
+		public int HenchMount;
 		public int HenchGearColor;
 		public string HenchName;
 		public string HenchTitle;
@@ -109,6 +110,9 @@ namespace Server.Items
 		public int Hench_BeardHue { get { return HenchBeardHue; } set { HenchBeardHue = value; InvalidateProperties(); } }
 
 		[CommandProperty(AccessLevel.Owner)]
+		public int Hench_Mount { get { return HenchMount; } set { HenchMount = value; InvalidateProperties(); } }
+
+		[CommandProperty(AccessLevel.Owner)]
 		public int Hench_GearColor { get { return HenchGearColor; } set { HenchGearColor = value; InvalidateProperties(); } }
 
 		[CommandProperty(AccessLevel.Owner)]
@@ -152,6 +156,11 @@ namespace Server.Items
 				if ( HenchBody == 400 ){ HenchName = NameList.RandomName( "male" ); }
 				else { HenchName = NameList.RandomName( "female" ); }
 			}
+
+			// A newly created henchman rides a horse until its owner picks a
+			// different mount in the customization menu.
+			if ( HenchMount > 0 ){} else { HenchMount = (int)HenchMountType.Horse; }
+
 
 			Name = "henchman";
 			Weight = 1.0;
@@ -226,13 +235,13 @@ namespace Server.Items
 
 				int nStats = from.RawStr + from.RawDex + from.RawInt;
 
-				BaseCreature friend = new HenchmanWizard( HenchBody, nMounted, nSkills, nStats );
+				BaseCreature friend = new HenchmanWizard( HenchBody, nMounted, nSkills, nStats, HenchMount );
 					friend.Delete();
 
 				if ( this is HenchmanMonsterItem ){ friend = new HenchmanMonster( HenchBody, nMounted, nSkills, nStats, HenchWeaponID, HenchShieldID ); }
-				else if ( this is HenchmanWizardItem ){ friend = new HenchmanWizard( HenchBody, nMounted, nSkills, nStats ); }
-				else if ( this is HenchmanFighterItem ){ friend = new HenchmanFighter( HenchBody, nMounted, nSkills, nStats ); }
-				else if ( this is HenchmanArcherItem ){ friend = new HenchmanArcher( HenchBody, nMounted, nSkills, nStats ); }
+				else if ( this is HenchmanWizardItem ){ friend = new HenchmanWizard( HenchBody, nMounted, nSkills, nStats, HenchMount ); }
+				else if ( this is HenchmanFighterItem ){ friend = new HenchmanFighter( HenchBody, nMounted, nSkills, nStats, HenchMount ); }
+				else if ( this is HenchmanArcherItem ){ friend = new HenchmanArcher( HenchBody, nMounted, nSkills, nStats, HenchMount ); }
 
 				bool validLocation = false;
 				Point3D loc = from.Location;
@@ -430,7 +439,7 @@ namespace Server.Items
 			if ( HenchEquipment == null )
 				HenchEquipment = new List<Item>();
 
-			writer.Write( (int) 2 ); // version
+			writer.Write( (int) 3 ); // version
 		    writer.Write( HenchSerial );
 		    writer.Write( HenchTimer );
 		    writer.Write( HenchWeaponID );
@@ -454,6 +463,7 @@ namespace Server.Items
             writer.WriteItemList<Item>( HenchEquipment, true );
             writer.Write( HenchBeard );
             writer.Write( HenchBeardHue );
+            writer.Write( HenchMount );
 		}
 
 		public override void Deserialize( GenericReader reader )
@@ -503,6 +513,15 @@ namespace Server.Items
 			{
 				HenchBeard = 0;
 				HenchBeardHue = 0;
+			}
+
+			if ( version >= 3 )
+			{
+				HenchMount = Server.Mobiles.HenchMount.Clamp( reader.ReadInt() );
+			}
+			else
+			{
+				HenchMount = (int) HenchMountType.Horse;
 			}
 
 			if ( HenchDead > 0 ){ HenchSerial = 0; }

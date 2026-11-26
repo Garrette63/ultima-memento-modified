@@ -128,6 +128,32 @@ namespace Server.Gumps
 			m_Deed.InvalidateProperties();
 		}
 
+		// The mount choice lives on the summoning deed, next to the hair and
+		// skin values, so an older deed without the field reads as a horse.
+		protected int GetMount()
+		{
+			if ( m_Deed == null || m_Deed.Deleted )
+				return (int) HenchMountType.Horse;
+
+			return HenchMount.Clamp( m_Deed.HenchMount );
+		}
+
+		protected void SaveMount( int mount )
+		{
+			mount = HenchMount.Clamp( mount );
+
+			if ( m_Deed != null && !m_Deed.Deleted )
+			{
+				m_Deed.HenchMount = mount;
+				m_Deed.InvalidateProperties();
+			}
+
+			// Apply the choice to a henchman that is mounted right now. One
+			// that is on foot picks it up the next time it mounts.
+			HenchmanFunctions.RemountHenchman( m_Henchman, mount );
+		}
+
+
 		// TazUO and ClassicUO choose the paperdoll avatar from Mobile.IsFemale:
 		// PaperDollInteractable.UpdateUI matches bodies 0x0191/0x0193 (and the elf,
 		// gargoyle and shroud bodies) explicitly, and everything else - including the
@@ -324,7 +350,7 @@ namespace Server.Gumps
 
 			from.SendSound( 0x4A );
 
-			RenderPanel( 370, 330, "HENCHMAN CUSTOMIZATION" );
+			RenderPanel( 370, 370, "HENCHMAN CUSTOMIZATION" );
 
 			AddHtml( 20, 42, 340, 40, "<CENTER><BASEFONT COLOR=#E4E377>" + DisplayName( m_Henchman ) + "</BASEFONT></CENTER>", false, false );
 
@@ -352,8 +378,14 @@ namespace Server.Gumps
 			AddButton( 20, y, 0xFA5, 0xFA7, 5, GumpButtonType.Reply, 0 );
 			AddHtml( 55, y + 2, 280, 18, "<BASEFONT COLOR=#FFFFFF>Skin Tone</BASEFONT>", false, false );
 
-			AddButton( 20, 270, 0xFB1, 0xFB3, 0, GumpButtonType.Reply, 0 );
-			AddHtml( 55, 272, 280, 18, "<BASEFONT COLOR=#FFFFFF>CLOSE</BASEFONT>", false, false );
+			y += 30;
+
+			AddButton( 20, y, 0xFA5, 0xFA7, 6, GumpButtonType.Reply, 0 );
+			AddHtml( 55, y + 2, 280, 18, "<BASEFONT COLOR=#FFFFFF>Mount</BASEFONT>", false, false );
+
+
+			AddButton( 20, 300, 0xFB1, 0xFB3, 0, GumpButtonType.Reply, 0 );
+			AddHtml( 55, 302, 280, 18, "<BASEFONT COLOR=#FFFFFF>CLOSE</BASEFONT>", false, false );
 		}
 
 		public override void OnResponse( NetState sender, RelayInfo info )
@@ -397,6 +429,11 @@ namespace Server.Gumps
 					CloseAll();
 					from.SendGump( new HenchmanCustomizeSkinGump( from, m_Henchman ) );
 					break;
+				case 6:
+					CloseAll();
+					from.SendGump( new HenchmanCustomizeMountGump( from, m_Henchman ) );
+					break;
+
 			}
 		}
 
@@ -411,6 +448,8 @@ namespace Server.Gumps
 			owner.CloseGump( typeof( HenchmanCustomizeBeardGump ) );
 			owner.CloseGump( typeof( HenchmanCustomizeGenderGump ) );
 			owner.CloseGump( typeof( HenchmanCustomizeSkinGump ) );
+			owner.CloseGump( typeof( HenchmanCustomizeMountGump ) );
+
 		}
 	}
 
@@ -754,4 +793,64 @@ namespace Server.Gumps
 			SendMain();
 		}
 	}
+
+	public class HenchmanCustomizeMountGump : HenchmanCustomizeGumpBase
+	{
+		public HenchmanCustomizeMountGump( Mobile from, BaseCreature henchman ) : base( from, henchman )
+		{
+			if ( !IsValid() )
+				return;
+
+			from.SendSound( 0x4A );
+
+			RenderPanel( 420, 360, "MOUNT" );
+
+			int current = GetMount();
+
+			AddHtml( 20, 55, 380, 18, "<CENTER><BASEFONT COLOR=#E4E377>Currently Selected: " + HenchMount.GetName( current ) + "</BASEFONT></CENTER>", false, false );
+
+			for ( int i = 0; i < HenchMount.Count; ++i )
+			{
+				int y = 90 + ( i * 30 );
+				string color = ( i == current ? "#FFD700" : "#FFFFFF" );
+
+				AddButton( 20, y, 0xFA5, 0xFA7, 100 + i, GumpButtonType.Reply, 0 );
+				AddHtml( 55, y + 2, 320, 18, "<BASEFONT COLOR=" + color + ">" + HenchMount.GetName( i ) + "</BASEFONT>", false, false );
+			}
+
+			AddBackButton( 20, 300 );
+		}
+
+		public override void OnResponse( NetState sender, RelayInfo info )
+		{
+			Mobile from = sender.Mobile;
+
+			if ( from == null || from != m_From || !IsValid() )
+			{
+				CloseAll();
+				return;
+			}
+
+			if ( info.ButtonID == 0 )
+			{
+				SendMain();
+				return;
+			}
+
+			if ( info.ButtonID >= 100 && info.ButtonID < 100 + HenchMount.Count )
+			{
+				int mount = info.ButtonID - 100;
+
+				SaveMount( mount );
+				from.SendSound( 0x248 );
+			}
+			else
+			{
+				return;
+			}
+
+			SendMain();
+		}
+	}
+
 }

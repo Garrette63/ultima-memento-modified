@@ -32,7 +32,7 @@ namespace Server.Mobiles
 		}
 
 		[Constructable] 
-		public HenchmanArcher( int myBody, int nMounted, double nSkills, int nStats ) : base( AIType.AI_Archer, FightMode.Closest, 10, 1, 0.2, 0.4 )
+		public HenchmanArcher( int myBody, int nMounted, double nSkills, int nStats, int nMount ) : base( AIType.AI_Archer, FightMode.Closest, 10, 1, 0.2, 0.4 )
 		{
 			Name = "henchman";
 			Body = myBody;
@@ -88,7 +88,7 @@ namespace Server.Mobiles
 
 			if ( nMounted > 0 )
 			{
-				new HenchHorse().Rider = this;
+				new HenchMount( nMount ).Rider = this;
 				ActiveSpeed = 0.1;
 				PassiveSpeed = 0.2;
 			}

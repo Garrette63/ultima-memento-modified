@@ -126,7 +126,7 @@ namespace Server.Misc
 							IMount mount = m.Mount;
 							if ( mount == null && ( m is HenchmanArcher || m is HenchmanFighter || m is HenchmanWizard ) )
 							{
-								new HenchHorse().Rider = m;
+								new HenchMount( GetHenchMount( m ) ).Rider = m;
 							}
 							bc.ActiveSpeed = 0.1;
 							bc.PassiveSpeed = 0.2;
@@ -135,6 +135,46 @@ namespace Server.Misc
 				}
 			}
 		}
+
+		// The mount chosen in the henchman customization menu is stored on the
+		// summoning deed (HenchmanItem.HenchMount) and defaults to the horse.
+		public static int GetHenchMount( Mobile henchman )
+		{
+			HenchmanItem deed = FindDeed( henchman );
+
+			if ( deed == null || deed.Deleted )
+				return (int) HenchMountType.Horse;
+
+			return HenchMount.Clamp( deed.HenchMount );
+		}
+
+		// Swaps the mount of a henchman that is mounted right now. A henchman
+		// that is on foot keeps the deed value and picks it up the next time
+		// MountHenchman runs.
+		public static void RemountHenchman( Mobile henchman, int mount )
+		{
+			if ( henchman == null || henchman.Deleted || !henchman.Alive || henchman.Mount == null )
+				return;
+
+			if ( !( henchman is HenchmanArcher || henchman is HenchmanFighter || henchman is HenchmanWizard ) )
+				return;
+
+			IMount oldMount = henchman.Mount;
+
+			oldMount.Rider = null;
+
+			BaseCreature oldCreature = oldMount as BaseCreature;
+
+			if ( oldCreature != null && !oldCreature.Deleted )
+				oldCreature.Delete();
+
+			new HenchMount( mount ).Rider = henchman;
+
+			BaseCreature bc = (BaseCreature)henchman;
+			bc.ActiveSpeed = 0.1;
+			bc.PassiveSpeed = 0.2;
+		}
+
 
 		public static bool OnMoving( Mobile m, Point3D oldLocation, Mobile from, DateTime m_NextMorale )
 		{
