@@ -139,6 +139,35 @@ namespace Server.Mobiles
 			}
 		}
 
+		private class DivinationEntry : ContextMenuEntry
+		{
+			private GypsyLady m_GypsyLady;
+			private Mobile m_From;
+
+			// 6245 + the client's 3,000,000 context-menu offset = cliloc 3006245, "Tell Fortune".
+			// No cliloc file is edited; this is the closest existing client context label.
+			public DivinationEntry( GypsyLady GypsyLady, Mobile from ) : base( 6245, 12 )
+			{
+				m_GypsyLady = GypsyLady;
+				m_From = from;
+			}
+
+			public override void OnClick()
+			{
+				if ( m_GypsyLady == null || m_GypsyLady.Deleted || m_From == null || m_From.Deleted || !m_From.Alive )
+					return;
+
+				if ( !m_From.InRange( m_GypsyLady, 12 ) )
+				{
+					m_From.SendMessage( "The gypsy is too far away to hear you." );
+					return;
+				}
+
+				m_From.CloseGump( typeof( GypsyAskGump ) );
+				m_From.SendGump( new GypsyAskGump( m_From, m_GypsyLady, String.Empty, null, false ) );
+			}
+		}
+
         public void FindTruth( Mobile from )
         {
             if ( Deleted || !from.Alive )
@@ -416,6 +445,13 @@ namespace Server.Mobiles
 			if ( from.Alive )
 			{
 				list.Add( new TruthEntry( this, from ) );
+
+				if ( CheckChattingAccess( from ) )
+				{
+					DivinationEntry entry = new DivinationEntry( this, from );
+					entry.Enabled = GypsyOracle.Enabled;
+					list.Add( entry );
+				}
 			}
 
 			base.AddCustomContextEntries( from, list );
@@ -428,16 +464,16 @@ namespace Server.Mobiles
 		public override void OnSingleClick( Mobile from )
 		{
 			base.OnSingleClick( from );
-			ShowMenu( from );
+			ShowContextMenu( from );
 		}
 
 		public override void OnAosSingleClick( Mobile from )
 		{
 			base.OnAosSingleClick( from );
-			ShowMenu( from );
+			ShowContextMenu( from );
 		}
 
-		private void ShowMenu( Mobile from )
+		private void ShowContextMenu( Mobile from )
 		{
 			if ( Deleted || from == null || from.Deleted || !from.Alive || from.NetState == null )
 				return;
@@ -445,8 +481,9 @@ namespace Server.Mobiles
 			if ( !from.CanSee( this ) || !from.InRange( this, 12 ) )
 				return;
 
-			from.CloseGump( typeof( GypsyMenuGump ) );
-			from.SendGump( new GypsyMenuGump( from, this ) );
+			// Setting Mobile.ContextMenu both sends the menu packet and stores the
+			// menu, so the client's reply is accepted by ContextMenuResponse.
+			from.ContextMenu = new ContextMenu( from, this );
 		}
 
 		public GypsyLady( Serial serial ) : base( serial )
