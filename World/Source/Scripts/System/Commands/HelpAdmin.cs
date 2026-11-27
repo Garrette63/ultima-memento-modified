@@ -76,7 +76,7 @@ namespace Server.Items
 						+ "[searchimage - Allows you to find images in UO and then add them to the world.<br><br>"
 						+ "[staex - Allows you to export items into a decoration file.<br><br>"
 						+ "[townhouses - Lets you build in-game player housing, and also find all the houses built in the world.<br><br>"
-						+ "[updateserver - Pulls the latest code from git, rebuilds the core with the toolchain for this server's operating system, restarts the server, then rebuilds the world with [buildworld once it is back up. Add 'nocompile' to skip the core build, or 'nobuild' to skip the world rebuild.<br><br>"
+						+ "[updateserver - Pulls the latest code from git, rebuilds the core with the toolchain for this server's operating system, restarts the server, then rebuilds the world with [buildworld once it is back up. Add 'ff' or 'rebase' to change how upstream is reconciled (default is a merge), 'nocompile' to skip the core build, or 'nobuild' to skip the world rebuild.<br><br>"
 						+ "[viewhouses - Lets you see a list of houses owned by the one you target.<br><br>"
 
 						+ "<br><br>"

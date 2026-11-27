@@ -66,8 +66,8 @@ namespace Server.Misc
 
 		#region Command
 
-		[Usage( "UpdateServer [nocompile] [nobuild]" )]
-		[Description( "Pulls the latest code from git, rebuilds the core with the toolchain for this server's operating system (mcs on Linux/Unix, csc on Windows), restarts the server, then runs [buildworld once the shard is back up.  'nocompile' skips the core rebuild, 'nobuild' skips the world rebuild." )]
+		[Usage( "UpdateServer [ff|rebase] [nocompile] [nobuild]" )]
+		[Description( "Pulls the latest code from git, rebuilds the core with the toolchain for this server's operating system (mcs on Linux/Unix, csc on Windows), restarts the server, then runs [buildworld once the shard is back up.  Upstream is merged by default; pass 'ff' for fast-forward-only or 'rebase' to rebase instead.  'nocompile' skips the core rebuild, 'nobuild' skips the world rebuild." )]
 		public static void UpdateServer_OnCommand( CommandEventArgs e )
 		{
 			Mobile from = e.Mobile;
@@ -82,6 +82,7 @@ namespace Server.Misc
 
 			bool compile = true;
 			bool build = true;
+			string strategy = "merge";
 
 			for ( int i = 0; i < e.Arguments.Length; ++i )
 			{
@@ -96,10 +97,16 @@ namespace Server.Misc
 					compile = false;
 				else if ( arg == "nobuild" || arg == "norebuild" )
 					build = false;
+				else if ( arg == "ff" || arg == "ff-only" || arg == "ffonly" )
+					strategy = "ff";
+				else if ( arg == "rebase" )
+					strategy = "rebase";
+				else if ( arg == "merge" || arg == "norebase" )
+					strategy = "merge";
 				else
 				{
 					if ( from != null )
-						from.SendMessage( 0x22, "Format: [UpdateServer [nocompile] [nobuild]" );
+						from.SendMessage( 0x22, "Format: [UpdateServer [ff|rebase] [nocompile] [nobuild]" );
 
 					return;
 				}
@@ -110,10 +117,11 @@ namespace Server.Misc
 
 			m_Running = true;
 
-			string start = string.Format( "{0} started a server update on {1} ({2}{3}).  Pulling the latest code...",
+			string start = string.Format( "{0} started a server update on {1} (pull [{2}]{3}{4}).  Pulling the latest code...",
 				requestedBy,
 				platform,
-				compile ? "pull + core build" : "pull",
+				strategy,
+				compile ? " + core build" : "",
 				build ? ", then restart and rebuild" : ", then restart" );
 
 			Console.WriteLine( "[UpdateServer] {0}", start );
@@ -144,6 +152,7 @@ namespace Server.Misc
 			job.RequestedBy = requestedBy;
 			job.Compile = compile;
 			job.Build = build;
+			job.PullStrategy = strategy;
 
 			ThreadPool.QueueUserWorkItem( new WaitCallback( PullWorker ), job );
 			new UpdatePoller( job ).Start();
@@ -159,6 +168,7 @@ namespace Server.Misc
 			public string RequestedBy;
 			public bool Compile;
 			public bool Build;
+			public string PullStrategy = "merge";
 
 			public string Stage = "starting";
 			public string Output = "";
@@ -232,14 +242,16 @@ namespace Server.Misc
 				// Never let a staged binary left over from an earlier attempt be swapped in later.
 				DeleteStagingBinary();
 
-				Console.WriteLine( "[UpdateServer] git pull in {0}", repo );
+				string pullArgs = BuildPullArguments( repo, job.PullStrategy );
+
+				Console.WriteLine( "[UpdateServer] git pull [{0}] in {1}", job.PullStrategy, repo );
 
 				string output;
-				int code = RunProcess( "git", "-C " + Quote( repo ) + " --no-pager pull --no-edit", repo, PullTimeout, out output );
+				int code = RunProcess( "git", pullArgs, repo, PullTimeout, out output );
 
 				// Some Unix images have git outside the server's PATH; Windows keeps its own error.
 				if ( code == ProcessStartFailed && IsUnixHost() )
-					code = RunProcess( "/usr/bin/git", "-C " + Quote( repo ) + " --no-pager pull --no-edit", repo, PullTimeout, out output );
+					code = RunProcess( "/usr/bin/git", pullArgs, repo, PullTimeout, out output );
 
 				job.Output = output;
 
@@ -327,11 +339,20 @@ namespace Server.Misc
 		{
 			m_Running = false;
 
-			Console.WriteLine( "[UpdateServer] {0}", message );
-			Log( message );
+			string hint = OutputHint( job.Output, 300 );
+			string detail = ( hint.Length == 0 ? "" : " :: " + hint );
 
-			if ( job.From != null && !job.From.Deleted )
-				job.From.SendMessage( 0x22, message );
+			Console.WriteLine( "[UpdateServer] {0}{1}", message, detail );
+			Log( message + detail );
+
+			if ( job.From == null || job.From.Deleted )
+				return;
+
+			job.From.SendMessage( 0x22, message );
+
+			// The git/compiler complaint itself, so the admin does not have to open the log.
+			if ( hint.Length > 0 )
+				job.From.SendMessage( 0x22, hint );
 		}
 
 		/// <summary>
@@ -831,6 +852,56 @@ namespace Server.Misc
 			}
 
 			return winCode;
+		}
+
+		/// <summary>
+		/// Builds the `git pull` argument list.  The reconcile strategy is always explicit: since git
+		/// 2.27 a divergent branch otherwise fails with exit 128 ("Need to specify how to reconcile
+		/// divergent branches") instead of doing what a plain `git pull` used to do.
+		/// </summary>
+		private static string BuildPullArguments( string repo, string strategy )
+		{
+			string mode;
+
+			if ( strategy == "ff" )
+				mode = " --ff-only";
+			else if ( strategy == "rebase" )
+				mode = " --rebase";
+			else
+				mode = " --no-rebase";
+
+			return "-C " + Quote( repo ) + " --no-pager pull --no-edit" + mode;
+		}
+
+		/// <summary>
+		/// The last non-empty output lines, trimmed to something that fits comfortably in an in-game
+		/// message (the full output is always in Data/Logs/UpdateServer.log).
+		/// </summary>
+		private static string OutputHint( string output, int maxCharacters )
+		{
+			if ( output == null || output.Length == 0 )
+				return "";
+
+			string[] lines = output.Replace( "\r\n", "\n" ).Replace( '\r', '\n' ).Split( '\n' );
+			List<string> tail = new List<string>();
+
+			for ( int i = lines.Length - 1; i >= 0 && tail.Count < 2; --i )
+			{
+				string line = lines[i].Trim();
+
+				if ( line.Length > 0 )
+					tail.Insert( 0, line );
+			}
+
+			if ( tail.Count == 0 )
+				return "";
+
+			string text = string.Join( " | ", tail.ToArray() );
+
+			if ( text.Length > maxCharacters )
+				text = "..." + text.Substring( text.Length - ( maxCharacters - 3 ) );
+
+			return text;
 		}
 
 		private static DateTime GetWriteTime( string path )
