@@ -12,11 +12,9 @@ namespace Server.Gumps
 	/// </summary>
 	public class GypsyAskGump : Gump
 	{
-		private const string Accent = "#d5a496";
-
 		private readonly GypsyLady m_Gypsy;
 
-		public GypsyAskGump( Mobile from, GypsyLady gypsy, string question, string answer, bool pending ) : base( 75, 50 )
+		public GypsyAskGump( Mobile from, GypsyLady gypsy, string question, string answer, bool pending ) : base( 50, 50 )
 		{
 			m_Gypsy = gypsy;
 
@@ -27,9 +25,17 @@ namespace Server.Gumps
 
 			AddPage( 0 );
 
-			AddImage( 0, 2, 9543, PlayerSettings.GetGumpHue( from ) );
-			AddHtml( 12, 15, 341, 20, "<BODY><BASEFONT Color=" + Accent + "><B>Visions of the Truth</B></BASEFONT></BODY>", false, false );
-			AddButton( 367, 12, 4017, 4017, 0, GumpButtonType.Reply, 0 );
+			// The same frame and portrait as the starting-area gypsy gump.
+			AddImage( 0, 0, 2611, PlayerSettings.GetGumpHue( from ) );
+			AddImage( 10, 8, 1102 );
+
+			int header = 11473;
+
+			if ( Server.MySettings.S_ServerName == "Adventurers of Akalabeth" )
+				header = 11376;
+
+			AddImage( 271, 13, header, 2813 );
+			AddButton( 850, 14, 4017, 4017, 0, GumpButtonType.Reply, 0 );
 
 			string body;
 
@@ -47,19 +53,21 @@ namespace Server.Gumps
 				body = "Ask what you will of the past, the present or the days to come, and I shall read the cards for you.";
 			}
 
-			AddHtml( 12, 42, 380, 180, "<BODY><BASEFONT Color=" + Accent + ">" + body + "</BASEFONT></BODY>", false, true );
+			AddHtml( 278, 73, 604, 250, "<BODY><BASEFONT Color=#DEC6DE>" + body + "</BASEFONT></BODY>", false, true );
 
 			if ( pending )
 			{
-				AddHtml( 12, 232, 380, 40, "<BODY><BASEFONT Color=" + Accent + "><I>Please wait for the spirits.</I></BASEFONT></BODY>", false, false );
+				AddHtml( 278, 330, 604, 40, "<BODY><BASEFONT Color=#DEC6DE><I>Please wait for the spirits.</I></BASEFONT></BODY>", false, false );
 				return;
 			}
 
-			AddHtml( 12, 232, 200, 20, "<BODY><BASEFONT Color=" + Accent + ">Your question:</BASEFONT></BODY>", false, false );
-			AddTextEntry( 12, 252, 322, 20, 0x44, 1, question == null ? String.Empty : question );
+			AddHtml( 278, 330, 200, 20, "<BODY><BASEFONT Color=#DEC6DE>Your question:</BASEFONT></BODY>", false, false );
+			AddTextEntry( 278, 352, 480, 20, 0x44, 1, question == null ? String.Empty : question );
 
-			AddButton( 340, 250, 4005, 4006, 1, GumpButtonType.Reply, 0 );
-			AddHtml( 340, 252, 44, 20, "<BODY><BASEFONT Color=" + Accent + "><B>Ask</B></BASEFONT></BODY>", false, false );
+			// The circular spread of tarot cards (0x12A5), clear of the Ask button.
+			AddItem( 760, 345, 4773 );
+			AddButton( 800, 350, 4005, 4006, 1, GumpButtonType.Reply, 0 );
+			AddHtml( 828, 352, 44, 20, "<BODY><BASEFONT Color=#DEC6DE><B>Ask</B></BASEFONT></BODY>", false, false );
 		}
 
 		public override void OnResponse( NetState sender, RelayInfo info )
