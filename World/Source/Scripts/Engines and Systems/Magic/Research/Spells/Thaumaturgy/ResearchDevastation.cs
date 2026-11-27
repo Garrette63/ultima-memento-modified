@@ -116,12 +116,12 @@ namespace Server.Spells.Research
 
 						Caster.DoHarmful( m );
 
-						if ( m is PlayerMobile ){ m.Damage( 10000, Caster ); Caster.Criminal = true; }
+						if ( m is PlayerMobile ){ m.Damage( 10000, Caster ); Server.Misc.GetPlayerInfo.MakeCriminal( Caster ); }
 						else if ( m is BaseCreature )
 						{
 							if ( m is BaseVendor || m is BasePerson )
 							{
-								Caster.Criminal = true;
+								Server.Misc.GetPlayerInfo.MakeCriminal( Caster );
 								Caster.Kills = Caster.Kills + 1;
 							}
 

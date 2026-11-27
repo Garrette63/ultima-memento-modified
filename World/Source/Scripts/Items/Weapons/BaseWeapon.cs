@@ -1697,7 +1697,10 @@ namespace Server.Items
 			if ( defender is Slime || defender is Xenomorph || defender is GreenSlime || defender is BlackPudding || defender is LavaPuddle || defender is AcidPuddle || defender is ToxicElemental )
 				acidic = true;
 
-			if ( m_MaxHits > 0 && Density != Density.None && ( ( MaxRange <= 1 && acidic ) || Utility.Random( ruin ) == 0 ) )
+			// A henchman's owner cannot keep the lent gear repaired, so it never
+			// wears while the henchman is the one wielding it (this also skips
+			// the guaranteed acid-blood scar). See HenchmanFunctions.IgnoresDurability.
+			if ( m_MaxHits > 0 && Density != Density.None && !Server.Misc.HenchmanFunctions.IgnoresDurability( attacker ) && ( ( MaxRange <= 1 && acidic ) || Utility.Random( ruin ) == 0 ) )
 			{
 				if ( m_AosWeaponAttributes.SelfRepair > Utility.Random( 10 ) )
 					HitPoints += Utility.RandomMinMax( 1, (int)Density );
@@ -2149,10 +2152,13 @@ namespace Server.Items
 
 		public virtual void GetDamageTypes( Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy, out int chaos, out int direct )
 		{
-			if( wielder is BaseCreature )
-			{
-				BaseCreature bc = (BaseCreature)wielder;
+			BaseCreature bc = wielder as BaseCreature;
 
+			// Human henchmen wield the elemental split of their weapon exactly
+			// like a player; creature henchmen (and every other creature) keep
+			// their own creature damage types.
+			if( bc != null && !Server.Misc.HenchmanFunctions.UsesWeaponDamageTypes( bc ) )
+			{
 				phys = bc.PhysicalDamage;
 				fire = bc.FireDamage;
 				cold = bc.ColdDamage;

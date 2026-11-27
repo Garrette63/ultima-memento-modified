@@ -81,7 +81,7 @@ namespace Server.Mobiles
 
 			if ( killer is PlayerMobile )
 			{
-				killer.Criminal = true;
+				Server.Misc.GetPlayerInfo.MakeCriminal( killer );
 				killer.Kills = killer.Kills + 1;
 			}
 

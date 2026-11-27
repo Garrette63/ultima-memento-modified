@@ -36,6 +36,7 @@ namespace Server.Regions
 			base.OnEnter( m );
 			if ( m is PlayerMobile )
 			{
+				if ( m.Criminal ){ m.Criminal = false; } // UMBRA: entering the Undercity forgives any criminal status
 				LoggingFunctions.LogRegions( m, this.Name, "enter" );
 			}
 

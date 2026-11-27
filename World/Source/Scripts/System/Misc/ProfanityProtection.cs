@@ -31,7 +31,7 @@ namespace Server.Misc
 			{
 				case ProfanityAction.None: return true;
 				case ProfanityAction.Disallow: return false;
-				case ProfanityAction.Criminal: from.Criminal = true; return true;
+				case ProfanityAction.Criminal: GetPlayerInfo.MakeCriminal( from ); return true;
 				case ProfanityAction.CriminalAction: from.CriminalAction( false ); return true;
 				case ProfanityAction.Disconnect:
 				{

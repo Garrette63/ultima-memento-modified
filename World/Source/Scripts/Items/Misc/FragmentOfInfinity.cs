@@ -124,7 +124,8 @@ namespace Server.Items
 	}
 
 	// Drop rule for the fragment: a flat 10% chance whenever one of the named
-	// bosses, or any of the 25 Magical Prison bosses, is killed.
+	// bosses, any of the 25 Magical Prison bosses, or a champion spawn champion
+	// is killed.
 	public static class FragmentOfInfinityDrops
 	{
 		private const double DropChance = 0.10;
@@ -138,11 +139,11 @@ namespace Server.Items
 			EventSink.OnKilledBy += new OnKilledByEventHandler( OnKilledBy );
 		}
 
-		// The boss registry lives in MobileUtilities so the "(boss)" name tag
+		// The elite registry lives in MobileUtilities so the "(elite)" name tag
 		// and this drop rule can never drift apart.
 		private static bool IsFragmentCarrier( BaseCreature bc )
 		{
-			return MobileUtilities.IsBoss( bc );
+			return MobileUtilities.IsElite( bc );
 		}
 
 		// Shared roll used by the corpse drops and by the bosses that replace
