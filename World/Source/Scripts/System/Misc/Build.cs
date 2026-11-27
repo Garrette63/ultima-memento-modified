@@ -16469,6 +16469,11 @@ namespace Server.Scripts.Commands
 {
     public class BuildWorld
     {
+        private static DateTime m_LastBuild;
+
+        // When the last [buildworld finished (used by [UpdateServer to avoid building twice in a row).
+        public static DateTime LastBuild { get { return m_LastBuild; } }
+
         public static void Initialize()
         {
             CommandSystem.Register("BuildWorld", AccessLevel.Counselor, new CommandEventHandler( BuildWorlds ));
@@ -16590,6 +16595,8 @@ namespace Server.Scripts.Commands
 
 			if ( MySettings.ConsoleLog ){ Console.WriteLine( "World Has Been Rebuilt!" ); }
 			e.Mobile.SendMessage( "The world has been rebuilt." );
+
+			m_LastBuild = DateTime.Now;
 		}
     }
 }
