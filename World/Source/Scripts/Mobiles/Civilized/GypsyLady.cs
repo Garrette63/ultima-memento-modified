@@ -421,6 +421,34 @@ namespace Server.Mobiles
 			base.AddCustomContextEntries( from, list );
 		}
 
+		// The shard runs AOS single-click properties (CurrentExpansion sets
+		// PacketHandlers.SingleClickProps), so OnSingleClick is normally not
+		// called; both are overridden so the menu appears however the client
+		// is configured.
+		public override void OnSingleClick( Mobile from )
+		{
+			base.OnSingleClick( from );
+			ShowMenu( from );
+		}
+
+		public override void OnAosSingleClick( Mobile from )
+		{
+			base.OnAosSingleClick( from );
+			ShowMenu( from );
+		}
+
+		private void ShowMenu( Mobile from )
+		{
+			if ( Deleted || from == null || from.Deleted || !from.Alive || from.NetState == null )
+				return;
+
+			if ( !from.CanSee( this ) || !from.InRange( this, 12 ) )
+				return;
+
+			from.CloseGump( typeof( GypsyMenuGump ) );
+			from.SendGump( new GypsyMenuGump( from, this ) );
+		}
+
 		public GypsyLady( Serial serial ) : base( serial )
 		{
 		}

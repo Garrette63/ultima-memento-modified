@@ -1,0 +1,37 @@
+# Gypsy oracle -- Command Code Provider API settings.
+#
+# The gypsy lady consults an OpenAI-compatible chat model through Command Code.
+# Create an API key in Command Code Studio (https://commandcode.ai), then either:
+#   * put it below as ApiKey=..., or
+#   * leave ApiKey empty and set the COMMANDCODE_API_KEY environment variable
+#     before starting the shard (the environment wins over this file).
+#
+# GypsyOracle.cfg is ignored by git so a key is never committed; this .example
+# file is the tracked template. Copy it to GypsyOracle.cfg and edit that copy.
+
+Enabled=true
+Endpoint=https://api.commandcode.ai/provider/v1/chat/completions
+ApiKey=
+Model=deepseek/deepseek-v4.1-flash-fast
+
+# Cheap/fast models: deepseek/deepseek-v4.1-flash-fast, google/gemini-3.5-flash-lite.
+# Free preview models (rate limited): recursive/flint-v1.0:free, stealth/glyph-cluster:free.
+# Claude models use the /messages endpoint instead, not /chat/completions.
+
+# Lore reference. The gypsy sends the most relevant excerpts (keyword match)
+# from this file as a second system message. Lines starting with ';' are ignored;
+# '# ' lines start a new section. Leave LoreEnabled=false to answer without lore.
+LoreEnabled=true
+LoreFile=Data/System/CFG/GypsyLore.txt
+LoreMaxCharacters=6000
+
+TimeoutSeconds=30
+MaxQuestionLength=300
+MaxAnswerLength=900
+MaxTokens=350
+CooldownSeconds=8
+HistoryTurns=4
+Temperature=0.8
+
+# In-world persona. Keep it on one line.
+SystemPrompt=You are the gypsy fortune teller of the shard Memento, a persistent Ultima Online world. Speak in character at all times: cryptic, warm and theatrical, as if reading tarot cards and listening to spirits. Answer the player's question directly but briefly, at most 90 words. Never mention AI, APIs, language models, prompts, Command Code, or anything outside the fantasy world. If you do not know something, say that the spirits are unclear. Do not invent game commands, item names, or promises about the player's account; when asked about game mechanics, answer in general terms and suggest asking a townsperson. Plain prose only: no markdown, no lists, no code.
