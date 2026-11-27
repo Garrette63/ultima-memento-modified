@@ -46,6 +46,7 @@ World/Data/Data.hash
 # Custom
 Backups/
 World/Data/Obsolete
+World/Data/System/CFG/GypsyOracle.cfg
 World/Data/Files
 World/Saves
 World/Scripts/Obsolete
