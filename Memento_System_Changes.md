@@ -9,7 +9,7 @@ This document tracks every file created or edited for the Memento Coin / Artefac
 Every source change leaves two trails:
 
 - **Back up first.** Copy the file *before* editing it into `Backups/` (git-ignored) as `<OriginalFileName>.<YYYY-MM-DD-HHMMSS>.bak` — e.g. `Backups/ResourceMods.cs.2026-11-15-135748.bak`. One backup per editing session, and the numbered entry names it (`Backed up as …`).
-- **Record the change.** Add the next numbered entry to `## Change History (newest last)` (bold one-line summary, indented `-` detail bullets, compile result at the end) and update the `## Files Created` / `## Files Edited` tables plus the matching `## Current Behaviour` section when behaviour changes. The last entry is **269**, so the next entry is **270**.
+- **Record the change.** Add the next numbered entry to `## Change History (newest last)` (bold one-line summary, indented `-` detail bullets, compile result at the end) and update the `## Files Created` / `## Files Edited` tables plus the matching `## Current Behaviour` section when behaviour changes. The last entry is **268**, so the next entry is **269**.
 - **Never leave a file without a rollback point.** If an edit ever happens before its backup is taken, snapshot the file immediately afterwards anyway (same naming), note it in the entry, and refresh the snapshot before the next edit.
 
 Paths in the tables are relative to the `World` folder — `World/` in this repository, which mirrors the older standalone copy at `/home/Feesh/World` the tables were first written against.
@@ -1380,15 +1380,6 @@ No other files were modified.
   - **Fallback:** Apply Revert now reports “no recorded original” only when there is genuinely no art left; if the registry row disappears between the ensure and revert calls, it still applies the known art through `SetAppearance` instead of failing.
   - **Verified:** `mcs` compiled the Transmogrify folder plus `GypsyLady.cs` with **0 errors** (pre-existing unused-`version` warnings only). `git diff --check`: clean.
   - **Backups:** `Backups/TransmogrifyRegistry.cs.2026-11-27-202825.bak`, `Backups/TransmogrifyGump.cs.2026-11-27-202825.bak` and `Backups/Memento_System_Changes.md.2026-11-27-202907.bak`.
-
-269. **Restart could leave a socket-holding zombie: "Listener Failed (In Use)" + players stuck at "authenticating"** — edited `Source/Scripts/System/Misc/UpdateServer.cs`.
-  - **Symptoms:** the replacement instance printed `Listener Failed: <addr>:<port> (In Use)` and players sat at **authenticating account** with no error message.
-  - **Cause:** `Core.Kill( false )` runs `HandleClosed()` **inline**, and that waits for any in-flight world write. If the wait wedges, the old process stays alive **still holding the listen socket** while its main loop is blocked, so accepted connections are never serviced (→ stuck at authenticating). The replacement, started on a fixed 3 s delay, then found the port busy — and `Listener.Bind()` only *prints* `Listener Failed … (In Use)` and returns null, so that second instance kept running with **no listener at all** (and would later autosave its own stale world over the live one).
-  - **Fix A — the old process always dies:** a watchdog thread started just before `Core.Kill()` calls `Environment.Exit( 0 )` after **20 s** if shutdown is still running, releasing the socket. The world was already saved before the restart was scheduled, so this is safe.
-  - **Fix B — the replacement waits for the old PID, not a stopwatch:** the Unix wrapper is now `sleep 2; i=0; while kill -0 <pid> … [ $i -lt 90 ]; do sleep 1; done; cd <World> && exec …`, and the generated Windows .bat gained a `:waitpid` loop (`tasklist /FI "PID eq <pid>" | find /I "World.exe"`, up to 90 s) before the `World.exe.new` swap and `start`. Both cap at 90 s and then proceed.
-  - **Verified:** scripts `mcs` → **0 errors, 6507 warnings** (unchanged baseline). Harness with a stand-in "old server" that lives 6 s: the new wrapper's `exec` fired after **6.1 s** with the old PID already gone (the previous fixed 2–3 s sleep started the replacement while the port was still held). Generated Windows wrapper inspected: `:waitpid` → `:swap` → `:launch`, no duplicate labels, original arguments preserved (`start "" "World.exe" -service`).
-  - **Recovering a shard already in this state:** `netstat -ano | findstr :2593` for the owner, `tasklist | findstr /I world.exe` (expect two), `taskkill /F /IM World.exe`, then start **one** instance and confirm the console shows `Listening: …` and no `Listener Failed`. Kill the listener-less instance promptly — it autosaves its own copy of the world.
-  - **Backups:** `Backups/UpdateServer.cs.2026-11-27-223121.bak` and `Backups/Memento_System_Changes.md.2026-11-27-223121.bak`.
 
 
 ---
