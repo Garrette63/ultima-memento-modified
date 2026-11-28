@@ -270,7 +270,9 @@ namespace Server.Gumps
 			return false;
 		}
 
-		protected static readonly int[] SkinHues = CreateHues( 1002, 57 );
+		// The 57 human skin hues (1002-1058) plus hue 2928, which is offered
+		// here as an extra skin tone (58 swatches: ten rows of six).
+		protected static readonly int[] SkinHues = CreateSkinHues();
 		protected static readonly int[] HairHues = CreateHues( 1102, 48 );
 
 		private static int[] CreateHues( int start, int count )
@@ -279,6 +281,17 @@ namespace Server.Gumps
 
 			for ( int i = 0; i < count; ++i )
 				hues[i] = start + i;
+
+			return hues;
+		}
+
+		private static int[] CreateSkinHues()
+		{
+			int[] humanHues = CreateHues( 1002, 57 );
+			int[] hues = new int[humanHues.Length + 1];
+
+			humanHues.CopyTo( hues, 0 );
+			hues[humanHues.Length] = 2928;
 
 			return hues;
 		}
