@@ -49,7 +49,9 @@ namespace Server.Misc
 		private static readonly TimeSpan PullTimeout = TimeSpan.FromMinutes( 5.0 );
 		private static readonly TimeSpan CompileTimeout = TimeSpan.FromMinutes( 15.0 );
 		private static readonly TimeSpan RestartDelay = TimeSpan.FromSeconds( 5.0 );
-		private static readonly TimeSpan ReplaceDelay = TimeSpan.FromSeconds( 3.0 );
+		private static readonly TimeSpan ReplaceDelay = TimeSpan.FromSeconds( 2.0 );
+		private static readonly TimeSpan ShutdownWatchdog = TimeSpan.FromSeconds( 20.0 );
+		private const int ReplacementWaitSeconds = 90;
 		private static readonly TimeSpan BuildDelay = TimeSpan.FromSeconds( 60.0 );
 		private static readonly TimeSpan RecentBuildWindow = TimeSpan.FromMinutes( 5.0 );
 		private static readonly TimeSpan StaleMarkerAge = TimeSpan.FromDays( 1.0 );
@@ -411,6 +413,16 @@ namespace Server.Misc
 			Console.WriteLine( "[UpdateServer] Restarting the server..." );
 			Log( "Restarting the server." );
 
+			// Core.Kill() runs HandleClosed() inline, and HandleClosed() waits for any in-flight
+			// world write.  If that wait ever wedges, the old process keeps its listen socket open but
+			// stops servicing it: players hang at "authenticating" and the replacement prints
+			// "Listener Failed: … (In Use)" and then runs without a listener.  Take the process down
+			// regardless, so the socket is released.
+			Thread watchdog = new Thread( new ThreadStart( ForceExitIfShutdownStalls ) );
+
+			watchdog.IsBackground = true;
+			watchdog.Start();
+
 			try
 			{
 				Core.Kill( false );
@@ -424,6 +436,31 @@ namespace Server.Misc
 
 			// Core.Kill normally takes the process down immediately; this is only a fallback.
 			Environment.Exit( 0 );
+		}
+
+		/// <summary>
+		/// Last-resort exit used while shutting down for a restart: if HandleClosed() is still running
+		/// after the watchdog period, terminate anyway so the listening socket is freed for the
+		/// replacement process.  The world was already saved before the restart was scheduled.
+		/// </summary>
+		private static void ForceExitIfShutdownStalls()
+		{
+			try
+			{
+				Thread.Sleep( (int)ShutdownWatchdog.TotalMilliseconds );
+
+				string message = string.Format(
+					"Shutdown was still running after {0} seconds; forcing the process to exit so the replacement can bind.",
+					(int)ShutdownWatchdog.TotalSeconds );
+
+				Console.WriteLine( "[UpdateServer] {0}", message );
+				Log( message );
+
+				Environment.Exit( 0 );
+			}
+			catch
+			{
+			}
 		}
 
 		private static void StartReplacement()
@@ -441,9 +478,15 @@ namespace Server.Misc
 
 			StringBuilder sb = new StringBuilder();
 
+			int pid = Process.GetCurrentProcess().Id;
+
 			sb.Append( "sleep " );
 			sb.Append( (int)ReplaceDelay.TotalSeconds );
-			sb.Append( "; cd " );
+			sb.Append( "; i=0; while kill -0 " );
+			sb.Append( pid );
+			sb.Append( " 2>/dev/null && [ $i -lt " );
+			sb.Append( ReplacementWaitSeconds );
+			sb.Append( " ]; do sleep 1; i=$((i+1)); done; cd " );
 			sb.Append( Quote( GetWorldDirectory() ) );
 			sb.Append( " && exec" );
 
@@ -474,7 +517,7 @@ namespace Server.Misc
 			if ( !string.IsNullOrEmpty( dir ) && !Directory.Exists( dir ) )
 				Directory.CreateDirectory( dir );
 
-			File.WriteAllText( script, BuildWindowsRestartScript( world, Core.Arguments ) );
+			File.WriteAllText( script, BuildWindowsRestartScript( world, Core.Arguments, Process.GetCurrentProcess().Id ) );
 
 			ProcessStartInfo psi = new ProcessStartInfo();
 
@@ -488,11 +531,12 @@ namespace Server.Misc
 		}
 
 		/// <summary>
-		/// Builds the .bat that finishes a Windows update: wait for this server to exit, swap in the
-		/// freshly compiled World.exe (if the core build produced one), then start the shard again.
-		/// Kept public and free of side effects so it can be exercised by a harness.
+		/// Builds the .bat that finishes a Windows update: wait for this server process to disappear
+		/// (so the listen socket is free), swap in the freshly compiled World.exe if the core build
+		/// produced one, then start the shard again.  Kept public and side-effect free so it can be
+		/// exercised by a harness.
 		/// </summary>
-		public static string BuildWindowsRestartScript( string worldDirectory, string arguments )
+		public static string BuildWindowsRestartScript( string worldDirectory, string arguments, int pid )
 		{
 			string args = ( arguments == null ? "" : arguments.Trim() );
 
@@ -504,7 +548,15 @@ namespace Server.Misc
 			sb.AppendLine( "ping -n 4 127.0.0.1 >NUL" );
 			sb.AppendLine( "cd /d \"" + worldDirectory + "\"" );
 			sb.AppendLine( "set TRIES=0" );
+			sb.AppendLine( ":waitpid" );
+			sb.AppendLine( "tasklist /FI \"PID eq " + pid + "\" 2>NUL | find /I \"World.exe\" >NUL" );
+			sb.AppendLine( "if errorlevel 1 goto swap" );
+			sb.AppendLine( "set /a TRIES+=1" );
+			sb.AppendLine( "if %TRIES% GEQ " + ReplacementWaitSeconds + " goto swap" );
+			sb.AppendLine( "ping -n 2 127.0.0.1 >NUL" );
+			sb.AppendLine( "goto waitpid" );
 			sb.AppendLine( ":swap" );
+			sb.AppendLine( "set TRIES=0" );
 			sb.AppendLine( "if not exist \"" + WindowsStagingFile + "\" goto launch" );
 			sb.AppendLine( "move /y \"" + WindowsStagingFile + "\" \"World.exe\" >NUL 2>&1" );
 			sb.AppendLine( "if not exist \"" + WindowsStagingFile + "\" goto launch" );
