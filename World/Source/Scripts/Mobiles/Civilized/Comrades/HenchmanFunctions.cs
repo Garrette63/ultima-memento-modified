@@ -172,6 +172,41 @@ namespace Server.Misc
 		}
 
 
+		// The hired henchmen follow their owner's war-mode stance. They are also
+		// always in war mode while they have a live combat target, even when the
+		// owner is at peace.
+		public static bool IsHiredHenchman( Mobile m )
+		{
+			return m is HenchmanFighter || m is HenchmanArcher || m is HenchmanWizard || m is HenchmanMonster;
+		}
+
+		public static void MirrorWarMode( Mobile m )
+		{
+			if ( IsHiredHenchman( m ) )
+				SetWarMode( m, false );
+		}
+
+		public static void SetWarMode( Mobile m, bool combat )
+		{
+			BaseCreature bc = m as BaseCreature;
+
+			if ( bc == null || !IsHiredHenchman( bc ) )
+			{
+				m.Warmode = combat;
+				return;
+			}
+
+			Mobile owner = bc.ControlMaster;
+			Mobile foe = bc.Combatant;
+			Mobile target = bc.ControlTarget;
+
+			bool fighting = combat
+				|| ( foe != null && !foe.Deleted && foe.Alive && !foe.IsDeadBondedPet && foe.Map == bc.Map )
+				|| ( bc.ControlOrder == OrderType.Attack && target != null && !target.Deleted && target.Alive && !target.IsDeadBondedPet && target.Map == bc.Map );
+
+			bc.Warmode = fighting || ( owner != null && !owner.Deleted && owner.Warmode );
+		}
+
 		public static bool OnMoving( Mobile m, Point3D oldLocation, Mobile from, DateTime m_NextMorale )
 		{
 			bool GoAway = false;

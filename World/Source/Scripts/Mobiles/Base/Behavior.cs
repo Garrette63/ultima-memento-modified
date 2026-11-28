@@ -6367,20 +6367,20 @@ namespace Server.Mobiles
 			switch( Action )
 			{
 				case ActionType.Wander:
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.Combatant = null;
 				m_Mobile.FocusMob = null;
 				m_Mobile.CurrentSpeed = m_Mobile.PassiveSpeed;
 				break;
 
 				case ActionType.Combat:
-				m_Mobile.Warmode = true;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 				m_Mobile.FocusMob = null;
 				m_Mobile.CurrentSpeed = m_Mobile.ActiveSpeed;
 				break;
 
 				case ActionType.Guard:
-				m_Mobile.Warmode = true;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 				m_Mobile.FocusMob = null;
 				m_Mobile.Combatant = null;
 				m_Mobile.CurrentSpeed = m_Mobile.ActiveSpeed;
@@ -6389,18 +6389,18 @@ namespace Server.Mobiles
 				break;
 
 				case ActionType.Flee:
-				m_Mobile.Warmode = true;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 				m_Mobile.FocusMob = null;
 				m_Mobile.CurrentSpeed = m_Mobile.ActiveSpeed;
 				break;
 
 				case ActionType.Interact:
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.CurrentSpeed = m_Mobile.PassiveSpeed;
 				break;
 
 				case ActionType.Backoff:
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.CurrentSpeed = m_Mobile.PassiveSpeed;
 				break;
 			}
@@ -6598,7 +6598,7 @@ namespace Server.Mobiles
 				m_Mobile.Home = m_Mobile.Location;
 				m_Mobile.CurrentSpeed = m_Mobile.PassiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.Combatant = null;
 				break;
 
@@ -6606,7 +6606,7 @@ namespace Server.Mobiles
 				m_Mobile.ControlMaster.RevealingAction();
 				m_Mobile.CurrentSpeed = m_Mobile.ActiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.Combatant = null;
 				break;
 
@@ -6614,7 +6614,7 @@ namespace Server.Mobiles
 				m_Mobile.ControlMaster.RevealingAction();
 				m_Mobile.CurrentSpeed = m_Mobile.PassiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
-				m_Mobile.Warmode = true;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 				m_Mobile.Combatant = null;
 				break;
 
@@ -6627,7 +6627,7 @@ namespace Server.Mobiles
 				m_Mobile.ControlMaster.RevealingAction();
 				m_Mobile.CurrentSpeed = m_Mobile.ActiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
-				m_Mobile.Warmode = true;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 				m_Mobile.Combatant = null;
 				string petname = String.Format( "{0}", m_Mobile.Name );
 				m_Mobile.ControlMaster.SendLocalizedMessage ( 1049671, petname );	//~1_PETNAME~ is now guarding you.
@@ -6638,7 +6638,7 @@ namespace Server.Mobiles
 				m_Mobile.CurrentSpeed = m_Mobile.ActiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
 
-				m_Mobile.Warmode = true;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 				m_Mobile.Combatant = null;
 				break;
 
@@ -6646,7 +6646,7 @@ namespace Server.Mobiles
 				m_Mobile.ControlMaster.RevealingAction();
 				m_Mobile.CurrentSpeed = m_Mobile.ActiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.Combatant = null;
 				break;
 
@@ -6654,7 +6654,7 @@ namespace Server.Mobiles
 				m_Mobile.ControlMaster.RevealingAction();
 				m_Mobile.CurrentSpeed = m_Mobile.PassiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.Combatant = null;
 				break;
 
@@ -6662,7 +6662,7 @@ namespace Server.Mobiles
 				m_Mobile.ControlMaster.RevealingAction();
 				m_Mobile.CurrentSpeed = m_Mobile.PassiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.Combatant = null;
 				break;
 
@@ -6671,7 +6671,7 @@ namespace Server.Mobiles
 				m_Mobile.Home = m_Mobile.Location;
 				m_Mobile.CurrentSpeed = m_Mobile.PassiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.Combatant = null;
 				break;
 
@@ -6680,7 +6680,7 @@ namespace Server.Mobiles
 				m_Mobile.CurrentSpeed = m_Mobile.ActiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
 
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.Combatant = null;
 				break;
 
@@ -6689,7 +6689,7 @@ namespace Server.Mobiles
 				m_Mobile.CurrentSpeed = m_Mobile.PassiveSpeed;
 				m_Mobile.PlaySound( m_Mobile.GetIdleSound() );
 
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.Combatant = null;
 				break;
 			}
@@ -6703,12 +6703,12 @@ namespace Server.Mobiles
 
 			if( m_Mobile.Combatant != null && !m_Mobile.Combatant.Deleted && m_Mobile.Combatant.Alive && !m_Mobile.Combatant.IsDeadBondedPet )
 			{
-				m_Mobile.Warmode = true;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 				m_Mobile.Direction = m_Mobile.GetDirectionTo( m_Mobile.Combatant );
 			}
 			else
 			{
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 			}
 
 			return true;
@@ -6737,12 +6737,12 @@ namespace Server.Mobiles
 					{
 						if( m_Mobile.Combatant != null && !m_Mobile.Combatant.Deleted && m_Mobile.Combatant.Alive && !m_Mobile.Combatant.IsDeadBondedPet )
 						{
-							m_Mobile.Warmode = true;
+							Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 							m_Mobile.Direction = m_Mobile.GetDirectionTo( m_Mobile.Combatant );
 						}
 						else
 						{
-							m_Mobile.Warmode = false;
+							Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 						}
 					}
 				}
@@ -6811,12 +6811,12 @@ namespace Server.Mobiles
 
 					if( m_Mobile.Combatant != null && !m_Mobile.Combatant.Deleted && m_Mobile.Combatant.Alive && !m_Mobile.Combatant.IsDeadBondedPet )
 					{
-						m_Mobile.Warmode = true;
+						Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 						m_Mobile.Direction = m_Mobile.GetDirectionTo( m_Mobile.Combatant );
 					}
 					else
 					{
-						m_Mobile.Warmode = false;
+						Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 					}
 				}
 				else
@@ -6830,12 +6830,12 @@ namespace Server.Mobiles
 					{
 						if( m_Mobile.Combatant != null && !m_Mobile.Combatant.Deleted && m_Mobile.Combatant.Alive && !m_Mobile.Combatant.IsDeadBondedPet )
 						{
-							m_Mobile.Warmode = true;
+							Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 							m_Mobile.Direction = m_Mobile.GetDirectionTo( m_Mobile.Combatant );
 						}
 						else
 						{
-							m_Mobile.Warmode = false;
+							Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 							m_Mobile.CurrentSpeed = 0.1;
 						}
 					}
@@ -7061,7 +7061,7 @@ namespace Server.Mobiles
 			{
 				m_Mobile.DebugSay( "Nothing to guard from" );
 
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				m_Mobile.CurrentSpeed = 0.1;
 
 				WalkMobileRange( controlMaster, 1, false, 0, 1 );
@@ -7641,7 +7641,7 @@ namespace Server.Mobiles
 			{
 				m_Mobile.DebugSay( "I am pacified, I wait" );
 				m_Mobile.Combatant = null;
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 
 			}
 			else
@@ -7663,7 +7663,7 @@ namespace Server.Mobiles
 				m_Mobile.BardTarget = null;
 
 				m_Mobile.Combatant = null;
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 			}
 			else
 			{
@@ -7675,7 +7675,7 @@ namespace Server.Mobiles
 					m_Mobile.BardTarget = null;
 
 					m_Mobile.Combatant = null;
-					m_Mobile.Warmode = false;
+					Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 				}
 				else
 				{
@@ -8861,7 +8861,7 @@ namespace Server.Mobiles
 			{
 				m_Mobile.DebugSay( "I am wandering" );
 
-				m_Mobile.Warmode = false;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 
 				base.DoActionWander();
 
@@ -9371,7 +9371,7 @@ namespace Server.Mobiles
 		public override bool DoActionCombat()
 		{
 			Mobile c = m_Mobile.Combatant;
-			m_Mobile.Warmode = true;
+			Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 
 			if( c == null || c.Deleted || !c.Alive || c.IsDeadBondedPet || !m_Mobile.CanSee( c ) || !m_Mobile.CanBeHarmful( c, false ) || c.Map != m_Mobile.Map )
 			{
@@ -9601,7 +9601,7 @@ namespace Server.Mobiles
 				m_Mobile.DebugSay( "Area seems clear, but my guard is up" );
 
 				Action = ActionType.Guard;
-				m_Mobile.Warmode = true;
+				Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, true );
 			}
 
 			return true;
@@ -10553,7 +10553,7 @@ namespace Server.Mobiles
 				}
 				else
 				{
-					m_Mobile.Warmode = false;
+					Server.Misc.HenchmanFunctions.SetWarMode( m_Mobile, false );
 
 					base.DoActionWander();
 				}
