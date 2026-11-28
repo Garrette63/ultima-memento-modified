@@ -9405,8 +9405,39 @@ namespace Server.Mobiles
 			if ( GetMaster() is PlayerMobile && NameHue > 0 && !( this is HenchmanMonster || this is HenchmanFighter || this is HenchmanWizard || this is HenchmanArcher ) ){ NameHue = -1; }
 		}
 
+		private DateTime m_ParalyzeBegan;
+
+		// Player-controlled creatures (tamed pets, henchmen and summons) must
+		// not stay paralyzed for minutes just because a spell triples its
+		// duration for non-players. The core's ParalyzedTimer keeps its own
+		// duration, but the AI clears the state once the shard-wide monster
+		// paralysis limit (MySettings.S_paralyzeDuration) has elapsed. Players
+		// and wild creatures keep their normal duration.
+		public override bool Paralyzed
+		{
+			get { return base.Paralyzed; }
+			set
+			{
+				if ( value && !base.Paralyzed )
+					m_ParalyzeBegan = DateTime.Now;
+				else if ( !value )
+					m_ParalyzeBegan = DateTime.MinValue;
+
+				base.Paralyzed = value;
+			}
+		}
+
 		public virtual void OnThink()
 		{
+			if ( Paralyzed
+				&& ( ( Controlled && ControlMaster is PlayerMobile ) || ( Summoned && SummonMaster is PlayerMobile ) )
+				&& m_ParalyzeBegan != DateTime.MinValue
+				&& MySettings.S_paralyzeDuration >= 0.0
+				&& DateTime.Now >= m_ParalyzeBegan + TimeSpan.FromSeconds( MySettings.S_paralyzeDuration ) )
+			{
+				Paralyzed = false;
+			}
+
 			if ( EmoteHue > 10000 )
 			{
 				bool keepMe = false;

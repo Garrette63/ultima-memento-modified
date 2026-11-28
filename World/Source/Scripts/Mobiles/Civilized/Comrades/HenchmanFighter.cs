@@ -126,6 +126,14 @@ namespace Server.Mobiles
 		// never level up or auto-bond at level 3 the way a tamed creature does.
 		public override bool JakoExpIsEnabled{ get{ return false; } }
 
+		// Keep the henchman's war-mode stance in sync with its owner, and in
+		// war mode whenever it has a live combat target.
+		public override void OnThink()
+		{
+			base.OnThink();
+			HenchmanFunctions.MirrorWarMode( this );
+		}
+
 		public override bool CanBeRenamedBy( Mobile from ){ return false; }
 
 		// The nStats-derived resistances behave like a player's Magic Resistance
