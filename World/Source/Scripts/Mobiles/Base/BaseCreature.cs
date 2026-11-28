@@ -9974,6 +9974,16 @@ namespace Server.Mobiles
         [CommandProperty(AccessLevel.GameMaster)]
         public virtual bool JakoIsEnabled { get { return true; } }
 
+        /// <summary>
+        /// Whether this creature takes part in the Jako pet experience system.
+        /// Hired henchmen are controlled by a player but are not pets, so they
+        /// override this to false and never earn experience, level up or
+        /// auto-bond at level 3. Normal creatures and tamed pets keep the
+        /// default, so their progression is unchanged.
+        /// </summary>
+        [CommandProperty(AccessLevel.GameMaster)]
+        public virtual bool JakoExpIsEnabled { get { return true; } }
+
         [CommandProperty(AccessLevel.GameMaster)]
         public virtual double ExpDecayPerc { get { return .20; } }
 
@@ -10028,6 +10038,7 @@ namespace Server.Mobiles
         public virtual void GainExp(Mobile killed, uint exp, bool tellOwner)
         {
 			if (Summoned) return;
+			if (!JakoExpIsEnabled) return;
             if (killed is PlayerMobile || !JakoIsEnabled  || Level == MaxLevel) return;
 			if (killed is BaseCreature)
 			{
@@ -10066,6 +10077,7 @@ namespace Server.Mobiles
         /// <param name="tellOwner">SendMessage to Owner about the loss.</param>
         public virtual void LoseExp(Mobile killer, uint exp, bool tellOwner)
         {
+            if (!JakoExpIsEnabled) return;
             if (killer is PlayerMobile || !this.JakoIsEnabled || (killer is BaseCreature && ((BaseCreature)killer).Controlled && ((BaseCreature)killer).ControlMaster != null || !((BaseCreature)killer).JakoIsEnabled))
                 return;
 
@@ -10203,7 +10215,9 @@ namespace Server.Mobiles
                 m_level = newLevel;
             }
 
-			if ( levelUp && 3 <= newLevel ) // Auto-Bond
+			// Only bondable pets auto-bond. Henchmen and the other non-bondable
+			// controlled NPCs never bond, even if their level is changed.
+			if ( levelUp && 3 <= newLevel && IsBondable ) // Auto-Bond
 			{
 				if (!IsBonded && ControlMaster != null)
 				{

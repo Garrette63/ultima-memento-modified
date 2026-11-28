@@ -160,6 +160,11 @@ namespace Server.Mobiles
 		public override bool DeleteCorpseOnDeath{ get{ return true; } }
 		public override bool IsDispellable { get { return false; } }
 		public override bool IsBondable{ get{ return false; } }
+
+		// Hired henchmen are not pets: they never earn experience, so they
+		// never level up or auto-bond at level 3 the way a tamed creature does.
+		public override bool JakoExpIsEnabled{ get{ return false; } }
+
 		public override bool CanBeRenamedBy( Mobile from ){ return false; }
 
 		public override void OnGaveMeleeAttack( Mobile defender )
