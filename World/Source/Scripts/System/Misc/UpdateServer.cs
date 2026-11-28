@@ -242,10 +242,13 @@ namespace Server.Misc
 				// Never let a staged binary left over from an earlier attempt be swapped in later.
 				DeleteStagingBinary();
 
-				string pullArgs = BuildPullArguments( repo, job.PullStrategy );
+				string pullArgs = BuildPullArguments( job.PullStrategy );
 
 				Console.WriteLine( "[UpdateServer] git pull [{0}] in {1}", job.PullStrategy, repo );
 
+				// No `-C <path>` here on purpose: the working directory already is the repository,
+				// and passing a path would drag OS-specific argument quoting into the pull (POSIX
+				// single quotes are taken literally by git on Windows).
 				string output;
 				int code = RunProcess( "git", pullArgs, repo, PullTimeout, out output );
 
@@ -858,8 +861,11 @@ namespace Server.Misc
 		/// Builds the `git pull` argument list.  The reconcile strategy is always explicit: since git
 		/// 2.27 a divergent branch otherwise fails with exit 128 ("Need to specify how to reconcile
 		/// divergent branches") instead of doing what a plain `git pull` used to do.
+		///
+		/// The repository is selected through ProcessStartInfo.WorkingDirectory, not `-C`, so no path
+		/// ever has to survive shell/command-line quoting (that broke on Windows).
 		/// </summary>
-		private static string BuildPullArguments( string repo, string strategy )
+		private static string BuildPullArguments( string strategy )
 		{
 			string mode;
 
@@ -870,7 +876,7 @@ namespace Server.Misc
 			else
 				mode = " --no-rebase";
 
-			return "-C " + Quote( repo ) + " --no-pager pull --no-edit" + mode;
+			return "--no-pager pull --no-edit" + mode;
 		}
 
 		/// <summary>
@@ -995,12 +1001,70 @@ namespace Server.Misc
 			return null;
 		}
 
+		/// <summary>
+		/// Quotes a single argument for the shell of the *host* OS: POSIX single quotes on Unix (used
+		/// by the restart command line) and CRT-style double quotes on Windows, where single quotes
+		/// are ordinary characters that the program would receive verbatim.
+		/// </summary>
 		private static string Quote( string value )
 		{
 			if ( value == null )
 				value = "";
 
-			return "'" + value.Replace( "'", "'\\''" ) + "'";
+			if ( IsUnixHost() )
+				return "'" + value.Replace( "'", "'\\''" ) + "'";
+
+			return QuoteWindowsArgument( value );
+		}
+
+		/// <summary>
+		/// Quotes one argument using the Windows command-line rules: wrap it in double quotes and
+		/// double any run of backslashes that sits in front of a quote or of the closing quote.
+		/// </summary>
+		private static string QuoteWindowsArgument( string value )
+		{
+			if ( value == null )
+				value = "";
+
+			StringBuilder sb = new StringBuilder();
+
+			sb.Append( '"' );
+
+			int backslashes = 0;
+
+			for ( int i = 0; i < value.Length; ++i )
+			{
+				char c = value[i];
+
+				if ( c == '\\' )
+				{
+					++backslashes;
+					continue;
+				}
+
+				if ( c == '"' )
+				{
+					sb.Append( '\\', backslashes * 2 + 1 );
+					sb.Append( '"' );
+					backslashes = 0;
+					continue;
+				}
+
+				if ( backslashes > 0 )
+				{
+					sb.Append( '\\', backslashes );
+					backslashes = 0;
+				}
+
+				sb.Append( c );
+			}
+
+			if ( backslashes > 0 )
+				sb.Append( '\\', backslashes * 2 );
+
+			sb.Append( '"' );
+
+			return sb.ToString();
 		}
 
 		private static int RunProcess( string fileName, string arguments, string workingDirectory, TimeSpan timeout, out string output )

@@ -9,7 +9,7 @@ This document tracks every file created or edited for the Memento Coin / Artefac
 Every source change leaves two trails:
 
 - **Back up first.** Copy the file *before* editing it into `Backups/` (git-ignored) as `<OriginalFileName>.<YYYY-MM-DD-HHMMSS>.bak` — e.g. `Backups/ResourceMods.cs.2026-11-15-135748.bak`. One backup per editing session, and the numbered entry names it (`Backed up as …`).
-- **Record the change.** Add the next numbered entry to `## Change History (newest last)` (bold one-line summary, indented `-` detail bullets, compile result at the end) and update the `## Files Created` / `## Files Edited` tables plus the matching `## Current Behaviour` section when behaviour changes. The last entry is **263**, so the next entry is **264**.
+- **Record the change.** Add the next numbered entry to `## Change History (newest last)` (bold one-line summary, indented `-` detail bullets, compile result at the end) and update the `## Files Created` / `## Files Edited` tables plus the matching `## Current Behaviour` section when behaviour changes. The last entry is **264**, so the next entry is **265**.
 - **Never leave a file without a rollback point.** If an edit ever happens before its backup is taken, snapshot the file immediately afterwards anyway (same naming), note it in the entry, and refresh the snapshot before the next edit.
 
 Paths in the tables are relative to the `World` folder — `World/` in this repository, which mirrors the older standalone copy at `/home/Feesh/World` the tables were first written against.
@@ -1328,6 +1328,15 @@ No other files were modified.
   - No oracle, context-menu, lore or cliloc changes.
   - **Verified:** `mcs` compiled `GypsyOracle.cs`, `GypsyAskGump.cs` and `GypsyLady.cs` with **0 errors** (only the pre-existing unused `version` warning).
   - **Backups:** `Backups/GypsyAskGump.cs.2026-11-27-183611.bak` and `Backups/Memento_System_Changes.md.2026-11-27-183611.bak`.
+
+264. **`[UpdateServer` died at `git pull` on Windows (exit 128) — argument quoting removed from the pull** — edited `Source/Scripts/System/Misc/UpdateServer.cs`.
+  - **Report:** the Windows shard logged `Host OS: Microsoft Windows NT 6.2.9200.0 (Windows)`, then `fatal: cannot change to ''C:\Arcade\ultima-memento-modified'': Invalid argument` → `git pull failed (exit code 128)`. (The abort hint from #258 did its job: git's own fatal line reached the console/player, not just the log.)
+  - **Cause:** `BuildPullArguments()` rendered `-C '<repo>'` through `Quote()`, which emits **POSIX single quotes**. There is no shell on that path on Windows, so git received the quotes literally and treated `'C:\Arcade\…'` (quotes included) as the directory. Single-quoting is only valid for `/bin/sh`.
+  - **Fix (root cause):** the pull no longer passes a path at all — `RunProcess()` already starts git **inside the repository directory** (`ProcessStartInfo.WorkingDirectory`), so the arguments are simply `--no-pager pull --no-edit [--no-rebase|--ff-only|--rebase]`. Nothing to quote, identical on every OS.
+  - **Fix (defence in depth):** `Quote()` is now OS-aware — POSIX single quotes on Unix (the `sh` restart line still needs them) and CRT-style double quoting on Windows through a new `QuoteWindowsArgument()` that doubles runs of backslashes before a quote or the closing quote.
+  - **Verified:** scripts `mcs` → **0 errors, 6507 warnings** (unchanged baseline). Harness: `BuildPullArguments()` → `--no-pager pull --no-edit --no-rebase` / `--ff-only` / `--rebase`; `QuoteWindowsArgument()` → `"C:\Arcade\ultima-memento-modified"`, `"C:\Program Files\Memento World"`, `"C:\trailing\\"`, `"C:\a\\\"b"`, `""`; `Quote("/tmp/a b/it's")` still `'/tmp/a b/it'\''s'` on Linux; and a real git run using only `WorkingDirectory` — `rev-parse --show-toplevel` returned the repo path and a merge pull of a diverged clone exited **0** (`Merge made by the 'ort' strategy`).
+  - **Deploying to the Windows shard:** the command cannot update itself while its pull is broken — commit/push this fix (or copy `UpdateServer.cs` across), run `git pull --no-rebase` once by hand in `C:\Arcade\ultima-memento-modified`, then start the shard; scripts recompile at startup and `[UpdateServer` works from then on.
+  - **Backups:** `Backups/UpdateServer.cs.2026-11-27-192207.bak` and `Backups/Memento_System_Changes.md.2026-11-27-192207.bak`.
 
 ---
 
