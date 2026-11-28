@@ -173,7 +173,7 @@ namespace Server.Mobiles
             if ( Deleted || !from.Alive )
                 return;
 
-			SayTo(from, "So you want me to reveal the truth of a parchment for you... or would you have me reshape a piece of armor?");
+			SayTo(from, "So you want me to reveal the truth of a parchment for you... or would you have me reshape a piece of equipment?");
 
             from.Target = new RevealTarget(this);
         }
@@ -396,7 +396,7 @@ namespace Server.Mobiles
 					}
 				}
 				///////////////////////////////////////////////////////////////////////////////////
-				else if ( targeted is BaseArmor || targeted is BaseClothing )
+				else if ( TransmogrifyCatalog.CanReshape( targeted as Item ) )
 				{
 					Item garb = (Item)targeted;
 
@@ -404,7 +404,7 @@ namespace Server.Mobiles
 					{
 						m_GypsyLady.SayTo(from, "I can only work with what you wear or carry.");
 					}
-					else if ( TransmogrifyCatalog.CountFor( garb.Layer ) == 0 )
+					else if ( TransmogrifyCatalog.CountFor( garb ) == 0 )
 					{
 						m_GypsyLady.SayTo(from, "The spirits show me nothing that this could become.");
 					}
@@ -433,7 +433,7 @@ namespace Server.Mobiles
 				///////////////////////////////////////////////////////////////////////////////////
 				else
 				{
-					m_GypsyLady.SayTo(from, "That is not a book, a parchment, or a piece of armor.");
+					m_GypsyLady.SayTo(from, "That is not a book, a parchment, or a piece of equipment.");
 				}
             }
         }

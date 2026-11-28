@@ -10,9 +10,10 @@ namespace Server.Items
 	// original can be put back later.
 	//
 	// The record lives in Saves/Transmogrify/Originals.xml - one row per item, keyed
-	// by serial, holding the ItemID and hue it had before its FIRST transmog. Rows
-	// are dropped when the item no longer exists, and a revert deletes its row, so a
-	// later transmog records the (restored) original again.
+	// by serial, holding the ItemID and hue it had when its baseline was first
+	// recorded (by Apply or by the first Revert). Rows are dropped when the item no
+	// longer exists; a revert KEEPS its row, so the art that was logged as the
+	// original stays available to every later revert.
 	public static class TransmogrifyRegistry
 	{
 		private class Original
@@ -42,8 +43,8 @@ namespace Server.Items
 			return item != null && m_Table.ContainsKey( item.Serial.Value );
 		}
 
-		// Looks up the art the item had before its first transmog. False when nothing
-		// is recorded, so the caller keeps the item's current appearance.
+		// Looks up the art the item had when its baseline was recorded. False when
+		// nothing is recorded, so the caller keeps the item's current appearance.
 		public static bool TryGetOriginal( Item item, out int itemID )
 		{
 			itemID = 0;
@@ -67,7 +68,8 @@ namespace Server.Items
 		}
 
 		// Records the item's current visuals as its original - unless one is already
-		// stored, because the first transmog is the real original.
+		// stored, because the first recorded look is the real original. Apply and the
+		// first Revert both call this, whichever comes first.
 		public static void Remember( Item item )
 		{
 			if ( item == null || item.Deleted )
@@ -86,8 +88,41 @@ namespace Server.Items
 			m_Table[serial] = original;
 		}
 
-		// Puts the recorded visuals back and clears the record. False when the item
-		// has nothing recorded, so the caller can say so.
+		// Returns the recorded original art, recording the item's current art first
+		// when nothing is stored yet. This is what lets Revert work the first time on
+		// an item that has no row (one that predates the record, or whose original was
+		// never captured): the look it has at that moment becomes the saved baseline.
+		public static int EnsureOriginal( Item item )
+		{
+			if ( item == null || item.Deleted )
+				return 0;
+
+			Original original;
+
+			if ( m_Table.TryGetValue( item.Serial.Value, out original ) )
+				return original.ItemID;
+
+			Remember( item );
+
+			// Persist the baseline now rather than waiting for the next world save:
+			// this is the one case where the row is created by Revert itself. Do not
+			// prune here - World.FindItem can be blind to an item while it is being
+			// moved or equipped, and pruning would delete the row we just made.
+			try
+			{
+				Save( false );
+			}
+			catch ( Exception ex )
+			{
+				Console.WriteLine( "[Transmogrify] saving the first Revert's original failed: {0}", ex );
+			}
+
+			return item.ItemID;
+		}
+
+		// Puts the recorded visuals back. The row is kept: the item is now showing the
+		// art that was logged as its original, and any later transmog must still revert
+		// to that same look. False when the item has nothing recorded.
 		public static bool Revert( Item item )
 		{
 			if ( item == null || item.Deleted )
@@ -103,9 +138,7 @@ namespace Server.Items
 			// Only the art is put back. Transmogging never changes the hue, so the one
 			// we captured can only differ if the player dyed the item afterwards - and
 			// a revert must not undo their own dye work.
-			item.ItemID = original.ItemID;
-
-			m_Table.Remove( serial );
+			TransmogrifyTool.SetAppearance( item, original.ItemID );
 
 			return true;
 		}
@@ -183,6 +216,11 @@ namespace Server.Items
 
 		private static void Save()
 		{
+			Save( true );
+		}
+
+		private static void Save( bool pruneStale )
+		{
 			string path = FilePath;
 			string dir = Path.GetDirectoryName( path );
 
@@ -207,8 +245,10 @@ namespace Server.Items
 
 				foreach ( KeyValuePair<int, Original> kv in m_Table )
 				{
-					// do not carry rows for items that are gone
-					if ( World.FindItem( (Serial) kv.Key ) == null )
+					// do not carry rows for items that are gone; the first-Revert save
+					// deliberately skips this, because the row may be newer than the
+					// item's visibility in World.Items during a move/equip
+					if ( pruneStale && World.FindItem( (Serial) kv.Key ) == null )
 					{
 						stale.Add( kv.Key );
 						continue;
@@ -237,8 +277,11 @@ namespace Server.Items
 			if ( File.Exists( tmp ) )
 				File.Delete( tmp );
 
-			for ( int i = 0; i < stale.Count; i++ )
-				m_Table.Remove( stale[i] );
+			if ( pruneStale )
+			{
+				for ( int i = 0; i < stale.Count; i++ )
+					m_Table.Remove( stale[i] );
+			}
 		}
 
 		private static int ParseInt( string value )

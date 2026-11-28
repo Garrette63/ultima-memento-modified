@@ -31,8 +31,9 @@ namespace Server.Items
 		private const int AnchorTop = 40;
 
 		private readonly Item m_Item;
-		private readonly Item m_Scroll;   // when set, this is a one-shot scroll: spend it on Apply
+		private readonly Item m_Scroll;   // one-shot scroll: spent only when a new appearance is Applied
 		private readonly int m_Selected;  // -1 when nothing has been picked yet
+		private readonly bool m_Revert;   // original art staged; Apply commits it
 		private readonly int m_Page;
 		private readonly bool m_ShowGear;  // false: naked doll showing only the target
 		private readonly int m_GoldCost;   // gypsy's fee, taken on Apply; 0 = free
@@ -54,17 +55,29 @@ namespace Server.Items
 		{
 		}
 
-		public TransmogrifyGump( Mobile from, Item item, Item scroll, int selected, int page, bool showGear, int goldCost ) : base( AnchorRight - GumpWidth, AnchorTop )
+		public TransmogrifyGump( Mobile from, Item item, Item scroll, int selected, int page, bool showGear, int goldCost ) : this( from, item, scroll, selected, page, showGear, goldCost, false )
+		{
+		}
+
+		public TransmogrifyGump( Mobile from, Item item, Item scroll, int selected, int page, bool showGear, int goldCost, bool revert ) : base( AnchorRight - GumpWidth, AnchorTop )
 		{
 			m_Item = item;
 			m_Scroll = scroll;
-			m_Selected = selected;
+			m_Selected = revert ? -1 : selected;
 			m_Page = page;
 			m_ShowGear = showGear;
 			m_GoldCost = goldCost;
+			m_Revert = revert;
 			m_Generation = NextGeneration( from );
 
-			List<TransmogrifyOption> options = TransmogrifyCatalog.OptionsFor( item.Layer );
+			List<TransmogrifyOption> options = TransmogrifyCatalog.OptionsFor( item );
+
+			// The recorded pre-transmog art, or the item's current art when nothing has
+			// been logged yet. Both Revert and the ORIGINAL pane use this.
+			int originalArt;
+
+			if ( !TransmogrifyRegistry.TryGetOriginal( item, out originalArt ) )
+				originalArt = item.ItemID;
 
 			// ---- the paperdoll model: the player's own body and outfit with this slot
 			// swapped. The mobile is announced once (Present); the window is only asked
@@ -85,8 +98,10 @@ namespace Server.Items
 				// option, or the item's own art when nothing has been picked yet
 				int focusArt;
 
-				if ( selected >= 0 && selected < options.Count )
-					focusArt = options[selected].ItemID;
+				if ( m_Revert )
+					focusArt = originalArt;
+				else if ( m_Selected >= 0 && m_Selected < options.Count )
+					focusArt = options[m_Selected].ItemID;
 				else
 					focusArt = item.ItemID;
 
@@ -127,14 +142,14 @@ namespace Server.Items
 			// Every appearance is drawn in the *item's* own hue - the list arts, the big
 			// picture and the paperdoll - so a preview reads as "this item, in that
 			// shape" and never as a differently coloured one.
-			int shownArt = item.ItemID;
+			int shownArt = m_Revert ? originalArt : item.ItemID;
 			int shownHue = item.Hue;
 			string shownName = ItemLabel( item );
 			bool picking = false;
 
-			if ( selected >= 0 && selected < options.Count )
+			if ( !m_Revert && m_Selected >= 0 && m_Selected < options.Count )
 			{
-				TransmogrifyOption sel = options[selected];
+				TransmogrifyOption sel = options[m_Selected];
 
 				shownArt = sel.ItemID;
 				shownName = sel.Name;
@@ -152,10 +167,6 @@ namespace Server.Items
 			AddHtml( 20, 14, 520, 20, Text( "#FFFF66", "<B>Transmogrify Equipment</B>" ), false, false );
 
 			// ---- header: the item as it truly is on the left, the choice on the right
-			int originalArt;
-
-			if ( !TransmogrifyRegistry.TryGetOriginal( item, out originalArt ) )
-				originalArt = item.ItemID;
 
 			// left - original appearance and the item's actual name
 			AddImageTiled( 16, 44, 256, 120, 0xA40 );
@@ -167,11 +178,19 @@ namespace Server.Items
 			// right - what is being considered (or the item as it stands right now)
 			AddImageTiled( 288, 44, 256, 120, 0xA40 );
 			AddAlphaRegion( 288, 44, 256, 120 );
-			AddHtml( 292, 48, 248, 18, Text( picking ? "#FFFF66" : "#9FB0BD", "<CENTER>CURRENT</CENTER>" ), false, false );
+			AddHtml( 292, 48, 248, 18, Text( ( picking || m_Revert ) ? "#FFFF66" : "#9FB0BD", "<CENTER>" + ( m_Revert ? "REVERT" : "CURRENT" ) + "</CENTER>" ), false, false );
 			AddItem( 394, 70, shownArt, shownHue );
-			AddHtml( 292, 118, 248, 44, Text( picking ? "#FFFF66" : "#FFFFFF", "<CENTER>" + Safe( shownName ) + "</CENTER>" ), false, false );
+			AddHtml( 292, 118, 248, 44, Text( ( picking || m_Revert ) ? "#FFFF66" : "#FFFFFF", "<CENTER>" + Safe( shownName ) + "</CENTER>" ), false, false );
 
-			string slot = m_Item.EquipLayerName( m_Item.Layer );
+			string slot;
+
+			if ( m_Item is BaseShield )
+				slot = "Shield";
+			else if ( m_Item is BaseWeapon )
+				slot = ( (BaseWeapon) m_Item ).Skill + " weapon";
+			else
+				slot = m_Item.EquipLayerName( m_Item.Layer );
+
 			string count = options.Count + " appearance" + ( options.Count == 1 ? "" : "s" );
 
 			// header row: slot on the left, two actions hard right. Both labels are
@@ -218,7 +237,7 @@ namespace Server.Items
 					int x = ( slotIndex % 2 == 0 ) ? ColX0 : ColX1;
 					int y = RowY0 + ( slotIndex / 2 ) * RowH;
 
-					if ( i == selected )
+					if ( i == m_Selected )
 					{
 						// highlight the option currently shown at the top and on the doll
 						AddImageTiled( x - 8, y - 8, 216, 62, 0xA40 );
@@ -230,7 +249,7 @@ namespace Server.Items
 
 					// names use the client's plain font: the bold face is cramped at this
 					// size; the selected entry is picked out by colour instead
-					AddHtml( x + 96, y + 14, 116, 44, Text( i == selected ? "#FFFF66" : "#FFFFFF", Safe( opt.Name ) ), false, false );
+					AddHtml( x + 96, y + 14, 116, 44, Text( i == m_Selected ? "#FFFF66" : "#FFFFFF", Safe( opt.Name ) ), false, false );
 				}
 
 				if ( pages > 1 )
@@ -259,7 +278,7 @@ namespace Server.Items
 			AddHtml( 224, 564, 60, 20, Text( "#FFFFFF", "Cancel" ), false, false );
 
 			AddButton( 285, 562, 0xFA5, 0xFA7, ButtonApply, GumpButtonType.Reply, 0 );
-			AddHtml( 315, 564, 160, 20, Text( picking ? "#FFFF66" : "#B0C4DE", m_GoldCost > 0 ? "Apply (" + m_GoldCost + " gp)" : "Apply" ), false, false );
+			AddHtml( 315, 564, 160, 20, Text( ( picking || m_Revert ) ? "#FFFF66" : "#B0C4DE", m_Revert ? "Apply Revert" : ( m_GoldCost > 0 ? "Apply (" + m_GoldCost + " gp)" : "Apply" ) ), false, false );
 		}
 
 		private static string Text( string colour, string html )
@@ -290,9 +309,9 @@ namespace Server.Items
 			return s.Replace( "<", "" ).Replace( ">", "" ).Replace( "&", "" );
 		}
 
-		private void Reopen( Mobile from, int selected, int page, bool showGear )
+		private void Reopen( Mobile from, int selected, int page, bool showGear, bool revert )
 		{
-			from.SendGump( new TransmogrifyGump( from, m_Item, m_Scroll, selected, page, showGear, m_GoldCost ) );
+			from.SendGump( new TransmogrifyGump( from, m_Item, m_Scroll, selected, page, showGear, m_GoldCost, revert ) );
 		}
 
 		// The paperdoll request goes out AFTER the gump packet. Sent before it, some
@@ -372,11 +391,19 @@ namespace Server.Items
 				return;
 			}
 
+			if ( !TransmogrifyCatalog.CanReshape( m_Item ) )
+			{
+				DismissPreview( from );
+
+				from.SendMessage( "That item can no longer be reshaped." );
+				return;
+			}
+
 			if ( !TransmogrifyTool.CanReach( from, m_Item ) )
 			{
 				DismissPreview( from );
 
-				from.SendMessage( "You can only change armor or clothing you are wearing or carrying." );
+				from.SendMessage( "You can only change armor, clothing or weapons you are wearing or carrying." );
 				return;
 			}
 
@@ -394,37 +421,78 @@ namespace Server.Items
 				return;
 			}
 
-			List<TransmogrifyOption> options = TransmogrifyCatalog.OptionsFor( m_Item.Layer );
+			List<TransmogrifyOption> options = TransmogrifyCatalog.OptionsFor( m_Item );
 
 			if ( button == ButtonGear )
 			{
 				// flips the rest of the outfit on the doll; the paperdoll window is left
 				// alone and simply re-dressed through RemoveItem/EquipUpdate
-				Reopen( from, m_Selected, m_Page, !m_ShowGear );
+				Reopen( from, m_Selected, m_Page, !m_ShowGear, m_Revert );
 				return;
 			}
 
 			if ( button == ButtonRevert )
 			{
-				if ( !TransmogrifyRegistry.Revert( m_Item ) )
+				// Stage the original look instead of applying it: the picker and the
+				// paperdoll show it, and nothing about the item changes until Apply.
+				int originalArt;
+
+				if ( !TransmogrifyRegistry.TryGetOriginal( m_Item, out originalArt ) )
 				{
-					from.SendMessage( "That item has no recorded original appearance." );
-					Reopen( from, m_Selected, m_Page, m_ShowGear );
-					return;
+					// First Revert on an item with no row: capture what it looks like
+					// now as the original and keep that baseline from here on.
+					TransmogrifyRegistry.EnsureOriginal( m_Item );
+
+					from.SendMessage( "No earlier appearance was on record; the current one has been saved as the original." );
 				}
 
-				from.SendSound( 0x57 );
-				DismissPreview( from );
-				from.SendMessage( "The item's original appearance has been restored." );
+				Reopen( from, -1, m_Page, m_ShowGear, true );
+
+				from.SendMessage( "The original appearance is shown. Press Apply to keep it." );
 				return;
 			}
 
 			if ( button == ButtonApply )
 			{
+				if ( m_Revert )
+				{
+					// Reverting is an undo, not a new look: it is free and does not
+					// spend the tool. The record is kept, so a later transmog still
+					// reverts to the same original.
+					int originalArt;
+					bool recorded = TransmogrifyRegistry.TryGetOriginal( m_Item, out originalArt );
+
+					if ( !recorded )
+						originalArt = TransmogrifyRegistry.EnsureOriginal( m_Item );
+
+					bool changed = m_Item.ItemID != originalArt;
+
+					if ( !TransmogrifyRegistry.Revert( m_Item ) )
+					{
+						// The row should have been ensured above. If it somehow vanished
+						// between the two calls, still put the known art back rather than
+						// sending the player down the "no recorded original" path.
+						if ( originalArt <= 0 )
+						{
+							from.SendMessage( "That item has no recorded original appearance." );
+							Reopen( from, -1, m_Page, m_ShowGear, true );
+							return;
+						}
+
+						TransmogrifyTool.SetAppearance( m_Item, originalArt );
+					}
+
+					from.SendSound( 0x57 );
+					DismissPreview( from );
+
+					from.SendMessage( changed ? "The item's original appearance has been restored." : "The item already has its original appearance." );
+					return;
+				}
+
 				if ( m_Selected < 0 || m_Selected >= options.Count )
 				{
 					from.SendMessage( "Choose an appearance first." );
-					Reopen( from, m_Selected, m_Page, m_ShowGear );
+					Reopen( from, m_Selected, m_Page, m_ShowGear, m_Revert );
 					return;
 				}
 
@@ -439,7 +507,7 @@ namespace Server.Items
 					if ( pack == null || pack.GetAmount( typeof( Gold ) ) < m_GoldCost )
 					{
 						from.SendMessage( "You cannot afford the spirits' price of {0} gold.", m_GoldCost );
-						Reopen( from, m_Selected, m_Page, m_ShowGear );
+						Reopen( from, m_Selected, m_Page, m_ShowGear, m_Revert );
 						return;
 					}
 
@@ -452,8 +520,8 @@ namespace Server.Items
 				TransmogrifyRegistry.Remember( m_Item );
 
 				// Only the appearance changes; the item keeps its own properties,
-				// hue and slot.
-				m_Item.ItemID = pick.ItemID;
+				// hue and slot. GraphicID follows when it simply mirrored ItemID.
+				TransmogrifyTool.SetAppearance( m_Item, pick.ItemID );
 
 				from.SendSound( 0x57 );
 
@@ -472,7 +540,7 @@ namespace Server.Items
 			{
 				// Select + preview only; Apply commits and spends the scroll. The rebuild
 				// re-dresses the paperdoll through EquipUpdate, so the window is untouched.
-				Reopen( from, index, index / PerPage, m_ShowGear );
+				Reopen( from, index, index / PerPage, m_ShowGear, false );
 			}
 		}
 

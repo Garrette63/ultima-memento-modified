@@ -16,13 +16,59 @@ namespace Server.Items
 		public string Source;
 		public Layer Layer;
 
-		public TransmogrifyOption( int itemID, int hue, string name, string source, Layer layer )
+		// What the art actually belongs to. A single art can be shared by several
+		// classes, so these flags are merged rather than trusting the first class found.
+		public bool IsShield;
+		public bool IsWeapon;
+		public bool IsArmor;
+		public bool IsClothing;
+		public bool IsTrinket;
+
+		// Weapon arts can be shared too; every weapon skill that can use this art is
+		// kept, so a weapon may only be reshaped into another weapon of its own skill.
+		public List<SkillName> WeaponSkills;
+
+		public TransmogrifyOption( int itemID, int hue, string name, string source, Layer layer, Type sourceType, bool hasWeaponSkill, SkillName weaponSkill )
 		{
 			ItemID = itemID;
 			Hue = hue;
 			Name = name;
 			Source = source;
 			Layer = layer;
+			WeaponSkills = new List<SkillName>();
+
+			AddSource( sourceType, hasWeaponSkill, weaponSkill );
+		}
+
+		public void AddSource( Type sourceType, bool hasWeaponSkill, SkillName weaponSkill )
+		{
+			if ( sourceType == null )
+				return;
+
+			if ( typeof( BaseShield ).IsAssignableFrom( sourceType ) )
+				IsShield = true;
+
+			if ( typeof( BaseArmor ).IsAssignableFrom( sourceType ) )
+				IsArmor = true;
+
+			if ( typeof( BaseClothing ).IsAssignableFrom( sourceType ) )
+				IsClothing = true;
+
+			if ( typeof( BaseTrinket ).IsAssignableFrom( sourceType ) )
+				IsTrinket = true;
+
+			if ( typeof( BaseWeapon ).IsAssignableFrom( sourceType ) )
+			{
+				IsWeapon = true;
+
+				if ( hasWeaponSkill && !WeaponSkills.Contains( weaponSkill ) )
+					WeaponSkills.Add( weaponSkill );
+			}
+		}
+
+		public bool UsesWeaponSkill( SkillName skill )
+		{
+			return WeaponSkills.Contains( skill );
 		}
 	}
 
@@ -50,6 +96,92 @@ namespace Server.Items
 		public static int CountFor( Layer layer )
 		{
 			return OptionsFor( layer ).Count;
+		}
+
+		// The filtered list for a particular item. Layer alone is not enough for the
+		// hand slots: shields, two-handed weapons, torches and lanterns all share
+		// Layer.TwoHanded, and pugilist gloves share Layer.Gloves with ordinary
+		// gloves. A shield may only become another shield; a weapon may only become
+		// another weapon that uses the same weapon skill; other hand-slot equipment
+		// stays within its own family.
+		public static List<TransmogrifyOption> OptionsFor( Item source )
+		{
+			if ( source == null || source.Deleted )
+				return new List<TransmogrifyOption>();
+
+			List<TransmogrifyOption> all = OptionsFor( source.Layer );
+			List<TransmogrifyOption> filtered = new List<TransmogrifyOption>();
+
+			if ( source is BaseShield )
+			{
+				for ( int i = 0; i < all.Count; i++ )
+				{
+					if ( all[i].IsShield )
+						filtered.Add( all[i] );
+				}
+
+				return filtered;
+			}
+
+			if ( source is BaseWeapon )
+			{
+				SkillName skill = ( (BaseWeapon) source ).Skill;
+
+				for ( int i = 0; i < all.Count; i++ )
+				{
+					if ( all[i].IsWeapon && all[i].UsesWeaponSkill( skill ) )
+						filtered.Add( all[i] );
+				}
+
+				return filtered;
+			}
+
+			if ( !IsHandSlot( source.Layer ) )
+				return all;
+
+			bool clothing = source is BaseClothing;
+			bool trinket = source is BaseTrinket;
+			bool armor = source is BaseArmor;
+
+			// A hand-slot item that is not one of the known families (a tool or a
+			// light, for example) gets no options rather than being mixed with weapons.
+			if ( !clothing && !trinket && !armor )
+				return filtered;
+
+			for ( int i = 0; i < all.Count; i++ )
+			{
+				if ( clothing && !all[i].IsClothing )
+					continue;
+
+				if ( trinket && !all[i].IsTrinket )
+					continue;
+
+				if ( armor && ( !all[i].IsArmor || all[i].IsShield ) )
+					continue;
+
+				filtered.Add( all[i] );
+			}
+
+			return filtered;
+		}
+
+		public static int CountFor( Item source )
+		{
+			return OptionsFor( source ).Count;
+		}
+
+		// What the transmogrifier will accept as a target. Shields are armor and are
+		// therefore covered by BaseArmor; weapons are now accepted too, but their
+		// options are restricted to weapons of the same skill above.
+		public static bool CanReshape( Item item )
+		{
+			return item != null && !item.Deleted
+				&& ( item is BaseArmor || item is BaseClothing || item is BaseWeapon );
+		}
+
+		private static bool IsHandSlot( Layer layer )
+		{
+			return layer == Layer.OneHanded || layer == Layer.TwoHanded || layer == Layer.Gloves;
 		}
 
 		// Diagnostics: total appearances known across every slot.
@@ -109,7 +241,7 @@ namespace Server.Items
 		private static Dictionary<Layer, List<TransmogrifyOption>> Build()
 		{
 			Dictionary<Layer, List<TransmogrifyOption>> table = new Dictionary<Layer, List<TransmogrifyOption>>();
-			HashSet<string> seen = new HashSet<string>();
+			Dictionary<string, TransmogrifyOption> seen = new Dictionary<string, TransmogrifyOption>();
 
 			// Item types live in the script assemblies, not in the core assembly that
 			// defines Server.Item, so scan the core plus every loaded script assembly
@@ -163,10 +295,22 @@ namespace Server.Items
 					if ( !IsWearable( layer ) )
 						continue;
 
+					BaseWeapon weapon = made as BaseWeapon;
+					SkillName weaponSkill = weapon != null ? weapon.Skill : SkillName.Swords;
+					bool hasWeaponSkill = weapon != null;
+
 					string key = ( (int)layer ) + ":" + made.ItemID;
 
-					if ( !seen.Add( key ) )
+					TransmogrifyOption existing;
+
+					if ( seen.TryGetValue( key, out existing ) )
+					{
+						// The same art can come from a gift/artifact wrapper or from a
+						// second class; merge its family and weapon skill into the entry
+						// already in the table.
+						existing.AddSource( t, hasWeaponSkill, weaponSkill );
 						continue;
+					}
 
 					List<TransmogrifyOption> list;
 
@@ -176,7 +320,10 @@ namespace Server.Items
 						table[layer] = list;
 					}
 
-					list.Add( new TransmogrifyOption( made.ItemID, 0, DisplayName( made, t ), t.Name, layer ) );
+					TransmogrifyOption option = new TransmogrifyOption( made.ItemID, 0, DisplayName( made, t ), t.Name, layer, t, hasWeaponSkill, weaponSkill );
+
+					seen[key] = option;
+					list.Add( option );
 				}
 				catch
 				{

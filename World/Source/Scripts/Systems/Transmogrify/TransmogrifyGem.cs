@@ -6,9 +6,10 @@ namespace Server.Items
 {
 	// The real transmogrify item: a gem that Paragon creatures drop.
 	//
-	// Same use as the test scroll - double click, target a piece of armour or
-	// clothing, pick an appearance, Apply - and it is spent on the Apply, with the
-	// item's original look recorded in Saves/Transmogrify so Revert can put it back.
+	// Same use as the test scroll - double click, target a piece of armour,
+	// clothing or a weapon, pick an appearance, Apply - and it is spent on the Apply,
+	// with the item's original look recorded in Saves/Transmogrify so Revert can put
+	// it back. Weapons are limited to other weapons of the same combat skill.
 	public class TransmogrifyGem : TransmogrifyTool
 	{
 		public const int GemHue = 0x48E;   // the shared transmogrify identity colour

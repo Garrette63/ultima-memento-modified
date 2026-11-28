@@ -45,6 +45,23 @@ namespace Server.Items
 			return from.Backpack != null && item.IsChildOf( from.Backpack );
 		}
 
+		// Changes only the appearance. When GraphicID was simply mirroring ItemID
+		// (the normal case for armour, shields and weapons), keep it in step too so
+		// weapon animation and paperdoll art follow the new shape. A custom
+		// GraphicID - modded art or a light's lit/unlit state - is left alone.
+		public static void SetAppearance( Item item, int itemID )
+		{
+			if ( item == null || item.Deleted || itemID <= 0 || item.ItemID == itemID )
+				return;
+
+			bool syncGraphic = item.GraphicID == item.ItemID;
+
+			if ( syncGraphic )
+				item.GraphicID = itemID;
+
+			item.ItemID = itemID;
+		}
+
 		public override void OnDoubleClick( Mobile from )
 		{
 			if ( Deleted || from == null || from.Deleted )
@@ -56,7 +73,7 @@ namespace Server.Items
 				return;
 			}
 
-			from.SendMessage( "Target the armor or clothing whose appearance you wish to change." );
+			from.SendMessage( "Target the armor, clothing, or weapon whose appearance you wish to change." );
 			from.Target = new ChooseTarget( this );
 		}
 
@@ -76,19 +93,19 @@ namespace Server.Items
 
 				Item item = targeted as Item;
 
-				if ( item == null || item.Deleted || !( item is BaseArmor || item is BaseClothing ) )
+				if ( item == null || item.Deleted || !TransmogrifyCatalog.CanReshape( item ) )
 				{
-					from.SendMessage( "That is not armor or clothing." );
+					from.SendMessage( "That is not armor, clothing, or a weapon." );
 					return;
 				}
 
 				if ( !TransmogrifyTool.CanReach( from, item ) )
 				{
-					from.SendMessage( "You can only change armor or clothing you are wearing or carrying." );
+					from.SendMessage( "You can only change armor, clothing or weapons you are wearing or carrying." );
 					return;
 				}
 
-				int count = TransmogrifyCatalog.CountFor( item.Layer );
+				int count = TransmogrifyCatalog.CountFor( item );
 
 				if ( count == 0 )
 				{

@@ -237,6 +237,11 @@ namespace Server.Items
 
 			piece.Layer = template.Layer;
 			piece.Hue = template.Hue;
+			// A two-handed weapon should occupy both hands even where the class only
+			// sets Layer.TwoHanded (bows and crossbows never set NeedsBothHands); a
+			// shield shares the same layer but stays on one side.
+			piece.NeedsBothHands = template.NeedsBothHands
+				|| ( template is BaseWeapon && template.Layer == Layer.TwoHanded );
 			piece.Movable = false;
 
 			return piece;
